@@ -1,0 +1,38 @@
+{
+  "name": "my-app-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "dev": "node scripts/dev.js",
+    "build": "node scripts/build.js",
+    "backend:dev": "cd backend && python manage.py runserver",
+    "backend:migrate": "cd backend && python manage.py migrate",
+    "dashboard:dev": "cd dashboard && npm run dev",
+    "landing:dev": "cd landing-page && npm run dev",
+    "prepare": "is-ci || husky install"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.0.2",
+    "is-ci": "^3.0.1",
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write"
+    ],
+    "*.py": [
+      "black"
+    ]
+  }
+}

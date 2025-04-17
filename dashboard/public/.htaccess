@@ -1,0 +1,9 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /vue/strikingdash/
+RewriteRule ^/vue/strikingdash/index\.html$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /vue/strikingdash/index.html [L]
+Header set Cache-Control "max-age=0,no-store"
+</IfModule>

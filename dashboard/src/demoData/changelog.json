@@ -1,0 +1,51 @@
+[
+    {
+        "id": 4,
+        "date": "Feb 19, 2023",
+        "version": "1.3.0",
+        "new": [
+            "Added FireStore CRUD"
+        ],
+        "fixed": false,
+        "updated": false
+    },
+    {
+        "id": 3,
+        "date": "Jan 4, 2023",
+        "version": "1.2.0",
+        "new": false,
+        "fixed": [
+            "NPM errors and warnings",
+            "Minor Style issues"
+        ],
+        "updated": [
+            "Updated Vue JS",
+            "Updated NPM packages compatible with latest Vue JS",
+            "Updated Ant Design to 3.2.15",
+            "Removed momentjs"
+        ]
+    },
+    {
+        "id": 2,
+        "date": "Dec 29, 2022",
+        "version":"1.1.0",
+        "new": [
+            "Added 4 New Home Page in Vue Version"
+        ],
+        "fixed": [
+            "Minor Style issues"
+        ],
+        "updated": false
+    },
+    {
+        "id": 1,
+        "date": "Dec 26, 2022",
+        "version":"1.0.0",
+        "new": [
+            "Initial Release"
+        ],
+        "fixed": false,
+        "updated": false
+    }
+]
+

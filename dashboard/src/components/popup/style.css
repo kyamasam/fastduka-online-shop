@@ -1,0 +1,33 @@
+.ant-popover-inner-content {
+  padding: 0 !important;
+}
+.ant-popover-inner .ant-popover-inner-content a{
+	display: flex;
+	align-items: center;
+}
+.ant-page-header-heading-sub-title{
+	line-height: 32px;
+}
+.dark-mode .ant-page-header-heading-sub-title{
+	color: #A4A5AA;
+}
+
+html[dir="rtl"] .ant-collapse > .ant-collapse-item > .ant-collapse-header .ant-collapse-arrow {
+  margin-left: 12px;
+}
+
+html[dir="rtl"] .ant-page-header-heading-sub-title {
+  margin-left: 12px;
+}
+
+html[dir="rtl"] .ant-skeleton-header {
+  padding-left: 16px;
+}
+
+html[dir="rtl"] .ant-timeline.ant-timeline-right .ant-timeline-item-right .ant-timeline-item-content {
+  margin-right: 32px;
+}
+
+.ninjadash-select-vertical-list{
+	margin-bottom: 15px;
+}

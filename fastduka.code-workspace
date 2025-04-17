@@ -1,0 +1,142 @@
+{
+  "folders": [
+    {
+      "name": "✨ Root",
+      "path": "."
+    },
+    {
+      "name": "🐍 Backend (Django)",
+      "path": "backend"
+    },
+    {
+      "name": "📊 Dashboard (Vue)",
+      "path": "dashboard"
+    },
+    {
+      "name": "🌐 Landing (Nuxt)",
+      "path": "landing-page"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "backend/": true,
+      "dashboard/": true,
+      "landing-page/": true
+    },
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[python]": {
+      "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "eslint.workingDirectories": [
+      "./dashboard",
+      "./landing-page"
+    ],
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/.nuxt": true,
+      "**/__pycache__": true
+    },
+    "task.allowAutomaticTasks": "on"
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode",
+      "ms-azuretools.vscode-docker",
+      "ms-python.black-formatter",
+      "Vue.volar"
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Start All Development Servers",
+        "dependsOrder": "parallel",
+        "dependsOn": [
+          "Backend Dev Server",
+          "Dashboard Dev Server",
+          "Landing Dev Server"
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        }
+      },
+      {
+        "label": "Backend Dev Server",
+        "type": "shell",
+        "command": "cd ${workspaceFolder}/backend && python manage.py runserver",
+        "presentation": {
+          "reveal": "always",
+          "panel": "new",
+          "group": "dev-servers"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Dashboard Dev Server",
+        "type": "shell",
+        "command": "cd ${workspaceFolder}/dashboard && npm run dev",
+        "presentation": {
+          "reveal": "always",
+          "panel": "new",
+          "group": "dev-servers"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Landing Dev Server",
+        "type": "shell",
+        "command": "cd ${workspaceFolder}/landing-page && npm run dev",
+        "presentation": {
+          "reveal": "always",
+          "panel": "new",
+          "group": "dev-servers"
+        },
+        "problemMatcher": []
+      }
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Django Debug",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/backend/manage.py",
+        "args": [
+          "runserver"
+        ],
+        "django": true,
+        "justMyCode": true
+      },
+      {
+        "name": "Vue Debug",
+        "type": "chrome",
+        "request": "launch",
+        "url": "http://localhost:8080",
+        "webRoot": "${workspaceFolder}/dashboard"
+      },
+      {
+        "name": "Nuxt Debug",
+        "type": "chrome",
+        "request": "launch",
+        "url": "http://localhost:3000",
+        "webRoot": "${workspaceFolder}/landing-page"
+      }
+    ],
+    "compounds": [
+      {
+        "name": "Full Stack Debug",
+        "configurations": ["Django Debug", "Vue Debug", "Nuxt Debug"]
+      }
+    ]
+  }
+}

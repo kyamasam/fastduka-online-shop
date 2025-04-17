@@ -1,0 +1,38 @@
+name: PicZangu Frontend CI/CD
+
+#events
+on:
+  push:
+    #selecting only development branch for running this workflow
+    branches:
+      - development
+jobs:
+  DevBuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Code
+        uses: actions/checkout@v4
+      - name: Setting up node env #setting the node env same as the dev machine
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.6.1
+          cache: "npm"
+      - name: Cache Dependencies
+        uses: actions/cache@v4.0.2
+        with:
+          path: ~/ .npm
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Checking Node Version
+        run: npm -v && node -v
+      - name: NPM Packages Install
+        run: npm install
+      - name: Build for development
+        run: npm run build
+      - name: Deploy to Cloudfront
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        run: |
+          aws s3 cp dist s3://${{ vars.AWS_BUCKET_NAME }} --recursive --region ${{ vars.AWS_REGION }}
+          aws cloudfront create-invalidation --distribution-id ${{ vars.AWS_DISTRIBUTION_ID }} --paths "/*" --region ${{ vars.AWS_REGION }}

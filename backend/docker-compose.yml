@@ -1,0 +1,56 @@
+services:
+
+  web:
+    container_name: meat_world_backend
+    build: .
+    image: meat_world_backend/webapp
+    command: gunicorn ${WEB_DIR_NAME}.wsgi -b 0.0.0.0:8000
+    volumes:
+      - static_volume:/home/app/webapp/static
+      - media_volume:/home/app/webapp/media
+      - ./.env:/home/app/webapp/.env
+    ports:
+      - 8000:8000
+    networks:
+      - backend-network
+    depends_on:
+      - db
+    environment:
+      - IN_DOCKER=1
+
+  db:
+    image: postgres:15.1-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/15.1/data
+    networks:
+      - backend-network
+    environment:
+      - POSTGRES_DB=${PG_NAME}
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/home/app/webapp/static
+      - media_volume:/home/app/webapp/media
+    networks:
+      - backend-network
+    ports:
+      - 8001:80
+    depends_on:
+      - web
+
+networks:
+  backend-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  static_volume:
+    driver: local
+  media_volume:
+#  media_volume:
+#  main_volume:
+

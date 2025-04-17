@@ -1,0 +1,44 @@
+server {
+    server_name shopapi.fastduka.co.ke;
+    
+    location = /favicon.ico { 
+        access_log off; 
+        log_not_found off; 
+    }
+
+    # Add explicit media location
+    location /media/ {
+        proxy_pass http://localhost:8001;  # Forward to your Docker nginx container
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Add explicit static location
+    location /static/ {
+        proxy_pass http://localhost:8001;  # Forward to your Docker nginx container
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    location / {
+        include proxy_params;
+        proxy_pass http://localhost:8000;
+    }
+
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/shopapi.fastduka.co.ke/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/shopapi.fastduka.co.ke/privkey.pem;
+}
+
+server {
+    if ($host = shopapi.fastduka.co.ke) {
+        return 301 https://$host$request_uri;
+    }
+    listen 80;
+    server_name shopapi.fastduka.co.ke;
+    return 404;
+}

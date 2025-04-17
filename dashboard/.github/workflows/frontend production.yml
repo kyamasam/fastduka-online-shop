@@ -1,0 +1,46 @@
+name: PicZangu Frontend Production CI/CD
+
+#events
+on:
+  push:
+    #selecting only production branch for running this workflow
+    branches:
+      - production
+jobs:
+  ProdBuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Code
+        uses: actions/checkout@v4
+      - name: Setting up node env #setting the node env same as the dev machine
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.6.1
+          cache: "npm"
+      - name: Cache Dependencies
+        uses: actions/cache@v4.0.2
+        with:
+          path: ~/ .npm
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Checking Node Version
+        run: npm -v && node -v
+      - name: NPM Packages Install
+        run: npm install
+      - name: Create .env file
+        run: |
+          echo "VITE_API_BASE_URL=${{vars.VITE_API_BASE_URL}}" >> .env
+          echo "VITE_FRONT_END_BASE_URL=${{vars.VITE_FRONT_END_BASE_URL}}" >> .env
+          echo "VITE_HOME_PAGE_URL=${{vars.VITE_HOME_PAGE_URL}}" >> .env
+      - name: Build for production
+        run: npm run build
+      - name: Deploy to Cloudfront
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL}}
+          VITE_FRONT_END_BASE_URL: ${{ vars.VITE_FRONT_END_BASE_URL}}
+          VITE_HOME_PAGE_URL: ${{ vars.VITE_HOME_PAGE_URL}}
+        run: |
+          aws s3 cp dist s3://${{ vars.PROD_AWS_BUCKET_NAME }} --recursive --region ${{ vars.AWS_REGION }}
+          aws cloudfront create-invalidation --distribution-id ${{ vars.PROD_AWS_DISTRIBUTION_ID }} --paths "/*" --region ${{ vars.AWS_REGION }}

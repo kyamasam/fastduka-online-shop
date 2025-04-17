@@ -1,0 +1,2 @@
+LIQUOR= 'LIQUOR'
+MEAT ="MEAT"
