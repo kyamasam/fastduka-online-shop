@@ -6,18 +6,23 @@
     "setup": "node scripts/setup.js",
     "dev": "node scripts/dev.js",
     "build": "node scripts/build.js",
-    "backend:dev": "cd backend && python manage.py runserver",
-    "backend:migrate": "cd backend && python manage.py migrate",
+    "backend:dev": "cd backend && ./venv/bin/python manage.py runserver --noreload",
+    "backend:dev:watch": "cd backend && ./venv/bin/python manage.py runserver",
+    "backend:migrate": "cd backend && ./venv/bin/python manage.py migrate",
     "dashboard:dev": "cd dashboard && npm run dev",
     "landing:dev": "cd landing-page && npm run dev",
-    "prepare": "is-ci || husky install"
+    "dev:all": "concurrently \"npm run backend:dev:watch\" \"npm run dashboard:dev\" \"npm run landing:dev\"",
+    "prepare": "is-ci || husky install",
+    "lint": "eslint --fix .",
+    "format": "prettier --write ."
   },
   "devDependencies": {
-    "prettier": "^3.0.3",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.1",
     "husky": "^8.0.3",
-    "lint-staged": "^15.0.2",
     "is-ci": "^3.0.1",
-    "concurrently": "^8.2.2"
+    "lint-staged": "^15.0.2",
+    "prettier": "^3.0.3"
   },
   "engines": {
     "node": ">=16.0.0",

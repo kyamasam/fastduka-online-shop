@@ -11,19 +11,22 @@ A monorepo containing Django Backend, Vue.js Dashboard, and Nuxt.js Landing Page
 ## Quick Start
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/my-app-monorepo.git
    cd my-app-monorepo
    ```
 
 2. Run the setup script:
+
    ```bash
    node scripts/setup.js
    ```
 
 3. Start all services:
+
    ```bash
-   npm run dev
+   npm run dev:all
    ```
 
 4. Access your applications:
@@ -69,6 +72,12 @@ npm run landing:dev
 
 ```bash
 npm run build
+```
+
+### Run all
+
+```bash
+npm run dev:all
 ```
 
 ## Git Workflow
