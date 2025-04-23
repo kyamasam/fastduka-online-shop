@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { IProduct } from "types/product-type";
+import type { IProduct } from "@/types/product-type";
 import { onMounted, ref } from "vue";
 import { toast } from "vue3-toastify";
 
