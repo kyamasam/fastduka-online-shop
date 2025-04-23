@@ -43,10 +43,10 @@ DATABASE_URL=sqlite:///db.sqlite3
 ALLOWED_HOSTS=localhost,127.0.0.1
 `,
     './dashboard/.env': `
-VITE_API_URL=http://localhost:8000/api
+VITE_API_BASE_URL=http://localhost:8000/api/
 `,
     './landing-page/.env': `
-NUXT_PUBLIC_API_URL=http://localhost:8000/api
+API_URL=http://localhost:8000/api
 `
   };
 
