@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'inventory',
     'vendors',
     'delivery',
+    'setup',
     'drf_spectacular',
     'corsheaders',
 
