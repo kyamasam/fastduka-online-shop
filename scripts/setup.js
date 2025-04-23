@@ -110,9 +110,7 @@ async function setupBackend() {
   const venvPath = path.join(backendDir, '.venv');
   if (!fs.existsSync(venvPath)) {
     console.log(`${colors.cyan}Creating virtual environment...${colors.reset}`);
-    const createVenvCmd = os.platform() === 'win32' 
-      ? 'python -m venv .venv' 
-      : 'python3 -m venv .venv';
+    const createVenvCmd = 'python3.12 -m venv .venv';
     runCommand(createVenvCmd, backendDir);
   }
   
@@ -122,16 +120,21 @@ async function setupBackend() {
     ? '.venv\\Scripts\\pip install -r requirements.txt' 
     : '.venv/bin/pip install -r requirements.txt';
   runCommand(pipCmd, backendDir, true);  // Ignore error if requirements.txt doesn't exist yet
+
+  // collect static
+  console.log(`${colors.cyan}Collecting static files...${colors.reset}`);
+  const collectStaticCmd = os.platform() === 'win32' 
+    ? '.venv\\Scripts\\python manage.py collectstatic --noinput' 
+    : '.venv/bin/python manage.py collectstatic --noinput';
+  runCommand(collectStaticCmd, backendDir, true);  // Ignore error if manage.py doesn't exist yet
+  // Run migrations
+  console.log(`${colors.cyan}Running database migrations...${colors.reset}`);
+  const migrateCmd = os.platform() === 'win32' 
+    ? '.venv\\Scripts\\python manage.py migrate' 
+    : '.venv/bin/python manage.py migrate';
   
-  // Create a simple django project if it doesn't exist yet
-  const manageFile = path.join(backendDir, 'manage.py');
-  if (!fs.existsSync(manageFile)) {
-    console.log(`${colors.yellow}Django project not found, creating a new one...${colors.reset}`);
-    const djangoAdminCmd = os.platform() === 'win32' 
-      ? '.venv\\Scripts\\pip install django && .venv\\Scripts\\django-admin startproject config .' 
-      : '.venv/bin/pip install django && .venv/bin/django-admin startproject config .';
-    runCommand(djangoAdminCmd, backendDir);
-  }
+  runCommand(migrateCmd, backendDir, true);  // Ignore error if manage.py doesn't exist yet
+
 }
 
 // Setup Vue.js dashboard
@@ -219,7 +222,7 @@ async function setup() {
   runCommand('npm install', process.cwd());
   
   console.log(`\n${colors.green}🎉 Setup complete! You can now run the following commands:${colors.reset}`);
-  console.log(`  - ${colors.cyan}npm run dev${colors.reset}: Start all services`);
+  console.log(`  - ${colors.cyan}npm run dev:all${colors.reset}: Start all services`);
   console.log(`  - ${colors.cyan}npm run backend:dev${colors.reset}: Start only the backend`);
   console.log(`  - ${colors.cyan}npm run dashboard:dev${colors.reset}: Start only the dashboard`);
   console.log(`  - ${colors.cyan}npm run landing:dev${colors.reset}: Start only the landing page`);
