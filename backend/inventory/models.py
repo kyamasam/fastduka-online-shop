@@ -1,6 +1,6 @@
 from django.db import models
 
-from inventory.constants import CUSTOMER_ORDER, STOCK_ADDITION, EXPIRY
+from inventory.constants import CUSTOMER_ORDER, IN_TRANSIT, STOCK_ADDITION, EXPIRY,ORDER_CANCELLED
 from products.models import Product, ProductVariant
 from users.models import UtilColumnsModel
 from vendors.models import Vendor
@@ -18,9 +18,12 @@ class InventoryHistory(UtilColumnsModel):
     action_types = [
         (CUSTOMER_ORDER, "Customer Order"),
                     (STOCK_ADDITION, "Stock Addition"),
+                    (ORDER_CANCELLED, "Cancellation"),
+                    (IN_TRANSIT, "In Transit"),
                     (EXPIRY, "Expiry")]
     inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE)
-    reference_id = models.CharField(max_length=255, null=True, blank=True)
+    reference_id = models.CharField(max_length=255, null=True, blank=True) # 1
+    reference_type = models.CharField(max_length=255, null=True, blank=True) # order
     previous_value= models.FloatField(default=0)
     new_value = models.FloatField(default=0)
     action_type = models.CharField(max_length=255, null=True, blank=True, choices=action_types)
