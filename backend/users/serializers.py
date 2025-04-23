@@ -174,6 +174,8 @@ class UserSerializer(serializers.ModelSerializer):
             user.groups.clear()
             for group in groups:
                 user.groups.add(group)
+
+        user.user_type = user_type
         user.save()
         if profile_data is not None:
             # check if the user has a profile

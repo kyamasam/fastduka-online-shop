@@ -76,6 +76,7 @@ const attemptSubmit = () => {
         if (isEditing) {
           // Update user
           delete formState.value?.password
+          delete formState.value?.profile
           await store.dispatch("patchData", {
             url: "users",
             id: userId,

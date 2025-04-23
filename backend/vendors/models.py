@@ -1,7 +1,7 @@
 from django.db import models
 
 from users.models import User, UtilColumnsModel
-from vendors.constants import VENDOR_APPROVAL_STATUS_CHOICES, VENDOR_DOCUMENT_TYPES, VENDOR_ROLE_CHOICES, VENDOR_ROLE_EDITOR, VENDOR_STATUS_PENDING
+from vendors.constants import VENDOR_APPROVAL_STATUS_CHOICES, VENDOR_DOCUMENT_TYPES, VENDOR_ROLE_CHOICES, VENDOR_ROLE_EDITOR, VENDOR_STATUS_APPROVED
 from django.core.validators import FileExtensionValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
 
@@ -10,9 +10,9 @@ class Vendor(UtilColumnsModel):
     name = models.CharField(max_length=255, unique=True)
 
     verification_status = models.CharField(
-        default=VENDOR_STATUS_PENDING,
+        default=VENDOR_STATUS_APPROVED,
         max_length=255, 
-        choices=VENDOR_APPROVAL_STATUS_CHOICES
+        choices=VENDOR_APPROVAL_STATUS_CHOICES,
     )
     location = models.CharField(max_length=255)
     latitude = models.FloatField(null=True, blank=True)

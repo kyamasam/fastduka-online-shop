@@ -24,7 +24,7 @@ class VendorViewSet(viewsets.ModelViewSet):
         # only users of type USER_TYPE_BUSINESS_OWNER can create Vendors
         if not self.request.user.user_type ==USER_TYPE_BUSINESS_OWNER: 
             raise serializers.ValidationError(f"Only users of type {USER_TYPE_BUSINESS_OWNER} can create Vendors")
-        vendor = serializer.save(is_active=False)
+        vendor = serializer.save(is_active=True)
         # Create vendor member entry for creator as admin
         VendorMember.objects.create(
             vendor=vendor,

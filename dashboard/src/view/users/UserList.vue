@@ -26,6 +26,11 @@ const columns = ref([
     key: "email",
   },
   {
+    title: "User Type",
+    dataIndex: "user_type",
+    key: "user_type",
+  },
+  {
     title: "Actions",
     dataIndex: "",
     key: "actions",
