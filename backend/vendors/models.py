@@ -18,6 +18,7 @@ class Vendor(UtilColumnsModel):
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     delivery_radius = models.FloatField(help_text = "delivery radius in KM",null=True, blank=True)
+    is_default = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

@@ -74,7 +74,7 @@ class VendorSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Vendor
-        fields = ['id', 'name', 'location', 'verification_status', 'is_active', 'members', 'documents',
+        fields = ['id', 'name', 'location','is_default', 'verification_status', 'is_active', 'members', 'documents',
                   'latitude','longitude','delivery_radius'
         ]
         read_only_fields = ['id', 'verification_status', 'is_active']
