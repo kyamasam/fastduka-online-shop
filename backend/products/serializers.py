@@ -69,11 +69,17 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         category = validated_data.pop("category_id", None)
-        instance.update(**validated_data)
+
+        # Update fields manually
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
         if category:
             instance.category = category
-            instance.save()
+
+        instance.save()
         return instance
+
     
     def get_reviews(self, obj):
         return ReviewSerializer(ProductReview.objects.filter(product=obj).order_by("-created_at"), many=True).data

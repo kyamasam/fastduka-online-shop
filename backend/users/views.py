@@ -57,7 +57,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if user.user_type == USER_TYPE_PLATFORM_MANAGER:
             return User.objects.all()
         if user.is_staff or user.is_superuser:
-            return User.objects.all(pk=user.id)
+            return User.objects.all()
         
         # For business managers and owners, return users from their vendors
         if user.user_type in [USER_TYPE_BUSINESS_MANAGER, USER_TYPE_BUSINESS_OWNER]:

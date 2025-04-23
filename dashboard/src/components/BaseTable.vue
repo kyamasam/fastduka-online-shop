@@ -194,6 +194,12 @@ export default {
     fetchUrl: function (newVal, oldVal) {
       this.queryData(this.fetchUrl);
     },
+    $route: function (to, from) {
+      console.log('changed');
+      
+      this.queryData(this.fetchUrl);
+    },
+    
   },
   mounted() {
     this.queryData(this.fetchUrl);
