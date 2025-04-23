@@ -58,8 +58,34 @@ def find_nearest_lat_long_to(user_lat, user_lng, store_locations):
 # nearest_stores = find_nearest_lat_long_to(user_lat, user_lng, store_locations)
 # print(nearest_stores)
 
+"""
+todo: match user to closest vendor - settings
+"""
 def find_nearest_vendor(user_lat, user_lng):
+  site_settings = SiteSettings.objects.first()
+
+  """"""
+  a_vendor = Vendor.objects.filter(is_default=True).first()
+
+  if a_vendor is None:
+    a_vendor = Vendor.objects.first()
+  
+  if a_vendor is None:
+    raise Exception('No vendors found')
+
+  if site_settings.match_user_to_closest_vendor == False:
+    return {
+          'lat': a_vendor.latitude,
+          'lng': a_vendor.longitude,
+          'distance': float(0),
+          'duration': 1,
+          'id': a_vendor.id
+      }
+
   vendors = Vendor.objects.filter(~Q(latitude=None) & ~Q(longitude=None))
+
+
+
   if vendors.count()==0:
     raise Exception('No vendors found')
   if vendors.count() ==1:
