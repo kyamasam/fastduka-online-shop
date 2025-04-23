@@ -3,6 +3,7 @@ import googlemaps
 from back_end.settings import GOOGLE_MAPS_API_KEY
 from vendors.models import Vendor
 from django.db.models import Q
+from settings_app.models import SiteSettings
 def find_nearest_lat_long_to(user_lat, user_lng, store_locations):
   """
   Finds the nearest store from a list of store locations to a specified user location.
