@@ -69,17 +69,28 @@
           label="Category"
           prop="category_id"
       >
-        <el-select
-            v-model="formState.category_id"
-            :loading="categoryLoader"
-            class="w-full rounded-none z-50"
-            placeholder="Select Category"
-            size="large"
-            @focus="fetchCategories"
-        >
-          <el-option v-for="category in categories" :key="category.value" :label="category.label"
-                     :value="category.value"/>
-        </el-select>
+        <div class="flex">
+          <el-select
+              v-model="formState.category_id"
+              :loading="categoryLoader"
+              class="w-full z-50 min-w-[200px] rounded"
+              placeholder="Select Category"
+              size="large"
+              @focus="fetchCategories"
+          >
+            <el-option v-for="category in categories" :key="category.value" :label="category.label"
+                      :value="category.value"/>
+          </el-select>
+          <!-- Add Category Button -->
+          <el-button
+              class="ml-2 bg-blue-500 border-none hover:bg-blue-600 focus:bg-blue-600 text-white rounded-none"
+              size="large"
+              type="primary"
+              @click="showCategoryForm = true"
+          >
+            <el-icon><Plus /></el-icon>
+          </el-button>
+        </div>
       </el-form-item>
     </div>
 
@@ -117,24 +128,6 @@
 
         <base-loader v-if="loadingCoverPhotoUpload"/>
       </a-upload>
-
-      <!--        <div class="file-upload-container w-full hidden">-->
-      <!--          <input-->
-      <!--              accept=".jpg,.png,.jpeg"-->
-      <!--              class="file-input w-full h-full"-->
-      <!--              type="file"-->
-      <!--              @change="handlePhotoChange"-->
-      <!--          />-->
-      <!--          <div class="file-upload-content">-->
-      <!--            <el-icon>-->
-      <!--              <upload-filled/>-->
-      <!--            </el-icon>-->
-      <!--            <div class="file-upload-text">-->
-      <!--              <span>Drop file here or <em>click to upload</em></span>-->
-      <!--              <div class="el-upload__tip">jpg/png files with a size less than 500kb</div>-->
-      <!--            </div>-->
-      <!--          </div>-->
-      <!--        </div>-->
     </el-form-item>
 
     <!-- Submit Button -->
@@ -150,24 +143,36 @@
       </el-button>
     </el-form-item>
   </el-form>
+
+  <!-- Category Form Popup -->
+  <CategoryForm 
+    :visible="showCategoryForm" 
+    @close="showCategoryForm = false"
+    @category-added="handleCategoryAdded"
+  />
 </template>
 
 <script>
 import BaseDialog from "@/components/BaseDialog.vue";
 import BaseLoader from "@/components/BaseLoader";
+import CategoryForm from "./CategoryForm.vue"; // Import the category form component
 import store from "@/vuex/store";
 import {notification} from "ant-design-vue";
 import axios from "axios";
 import {baseUrl} from "@/utility/constants";
 import router from "@/routes";
 import BaseDrawer from "@/BaseDrawer.vue";
+import { Plus, Upload } from '@element-plus/icons-vue'; // Import Plus icon
 
 export default {
   name: "ProductForm",
   components: {
     BaseDrawer,
     BaseDialog,
-    BaseLoader
+    BaseLoader,
+    CategoryForm, // Register CategoryForm component
+    Plus, // Register Plus icon
+    Upload
   },
   data() {
     return {
@@ -185,10 +190,14 @@ export default {
           status: "uploading",
         },
       },
-      uploadUrl: ''
+      uploadUrl: '',
+      showCategoryForm: false, // Controls visibility of the category form popup - only shows when plus icon is clicked
     };
   },
   methods: {
+    /**
+     * Fetch all product categories
+     */
     fetchCategories() {
       this.categoryLoader = true;
       store.dispatch("fetchList", {url: "category"})
@@ -199,26 +208,54 @@ export default {
             }));
             this.categoryLoader = false;
           })
-          .catch(() => {
+          .catch((error) => {
+            console.error("Error fetching categories:", error);
+            notification["error"]({
+              message: "Error",
+              description: "Failed to fetch categories. Please try again.",
+            });
             this.categoryLoader = false;
           });
     },
+    
+    /**
+     * Fetch product details when editing an existing product
+     */
     fetchProduct() {
-      this.productLoader = true;
       const productId = this.$route.params.productId;
+      if (!productId) {
+        // If no product ID, we're in create mode
+        this.productLoader = false;
+        return;
+      }
+      
+      this.productLoader = true;
       store.dispatch("fetchSingleItem", {url: "product", id: productId})
           .then((res) => {
-            this.formState = res.data
-            this.formStateCopy = res.data
+            this.formState = res.data;
+            this.formStateCopy = {...res.data}; // Create a deep copy for change tracking
             this.productLoader = false;
           })
-          .catch(() => {
+          .catch((error) => {
+            console.error("Error fetching product:", error);
+            notification["error"]({
+              message: "Error",
+              description: "Failed to fetch product details. Please try again.",
+            });
             this.productLoader = false;
           });
     },
-    handlePhotoChange(event) {
-      this.fileList = event.target.files[0];
+    
+    /**
+     * Handle file removal from upload component
+     */
+    handleRemove() {
+      this.fileList = [];
     },
+    
+    /**
+     * Track changes between original and current form state for PATCH requests
+     */
     saveChanges() {
       const changes = {};
 
@@ -245,7 +282,22 @@ export default {
 
       return changes;
     },
+    
+    /**
+     * Handle form submission (create or update product)
+     */
     async handleSubmit() {
+      // Validate the form
+      try {
+        await this.$refs.formRef.validate();
+      } catch (error) {
+        notification["error"]({
+          message: "Validation Error",
+          description: "Please fill in all required fields correctly.",
+        });
+        return;
+      }
+      
       const formData = new FormData();
 
       // Append each file to the formData if it meets the size condition
@@ -263,13 +315,18 @@ export default {
         }
       }
 
-      if (this.$route.name === 'edit-product') {
-        // this.formState = this.saveChanges();
+      const isEditMode = this.$route.name === 'edit-product';
+      
+      if (isEditMode) {
+        // In edit mode, we might only want to send changed fields
+        // Also, don't try to update primary_photo if not changed
         delete this.formState.primary_photo;
       }
 
       for (let key in this.formState) {
-        formData.append(key, this.formState[key]);
+        if (this.formState[key] !== null && this.formState[key] !== undefined) {
+          formData.append(key, this.formState[key]);
+        }
       }
 
       // Log the formData content for debugging
@@ -280,40 +337,91 @@ export default {
       try {
         // Retrieve auth data from localStorage
         const authData = JSON.parse(localStorage.getItem("piczanguAuthData"));
-
-        const routeName = this.$route.name;
-        if (routeName === "edit-product") {
+        let resp;
+        
+        if (isEditMode) {
           const productId = this.$route?.params?.productId;
-          const resp = await axios.patch(`${baseUrl}product/${productId}/`, formData, {
+          resp = await axios.patch(`${baseUrl}product/${productId}/`, formData, {
             headers: {
-              "Content-Type": "multipart/form-data", // Ensure multipart form-data header
-              Authorization: "Bearer " + authData?.access, // Include authorization token
+              "Content-Type": "multipart/form-data",
+              Authorization: "Bearer " + authData?.access,
             },
           });
-        }else {
-          const resp = await axios.post(`${baseUrl}product/`, formData, {
+          
+          notification["success"]({
+            message: "Success",
+            description: "Product updated successfully",
+          });
+        } else {
+          resp = await axios.post(`${baseUrl}product/`, formData, {
             headers: {
-              "Content-Type": "multipart/form-data", // Ensure multipart form-data header
-              Authorization: "Bearer " + authData?.access, // Include authorization token
+              "Content-Type": "multipart/form-data",
+              Authorization: "Bearer " + authData?.access,
             },
+          });
+          
+          notification["success"]({
+            message: "Success",
+            description: "Product created successfully",
           });
         }
 
-
-
         console.log("Success:", resp);
+        
+        // Navigate back to product list
+        router.push({ name: 'products' });
       } catch (err) {
         console.error("Error:", err);
+        const errorMessage = err.response?.data?.message || "An error occurred while saving the product";
+        notification["error"]({
+          message: "Error",
+          description: errorMessage,
+        });
       } finally {
         this.registerLoading = false;
-        // router.go(-1)
       }
+    },
+    
+    /**
+     * Handle newly added category from CategoryForm
+     * @param {Object} newCategory - The newly created category
+     */
+    handleCategoryAdded(newCategory) {
+      // Add the new category to the dropdown options
+      this.categories.push({
+        label: newCategory.name,
+        value: newCategory.id
+      });
+      
+      // Select the newly created category
+      this.formState.category_id = newCategory.id;
+      
+      // Show success notification
+      notification["success"]({
+        message: "Success",
+        description: `Category "${newCategory.name}" has been added and selected`,
+      });
     }
-
-
   },
   mounted() {
-    this.fetchProduct();
+    // Initialize empty form state if not editing
+    if (!this.$route.params.productId) {
+      this.formState = {
+        name: '',
+        description: '',
+        selling_price: null,
+        buying_price: null,
+        sale_price: null,
+        allowable_discount: null,
+        category_id: null
+      };
+      this.productLoader = false;
+    } else {
+      // Fetch product data if editing
+      this.fetchProduct();
+    }
+    
+    // Note: Category form is NOT initialized here - it will only show when the plus icon is clicked
   }
 };
 </script>
@@ -358,4 +466,3 @@ export default {
   color: #999;
 }
 </style>
-
