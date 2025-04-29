@@ -319,6 +319,16 @@
       </router-link>
     </a-menu-item>
 
+    <a-menu-item key="categories" @click="toggleCollapsed">
+      <template #icon>
+        <Tools class="h-8 w-8"/>
+
+      </template>
+      <router-link to="/dashboard/categories">
+        {{ 'Product Categories' }}
+      </router-link>
+    </a-menu-item>
+
     <a-menu-item key="orders" @click="toggleCollapsed">
       <template #icon>
         <promotion @click="routeTo('orders')"/>
@@ -454,6 +464,7 @@ import {
   Message, OfficeBuilding,
   PriceTag,
   Promotion, ScaleToOriginal,
+  Tools,
   User,
   UserFilled, Van,
   Wallet,
@@ -487,7 +498,7 @@ export default defineComponent({
     HomeFilled,
     ArrowUp,
     NavTitle,
-    LogoutOutlined
+    LogoutOutlined,Tools
   },
   setup(props) {
     const {t} = useI18n();
