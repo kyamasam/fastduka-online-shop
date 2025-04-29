@@ -37,7 +37,7 @@
                 </svg>
 
               </div>
-              <el-select placeholder="vendor" @focus="fetchVendors" v-model="store.state.mainRequests.vendor" style="width: 100px">
+              <el-select placeholder="shops" @focus="fetchVendors" v-model="store.state.mainRequests.vendor" style="width: 100px">
                 <el-option v-for="vendor in vendorList" :value="vendor" >
                   {{vendor?.name}}
                   <span class="text-green-500" v-if="vendor?.verification_status === 'APPROVED'">

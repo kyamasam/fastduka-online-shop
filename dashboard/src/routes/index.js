@@ -311,12 +311,12 @@ const routes = [
         ],
       },
       {
-        path: "vendors",
-        name: "vendors",
+        path: "shops",
+        name: "shops",
         component: VendorList,
         meta: {
           showInSideBar: false,
-          verboseName: "Vendors",
+          verboseName: "Shops",
           requiresAuth: true,
           allowed_roles: [
             "photographer",
@@ -338,7 +338,7 @@ const routes = [
             component: CreateVendorView,
             meta: {
               showInSideBar: false,
-              verboseName: "Create Vendors",
+              verboseName: "Create Shops",
               requiresAuth: true,
               allowed_roles: [],
               level: 1,

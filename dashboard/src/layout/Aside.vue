@@ -350,12 +350,12 @@
     </a-menu-item>
 
     <a-menu-item
-        key="vendors" @click="toggleCollapsed">
+        key="shops" @click="toggleCollapsed">
       <template #icon>
-        <office-building @click="routeTo('vendors')"/>
+        <office-building @click="routeTo('shops')"/>
       </template>
-      <router-link to="/dashboard/vendors">
-        {{ t('Vendors') }}
+      <router-link to="/dashboard/shops">
+        {{ t('Shops') }}
       </router-link>
     </a-menu-item>
 

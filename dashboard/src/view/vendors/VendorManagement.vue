@@ -48,7 +48,7 @@ watch(
 </script>
 
 <template>
-  <BaseDrawer close-route="vendors" :title="drawerTitle">
+  <BaseDrawer close-route="shops" :title="drawerTitle">
     <el-tabs v-model="activeRoute" type="border-card" class="demo-tabs" @tab-click="handleClick">
       <el-tab-pane
           v-for="tab in availableTabs"
