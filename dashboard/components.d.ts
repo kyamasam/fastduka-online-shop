@@ -46,6 +46,7 @@ declare module 'vue' {
     CardsFrame: typeof import('./src/components/cards/frame/CardsFrame.vue')['default']
     Dropdown: typeof import('./src/components/dropdown/Dropdown.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
+    ElCard: typeof import('element-plus/es')['ElCard']
     ElDialog: typeof import('element-plus/es')['ElDialog']
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
@@ -58,6 +59,8 @@ declare module 'vue' {
     ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElSwitch: typeof import('element-plus/es')['ElSwitch']
+    ElTable: typeof import('element-plus/es')['ElTable']
+    ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTag: typeof import('element-plus/es')['ElTag']
@@ -79,5 +82,8 @@ declare module 'vue' {
     StartCamera: typeof import('./src/components/StartCamera.vue')['default']
     Support: typeof import('./src/components/utilities/auth-info/Support.vue')['default']
     TrueOrFalse: typeof import('./src/components/TrueOrFalse.vue')['default']
+  }
+  export interface ComponentCustomProperties {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
   }
 }
