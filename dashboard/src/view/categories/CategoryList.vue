@@ -1,36 +1,95 @@
+<template>
+  <PageHeaders class="ninjadash-page-header-main" title="Orders" />
+  <router-view />
+
+  <BaseTable
+    :columns="columns"
+    show0ther-items
+    show-expanded-items
+    :fetchUrl="fetchUrl"
+    title="Orders"
+  >
+
+    <template v-slot:bodyCell="slotProps">
+      <template v-if="slotProps.column.key === 'photo'">
+        <div class="flex items-center gap-2">
+              <img
+                height="40"
+                width="40"
+                :src="slotProps?.text?.photo"
+                :alt="slotProps?.text?.name"
+              />
+        </div>
+      </template>
+      <template v-if="slotProps.column.key === 'actions'">
+        <el-button
+          class="bg-red-500 text-white hover:bg-red-600 border-none hover:ring-none rounded-none"
+          type="primary"
+          size="large"
+          @click="selectAction('order-rider', slotProps.text?.id)"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"
+            />
+          </svg>
+        </el-button>
+
+      </template>
+    </template>
+
+    <template v-slot:expandedRowRender="slotProps">
+      <a-table
+        :columns="innerColumns"
+        :data-source="slotProps?.record?.children"
+        :pagination="false"
+      >
+        <template #bodyCell="{ column, text }">
+
+          <template v-if="column.key === 'photo'">
+            <div class="flex items-center gap-2">
+              <img
+                height="40"
+                width="40"
+                :src="text?.photo"
+                :alt="text?.name"
+              />
+            </div>
+          </template>
+        </template>
+      </a-table>
+    </template>
+  </BaseTable>
+</template>
+
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, watch } from "vue";
+import { ArrowRight, Picture, CaretRight } from "@element-plus/icons-vue";
 import BaseTable from "@/components/BaseTable.vue";
-import CategoryForm from "@/view/products/components/CategoryForm.vue";
-import { Plus, Edit, Delete } from '@element-plus/icons-vue';
-import { ElMessageBox, ElMessage } from 'element-plus';
-import store from "@/vuex/store";
-import axios from "axios";
-import { baseUrl } from "@/utility/constants";
+import PageHeaders from "@/components/pageHeaders/PageHeaders.vue";
+import { formatDate } from "@/utility/functions";
+import { formatCurrency } from "@/utility/functions";
+import router from "@/routes";
 
-// State management
-const categories = ref([]);
-const loading = ref(false);
-const showCategoryForm = ref(false);
-const currentCategory = ref(null);
-const expandedRows = ref([]);
-
-// Table columns configuration
 const columns = ref([
   {
     title: "Name",
-    dataIndex: "",
+    dataIndex: "name",
     key: "name",
   },
   {
-    title: "Products",
-    dataIndex: "product_count",
-    key: "product_count",
-  },
-  {
-    title: "Parent Category",
-    dataIndex: "parent",
-    key: "parent",
+    title: "Photo",
+    dataIndex: "",
+    key: "photo",
   },
   {
     title: "Actions",
@@ -39,251 +98,96 @@ const columns = ref([
   },
 ]);
 
-// Fetch all categories with hierarchical data
-const fetchCategories = async () => {
-  loading.value = true;
-  try {
-    const response = await store.dispatch("fetchList", { url: "category" });
-    categories.value = response.data.results;
-    loading.value = false;
-  } catch (error) {
-    console.error("Error fetching categories:", error);
-    ElMessage.error("Failed to fetch categories. Please try again.");
-    loading.value = false;
+const innerColumns = ref([
+  {
+    title: "Name",
+    dataIndex: "name",
+    key: "name",
+    sorter: true,
+    width: "20%",
+  },
+  {
+    title: "Photo",
+    dataIndex: "",
+    key: "photo",
+    sorter: true,
+    width: "20%",
   }
-};
+]);
 
-// Open category form in create mode
-const handleAddCategory = () => {
-  currentCategory.value = null;
-  showCategoryForm.value = true;
-};
+const activeFilter = ref("");
+const fetchUrl = ref("category");
+const expandedRows = ref([]);
 
-// Open category form in edit mode
-const handleEditCategory = (category) => {
-  currentCategory.value = category;
-  showCategoryForm.value = true;
-};
-
-// Handle category deletion
-const handleDeleteCategory = async (category) => {
-  try {
-    await ElMessageBox.confirm(
-      `Are you sure you want to delete ${category.name}? This may affect products using this category.`,
-      'Warning',
-      {
-        confirmButtonText: 'Delete',
-        cancelButtonText: 'Cancel',
-        type: 'warning',
-      }
-    );
-    
-    loading.value = true;
-    const authData = JSON.parse(localStorage.getItem("piczanguAuthData"));
-    
-    await axios.delete(`${baseUrl}category/${category.id}/`, {
-      headers: {
-        Authorization: "Bearer " + authData?.access,
-      },
-    });
-    
-    ElMessage.success(`Category "${category.name}" deleted successfully`);
-    fetchCategories(); // Refresh the list
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error("Error deleting category:", error);
-      ElMessage.error(
-        error.response?.data?.message || "Failed to delete category"
-      );
-    }
-  } finally {
-    loading.value = false;
-  }
-};
-
-// Handle newly added or updated category
-const handleCategoryChange = () => {
-  fetchCategories();
-  showCategoryForm.value = false;
-};
-
-// Check if a category has children
-const hasChildren = (categoryId) => {
-  return categories.value.some(category => category.parent === categoryId);
-};
-
-// Toggle row expansion
-const toggleExpand = (categoryId) => {
-  const index = expandedRows.value.indexOf(categoryId);
-  if (index > -1) {
-    expandedRows.value.splice(index, 1);
+const toggleExpand = (row) => {
+  const index = expandedRows.value.indexOf(row.id);
+  if (index === -1) {
+    expandedRows.value.push(row.id);
   } else {
-    expandedRows.value.push(categoryId);
+    expandedRows.value.splice(index, 1);
   }
 };
 
-// Get children categories for a parent
-const getChildCategories = (parentId) => {
-  return categories.value.filter(category => category.parent === parentId);
+
+const selectAction = (action, productId) => {
+  router.push({ name: action, params: { orderId: productId } });
 };
 
-// Format category name with proper indentation for hierarchy
-const formatCategoryName = (category, level = 0) => {
-  return {
-    ...category,
-    _level: level,
-    _hasChildren: hasChildren(category.id)
-  };
-};
-
-// Process categories to display proper hierarchy
-const processCategories = () => {
-  const processed = [];
-  
-  // First add all root categories (no parent)
-  const rootCategories = categories.value.filter(c => !c.parent);
-  rootCategories.forEach(category => {
-    processed.push(formatCategoryName(category, 0));
-    
-    // If expanded, add children recursively
-    if (expandedRows.value.includes(category.id)) {
-      addChildrenRecursively(category.id, processed, 1);
-    }
-  });
-  
-  return processed;
-};
-
-// Helper function to add children categories recursively
-const addChildrenRecursively = (parentId, result, level) => {
-  const children = getChildCategories(parentId);
-  children.forEach(child => {
-    result.push(formatCategoryName(child, level));
-    
-    if (expandedRows.value.includes(child.id)) {
-      addChildrenRecursively(child.id, result, level + 1);
-    }
-  });
-};
-
-// Initialize component
-onMounted(() => {
-  fetchCategories();
-});
+watch(
+  activeFilter,
+  (newFilter) => {
+    fetchUrl.value = `category${newFilter || ""}`;
+  },
+  { immediate: true }
+);
 </script>
 
-<template>
-  <div class="category-list-container">
-    <div class="header flex justify-between items-center mb-4">
-      <h1 class="text-2xl font-bold">Categories</h1>
-      <el-button
-        type="primary"
-        size="large"
-        class="bg-red-500 border-none hover:bg-red-500 focus:bg-red-600"
-        @click="handleAddCategory"
-      >
-        <el-icon class="mr-1"><Plus /></el-icon>
-        Add Category
-      </el-button>
-    </div>
-    
-    <el-card style="box-shadow: none;" v-loading="loading" class="w-full shadow-none border-none">
-    
-      <el-table 
-        :data="processCategories()" 
-        style="width: 100%"
-        
-        row-key="id"
-      >
-        <!-- Name Column -->
-        <el-table-column label="Name" min-width="200">
-          <template #default="{ row }">
-            <div class="flex items-center">
-              <!-- Indentation based on level -->
-              <div 
-                v-if="row._level > 0" 
-                :style="{ width: `${row._level * 20}px` }"
-                class="inline-block"
-              ></div>
-              
-              <!-- Expand/Collapse Icon -->
-              <el-button
-                v-if="row._hasChildren"
-                type="text"
-                @click.stop="toggleExpand(row.id)"
-              >
-                <el-icon>
-                  <i :class="expandedRows.includes(row.id) ? 'el-icon-arrow-down' : 'el-icon-arrow-right'"></i>
-                </el-icon>
-              </el-button>
-              
-              <!-- Category Image -->
-              <img
-                v-if="row.photo"
-                :src="row.photo"
-                class="h-8 w-8 mr-2 rounded-md object-cover"
-                :alt="row.name"
-              />
-              
-              <!-- Category Name -->
-              <span>{{ row.name }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        
-        <!-- Product Count Column -->
-        <el-table-column label="Products" width="120" align="center">
-          <template #default="{ row }">
-            <el-tag size="small" type="info">
-              {{ row.product_count || 0 }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        
-        <!-- Parent Category Column -->
-        <el-table-column label="Parent Category" min-width="180">
-          <template #default="{ row }">
-            <span v-if="row.parent_name">{{ row.parent_name }}</span>
-            <span v-else class="text-gray-400">None</span>
-          </template>
-        </el-table-column>
-        
-        <!-- Actions Column -->
-        <el-table-column label="Actions" width="150" align="center">
-          <template #default="{ row }">
-            <div class="flex items-center justify-center space-x-2">
-              <el-button
-                type="primary"
-                size="default"
-                @click.stop="handleEditCategory(row)"
-              >
-                <el-icon><Edit /></el-icon>
-              </el-button>
-              
-              <el-button
-                type="danger"
-                size="default"
-                @click.stop="handleDeleteCategory(row)"
-              >
-                <el-icon><Delete /></el-icon>
-              </el-button>
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-card>
-    
-    <!-- Category Form Dialog -->
-    <CategoryForm
-      :visible="showCategoryForm"
-      @close="showCategoryForm = false"
-      @category-added="handleCategoryChange"
-    />
-  </div>
-</template>
+<style scoped>
+.nested-table {
+  :deep(.el-table__inner-wrapper::before) {
+    display: none;
+  }
+
+  :deep(.el-table__row) {
+    background: transparent;
+  }
+
+  :deep(.el-table__cell) {
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  :deep(.el-table__cell:last-child) {
+    border-bottom: none;
+  }
+}
+
+.el-image {
+  border-radius: 4px;
+  overflow: hidden;
+}
+</style>
 
 <style scoped>
-.category-list-container {
-  padding: 20px;
+.nested-table {
+  :deep(.el-table__inner-wrapper::before) {
+    display: none;
+  }
+
+  :deep(.el-table__row) {
+    background: transparent;
+  }
+
+  :deep(.el-table__cell) {
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  :deep(.el-table__cell:last-child) {
+    border-bottom: none;
+  }
+}
+
+.el-image {
+  border-radius: 4px;
+  overflow: hidden;
 }
 </style>
