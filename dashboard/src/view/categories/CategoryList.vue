@@ -2,9 +2,13 @@
   <PageHeaders class="ninjadash-page-header-main" title="Orders" />
   <router-view />
 
+  <CategoryForm :visible="showDialog"/>
+  
+
   <BaseTable
     :columns="columns"
     show0ther-items
+    create-route-name="create-category"
     :show-expanded-items="false"
     fetchUrl="category"
     title="Orders"
@@ -222,6 +226,11 @@ const handleFileUpload = (event, category) => {
   if (file) {
     editableData.photo = file;
   }
+};
+
+const showDialog = ref(false);
+const showCreateCategoryDialog = () => {
+  showDialog.value = true;
 };
 
 const saveChanges = async (category) => {
