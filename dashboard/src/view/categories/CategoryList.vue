@@ -56,7 +56,7 @@
             <Document />
           </el-icon>
           <span class="font-medium">
-            View Items ({{ slotProps?.text?.children?.length || 0 }})
+            View Categories ({{ slotProps?.text?.children?.length || 0 }})
           </span>
         </div>
       </template>
@@ -168,7 +168,7 @@ const columns = ref([
     key: "photo",
   },
   {
-    title: "Sub Items",
+    title: "Sub Categories",
     dataIndex: "",
     key: "children",
   },
