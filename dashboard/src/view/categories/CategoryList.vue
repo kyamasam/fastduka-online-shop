@@ -5,91 +5,168 @@
   <BaseTable
     :columns="columns"
     show0ther-items
-    show-expanded-items
-    :fetchUrl="fetchUrl"
+    :show-expanded-items="false"
+    fetchUrl="category"
     title="Orders"
   >
-
     <template v-slot:bodyCell="slotProps">
       <template v-if="slotProps.column.key === 'photo'">
         <div class="flex items-center gap-2">
-              <img
-                height="40"
-                width="40"
-                :src="slotProps?.text?.photo"
-                :alt="slotProps?.text?.name"
-              />
+          <template v-if="editableId !== slotProps.text.id">
+            <img
+              height="40"
+              width="40"
+              class="rounded object-cover"
+              :src="slotProps?.text?.photo"
+              :alt="slotProps?.text?.name"
+            />
+          </template>
+          <input
+            v-else
+            type="file"
+            accept="image/*"
+            @change="handleFileUpload($event, slotProps.text)"
+            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          />
         </div>
       </template>
-      <template v-if="slotProps.column.key === 'actions'">
-        <el-button
-          class="bg-red-500 text-white hover:bg-red-600 border-none hover:ring-none rounded-none"
-          type="primary"
-          size="large"
-          @click="selectAction('order-rider', slotProps.text?.id)"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="size-5"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"
-            />
-          </svg>
-        </el-button>
 
+      <template v-if="slotProps.column.key === 'name'">
+        <template v-if="editableId !== slotProps.text.id">
+          {{ slotProps.text.name }}
+        </template>
+        <el-input
+          v-else
+          v-model="editableData.name"
+          placeholder="Category name"
+          size="small"
+        />
+      </template>
+
+      <template v-if="slotProps.column.key === 'children'">
+        <div
+          class="flex items-center gap-2 cursor-pointer text-blue-600 hover:text-blue-800 transition-colors"
+          @click="openChildrenModal(slotProps.text)"
+        >
+          <el-icon>
+            <Document />
+          </el-icon>
+          <span class="font-medium">
+            View Items ({{ slotProps?.text?.children?.length || 0 }})
+          </span>
+        </div>
+      </template>
+
+      <template v-if="slotProps.column.key === 'actions'">
+        <div class="flex gap-2">
+          <template v-if="editableId !== slotProps.text.id">
+            <el-button
+              class="bg-blue-500 text-white hover:bg-blue-600 border-none hover:ring-none rounded-md"
+              type="primary"
+              size="large"
+              @click="startEditing(slotProps.text)"
+            >
+              <el-icon><Edit /></el-icon>
+            </el-button>
+            <el-button
+              class="bg-red-500 text-white hover:bg-red-600 border-none hover:ring-none rounded-md"
+              type="primary"
+              size="large"
+              @click="handleDelete(slotProps.text.id)"
+            >
+              <el-icon><Delete /></el-icon>
+            </el-button>
+          </template>
+          <template v-else>
+            <el-button
+              class="bg-green-500 text-white hover:bg-green-600 border-none hover:ring-none rounded-md"
+              type="primary"
+              size="large"
+              @click="saveChanges(slotProps.text)"
+            >
+              <el-icon><Check /></el-icon>
+            </el-button>
+            <el-button
+              class="bg-gray-500 text-white hover:bg-gray-600 border-none hover:ring-none rounded-md"
+              type="primary"
+              size="large"
+              @click="cancelEditing"
+            >
+              <el-icon><Close /></el-icon>
+            </el-button>
+          </template>
+        </div>
       </template>
     </template>
-
-    <template v-slot:expandedRowRender="slotProps">
-      <a-table
-        :columns="innerColumns"
-        :data-source="slotProps?.record?.children"
-        :pagination="false"
-      >
-        <template #bodyCell="{ column, text }">
-
-          <template v-if="column.key === 'photo'">
-            <div class="flex items-center gap-2">
-              <img
-                height="40"
-                width="40"
-                :src="text?.photo"
-                :alt="text?.name"
-              />
-            </div>
-          </template>
-        </template>
-      </a-table>
-    </template>
   </BaseTable>
+
+  <!-- Children Modal -->
+  <el-dialog
+    v-model="childrenModalVisible"
+    :title="selectedParent?.name || 'Items'"
+    width="80%"
+    center
+    :close-on-click-modal="false"
+  >
+    <a-table
+      :columns="innerColumns"
+      :data-source="selectedChildren"
+      :pagination="false"
+      class="rounded-lg shadow-sm"
+    >
+      <template #bodyCell="{ column, text }">
+        <template v-if="column.key === 'photo'">
+          <div class="flex items-center gap-2">
+            <img
+              height="40"
+              width="40"
+              class="rounded object-cover"
+              :src="text?.photo"
+              :alt="text?.name"
+            />
+          </div>
+        </template>
+      </template>
+    </a-table>
+
+    <template #footer>
+      <el-button
+        type="primary"
+        @click="childrenModalVisible = false"
+        class="px-6 py-3"
+      >
+        Close
+      </el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
-import { ArrowRight, Picture, CaretRight } from "@element-plus/icons-vue";
+import { ref, reactive } from "vue";
+import { Document, Edit, Delete, Check, Close } from "@element-plus/icons-vue";
 import BaseTable from "@/components/BaseTable.vue";
 import PageHeaders from "@/components/pageHeaders/PageHeaders.vue";
-import { formatDate } from "@/utility/functions";
-import { formatCurrency } from "@/utility/functions";
 import router from "@/routes";
+import { ElMessage, ElMessageBox } from "element-plus";
+import axios from "axios";
+import { baseUrl } from "@/utility/constants";
+import store from "@/vuex/store";
 
 const columns = ref([
   {
     title: "Name",
-    dataIndex: "name",
+    dataIndex: "",
     key: "name",
   },
   {
     title: "Photo",
     dataIndex: "",
     key: "photo",
+  },
+  {
+    title: "Sub Items",
+    dataIndex: "",
+    key: "children",
   },
   {
     title: "Actions",
@@ -103,91 +180,131 @@ const innerColumns = ref([
     title: "Name",
     dataIndex: "name",
     key: "name",
-    sorter: true,
-    width: "20%",
+    width: "30%",
   },
   {
     title: "Photo",
     dataIndex: "",
     key: "photo",
-    sorter: true,
-    width: "20%",
-  }
+    width: "70%",
+  },
 ]);
 
-const activeFilter = ref("");
-const fetchUrl = ref("category");
-const expandedRows = ref([]);
+const childrenModalVisible = ref(false);
+const selectedChildren = ref([]);
+const selectedParent = ref(null);
+const editableId = ref(null);
+const editableData = reactive({
+  name: "",
+  photo: null,
+});
 
-const toggleExpand = (row) => {
-  const index = expandedRows.value.indexOf(row.id);
-  if (index === -1) {
-    expandedRows.value.push(row.id);
-  } else {
-    expandedRows.value.splice(index, 1);
+const openChildrenModal = (parent) => {
+  selectedParent.value = parent;
+  selectedChildren.value = parent.children || [];
+  childrenModalVisible.value = true;
+};
+
+const startEditing = (category) => {
+  editableId.value = category.id;
+  editableData.name = category.name;
+  editableData.photo = null;
+};
+
+const cancelEditing = () => {
+  editableId.value = null;
+  editableData.name = "";
+  editableData.photo = null;
+};
+
+const handleFileUpload = (event, category) => {
+  const file = event.target.files[0];
+  if (file) {
+    editableData.photo = file;
   }
 };
 
+const saveChanges = async (category) => {
+  try {
+    const formData = new FormData();
+    formData.append("name", editableData.name);
+    if (editableData.photo) {
+      formData.append("photo", editableData.photo);
+    }
 
-const selectAction = (action, productId) => {
-  router.push({ name: action, params: { orderId: productId } });
+    const authData = JSON.parse(localStorage.getItem("piczanguAuthData"));
+    
+    const response = await axios.patch(
+      `${baseUrl}category/${category.id}/`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: "Bearer " + authData?.access,
+        },
+      }
+    );
+
+    ElMessage.success("Category updated successfully");
+    store.dispatch("fetchList", { url: "category" });
+    cancelEditing();
+  } catch (error) {
+    console.error("Update error:", error);
+    ElMessage.error(error.response?.data?.message || "Failed to update category");
+  }
 };
 
-watch(
-  activeFilter,
-  (newFilter) => {
-    fetchUrl.value = `category${newFilter || ""}`;
-  },
-  { immediate: true }
-);
+const handleDelete = (categoryId) => {
+  ElMessageBox.confirm(
+    "This will permanently delete the category. Continue?",
+    "Warning",
+    {
+      confirmButtonText: "Delete",
+      cancelButtonText: "Cancel",
+      type: "warning",
+    }
+  ).then(async () => {
+    try {
+      const authData = JSON.parse(localStorage.getItem("piczanguAuthData"));
+      await axios.delete(`${baseUrl}category/${categoryId}/`, {
+        headers: {
+          Authorization: "Bearer " + authData?.access,
+        },
+      });
+      
+      ElMessage.success("Category deleted successfully");
+      store.dispatch("fetchList", { url: "category" });
+    } catch (error) {
+      console.error("Delete error:", error);
+      ElMessage.error(error.response?.data?.message || "Failed to delete category");
+    }
+  }).catch(() => {});
+};
 </script>
 
 <style scoped>
-.nested-table {
-  :deep(.el-table__inner-wrapper::before) {
-    display: none;
-  }
+:deep(.el-dialog__header) {
+  @apply border-b border-gray-200 mb-4;
+}
 
-  :deep(.el-table__row) {
-    background: transparent;
-  }
+:deep(.el-dialog__title) {
+  @apply text-lg font-semibold text-gray-800;
+}
 
-  :deep(.el-table__cell) {
-    border-bottom: 1px solid #f0f0f0;
-  }
-
-  :deep(.el-table__cell:last-child) {
-    border-bottom: none;
-  }
+:deep(.el-dialog__body) {
+  @apply py-6;
 }
 
 .el-image {
   border-radius: 4px;
   overflow: hidden;
 }
-</style>
 
-<style scoped>
-.nested-table {
-  :deep(.el-table__inner-wrapper::before) {
-    display: none;
-  }
-
-  :deep(.el-table__row) {
-    background: transparent;
-  }
-
-  :deep(.el-table__cell) {
-    border-bottom: 1px solid #f0f0f0;
-  }
-
-  :deep(.el-table__cell:last-child) {
-    border-bottom: none;
-  }
+.flex.gap-2 .el-button {
+  padding: 8px 12px;
 }
 
-.el-image {
-  border-radius: 4px;
-  overflow: hidden;
+.el-icon {
+  vertical-align: middle;
 }
 </style>
