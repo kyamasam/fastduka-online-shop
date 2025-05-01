@@ -43,7 +43,7 @@
           v-else
           v-model="editableData.name"
           placeholder="Category name"
-          size="small"
+          size="defailt"
         />
       </template>
 
