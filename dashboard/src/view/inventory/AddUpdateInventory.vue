@@ -53,7 +53,7 @@ const fetchVendors = async () => {
   console.log("here");
   vendorsLoading.value = true;
   try {
-    const response = await store.dispatch("fetchList", { url: "shops" });
+    const response = await store.dispatch("fetchList", { url: "vendors" });
     // vendors.value = response?.data?.filter(
     //   (vendor) => vendor.verification_status === "APPROVED" && vendor.is_active
     // );
