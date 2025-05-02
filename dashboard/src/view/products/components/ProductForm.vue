@@ -63,34 +63,44 @@
     </el-form-item>
 
     <!-- Category Field -->
-    <div class="z-50">
+    <div class="z-50 ">
+      
       <el-form-item
           :rules="[{ required: true, message: 'Please select a product category', trigger: 'blur' }]"
           label="Category"
           prop="category_id"
       >
-        <div class="flex">
-          <el-select
-              v-model="formState.category_id"
-              :loading="categoryLoader"
-              class="w-full z-50 min-w-[200px] rounded"
-              placeholder="Select Category"
-              size="large"
-              @focus="fetchCategories"
-          >
-            <el-option v-for="category in categories" :key="category.value" :label="category.label"
-                      :value="category.value"/>
-          </el-select>
-          <!-- Add Category Button -->
-          <el-button
-              class="ml-2 bg-blue-500 border-none hover:bg-blue-600 focus:bg-blue-600 text-white rounded-none"
-              size="large"
-              type="primary"
-              @click="showCategoryForm = true"
-          >
-            <el-icon><Plus /></el-icon>
-          </el-button>
-        </div>
+
+       <div class="flex flex-col gap-2">
+          <div class="flex">
+            <el-select
+                v-model="formState.category_id"
+                :label="formState.category?.name"
+                :loading="categoryLoader"
+                class="w-full z-50 min-w-[200px] rounded"
+                placeholder="Select Category"
+                size="large"
+                @focus="fetchCategories"
+            >
+              <el-option v-for="category in categories" :key="category.id" :label="category.name"
+                        :value="category.id"/>
+            </el-select>
+            <!-- Add Category Button -->
+            <el-button
+                class="ml-2 bg-blue-500 border-none hover:bg-blue-600 focus:bg-blue-600 text-white rounded-none"
+                size="large"
+                type="primary"
+                @click="showCategoryForm = true"
+            >
+              <el-icon><Plus /></el-icon>
+            </el-button>
+          </div>
+       </div>
+       
+       <span class="bg-green-100 w-fit py-0.5 px-2 rounded text-gray-600 text-sm my-2">
+        {{ formState?.category?.name }}
+      </span>
+      
       </el-form-item>
     </div>
 
@@ -202,10 +212,7 @@ export default {
       this.categoryLoader = true;
       store.dispatch("fetchList", {url: "category"})
           .then((res) => {
-            this.categories = res.data.results.map((category) => ({
-              label: category.name,
-              value: category.id
-            }));
+            this.categories = res.data.results;
             this.categoryLoader = false;
           })
           .catch((error) => {
