@@ -20,9 +20,14 @@ export function raiseError(text) {
 }
 
 export function raiseServerError(err) {
-  // if (err?.response?.status === 401) {
-  //     return
-  // }
+  if (err?.response?.status === 500) {
+    ElNotification({
+      title: "Server Error",
+      type: "error",
+      position: "top-right",
+      message: "An error occurred on the server. Please try again.",
+    });
+  }
 
   err?.response?.data?.errors?.forEach((obj) => {
     setTimeout(function () {

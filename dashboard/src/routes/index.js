@@ -1,5 +1,6 @@
 import AddUpdateInventory from "@/view/inventory/AddUpdateInventory.vue";
 import UploadProductImages from "@/view/inventory/UploadProductImages.vue";
+import OnboardingFlow from "@/view/onboarding/OnboardingFlow.vue";
 import OrderList from "@/view/orders/OrderList.vue";
 import OrderManagement from "@/view/orders/OrderManagement.vue";
 import CreateProductView from "@/view/products/CreateProductView.vue";
@@ -26,7 +27,6 @@ import withdrawals from "@/view/wallet/withdrawals";
 import { createRouter, createWebHistory } from "vue-router";
 import Dashboard from "../layout/Dashboard.vue";
 import BlankPage from "../view/auth/BlankPage.vue";
-
 const routes = [
   {
     path: "/:pathMatch(.*)",
@@ -85,6 +85,15 @@ const routes = [
     meta: {
       requiresAuth: false,
       allowed_roles: ["photographer", "admin", "owner", "client"],
+    },
+  },
+  {
+    path: "/onboarding",
+    name: "onboarding",
+    component: OnboardingFlow,
+    meta: {
+      title: "Onboarding",
+      showInSideBar: false,
     },
   },
   {

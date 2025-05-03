@@ -137,6 +137,23 @@ export const actions = {
       throw err;
     }
   },
+  async upload(commit, payload) {
+    const response = await api
+      .post(`${baseUrl}${payload.url}`, payload.data, {
+        headers: {
+          "Content-Type":
+            "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
+        },
+      })
+      .then((response) => {
+        showSuccess("Successfully Uploaded Image");
+        return response;
+      })
+      .catch((err) => {
+        raiseServerError(err);
+        throw err;
+      });
+  },
   async uploadProfileImage(commit, payload) {
     const response = await api
       .post(`${baseUrl}photo-uploads/`, payload, {
