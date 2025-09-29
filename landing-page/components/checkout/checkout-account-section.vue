@@ -6,79 +6,65 @@
           <div class="col-md-6">
             <div class="tp-checkout-input">
               <label>First Name </label>
-              <input
-                v-model="formData['first_name']"
-                type="text"
-                placeholder="First Name"
-                @input="hasUserTyped = true"
-              />
+              <input v-model="formData['first_name']"
+                     type="text"
+                     placeholder="First Name"
+                     @input="hasUserTyped = true" />
             </div>
           </div>
           <div class="col-md-6">
             <div class="tp-checkout-input">
               <label>Last Name </label>
-              <input
-                v-model="formData['last_name']"
-                type="text"
-                placeholder="Last Name"
-                @input="hasUserTyped = true"
-              />
+              <input v-model="formData['last_name']"
+                     type="text"
+                     placeholder="Last Name"
+                     @input="hasUserTyped = true" />
             </div>
           </div>
           <div class="col-md-12">
             <div class="tp-checkout-input">
               <label>Delivery Location <span>*</span></label>
-              <LocationSearch
-                :default_latitude="formData?.profile?.latitude"
-                :default_longitude="formData?.profile?.longitude"
-                :location_address="formData?.profile?.address"
-                @location-selected="handleLocationSelected"
-              />
+              <LocationSearch :default_latitude="formData?.profile?.latitude"
+                              :default_longitude="formData?.profile?.longitude"
+                              :location_address="formData?.profile?.address"
+                              @location-selected="handleLocationSelected" />
             </div>
           </div>
           <div class="col-md-12">
             <div class="tp-checkout-input">
               <label>House No / Office No. <span>*</span></label>
 
-              <input
-                required
-                v-model="formData['profile']['suite_number']"
-                type="text"
-                placeholder="Apartment, suite, unit, etc. (optional)"
-                @input="hasUserTyped = true"
-              />
+              <input required
+                     v-model="formData['profile']['suite_number']"
+                     type="text"
+                     placeholder="Apartment, suite, unit, etc. (optional)"
+                     @input="hasUserTyped = true" />
             </div>
           </div>
           <div class="col-md-12">
             <div class="tp-checkout-input">
               <label>Email<span>*</span></label>
 
-              <input
-                required
-                v-model="formData['email']"
-                type="email"
-                placeholder="Email"
-                @input="hasUserTyped = true"
-              />
+              <input required
+                     v-model="formData['email']"
+                     type="email"
+                     placeholder="Email"
+                     @input="hasUserTyped = true" />
             </div>
           </div>
-          <div
-            v-if="
-              currentUserData === undefined ||
-              Object.keys(currentUserData).length === 0
-            "
-            class="col-md-12"
-          >
+          <div v-if="
+            currentUserData === undefined ||
+            Object.keys(currentUserData).length === 0
+          "
+               class="col-md-12">
             <div class="tp-checkout-input">
               <label>Password<span>*</span></label>
 
-              <input
-                required
-                v-model="formData['password']"
-                type="password"
-                placeholder="******"
-                @input="hasUserTyped = true"
-              />
+              <input required
+                     v-model="formData['password']"
+                     type="password"
+                     placeholder="******"
+                     @input="hasUserTyped = true" />
             </div>
           </div>
 
@@ -86,24 +72,21 @@
             <div class="tp-checkout-input">
               <label>Phone <span>*</span></label>
               <div class="flex">
-                <select
-                  required
-                  v-model="formData['phone_code']"
-                  class="border"
-                  type="select"
-                  @change="hasUserTyped = true"
-                >
-                  <option value="+254" label="+254" />
+                <select required
+                        v-model="formData['phone_code']"
+                        class="border"
+                        type="select"
+                        @change="hasUserTyped = true">
+                  <option value="+254"
+                          label="+254" />
                 </select>
 
-                <input
-                  required
-                  v-model="formData['phone_number']"
-                  type="text"
-                  placeholder=""
-                  maxlength="9"
-                  @input="hasUserTyped = true"
-                />
+                <input required
+                       v-model="formData['phone_number']"
+                       type="text"
+                       placeholder=""
+                       maxlength="9"
+                       @input="hasUserTyped = true" />
               </div>
             </div>
           </div>
@@ -111,23 +94,25 @@
       </div>
     </div>
 
-    <button
-      v-if="
-        currentUserData === undefined ||
-        Object.keys(currentUserData).length === 0
-      "
-      type="submit"
-      class="tp-checkout-btn w-100"
-    >
+    <button v-if="
+      currentUserData === undefined ||
+      Object.keys(currentUserData).length === 0
+    "
+            type="submit"
+            class="tp-checkout-btn w-100">
       Create Account
     </button>
-    <button v-else type="submit" class="tp-checkout-btn w-100">
+    <button v-else
+            type="submit"
+            class="tp-checkout-btn w-100">
       Update Profile
     </button>
-    <div v-if="isUpdating" class="text-center mt-2 text-gray-600">
+    <div v-if="isUpdating"
+         class="text-center mt-2 text-gray-600">
       <p>Automatically saving changes...</p>
     </div>
-    <div v-if="lastUpdated" class="text-center mt-2 text-green-600">
+    <div v-if="lastUpdated"
+         class="text-center mt-2 text-green-600">
       <p>Last updated: {{ lastUpdated }}</p>
     </div>
   </form>
@@ -160,7 +145,7 @@ const lastUpdated = ref("");
 const hasUserTyped = ref(false);
 
 const handleLocationSelected = (location) => {
-  console.log("Selected location:", location);
+  console.log("Selected location: *****", location);
   formData.value.profile.address = location?.address;
   formData.value.profile.latitude = location?.lat;
   formData.value.profile.longitude = location?.lng;

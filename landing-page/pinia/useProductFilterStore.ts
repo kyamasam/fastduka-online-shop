@@ -11,7 +11,7 @@ export const useProductFilterStore = defineStore("product_filter", () => {
     selectVal.value = e.value;
   };
 
-  const maxProductPrice = 10000;
+  const maxProductPrice = 10000000;
   let priceValues = [100, maxProductPrice];
   const handlePriceChange = (value: number[]) => {
     console.log("cjage", value);

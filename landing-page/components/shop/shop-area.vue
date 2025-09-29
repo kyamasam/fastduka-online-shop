@@ -1,22 +1,18 @@
 <template>
-  <section
-    :class="`tp-shop-area pb-120 ${
-      full_width ? 'tp-shop-full-width-padding' : ''
-    }`"
-  >
-    <div
-      :class="`${
-        full_width
-          ? 'container-fluid'
-          : shop_1600
-          ? 'container-shop'
-          : 'container'
-      }`"
-    >
+  <section :class="`tp-shop-area pb-120 ${full_width ? 'tp-shop-full-width-padding' : ''
+    }`">
+    <div :class="`${full_width
+      ? 'container-fluid'
+      : shop_1600
+        ? 'container-shop'
+        : 'container'
+      }`">
       <div class="row">
-        <div v-if="!shop_right_side && !shop_no_side" class="col-xl-3 col-lg-4">
+        <div v-if="!shop_right_side && !shop_no_side"
+             class="col-xl-3 col-lg-4">
           <!-- shop sidebar start -->
-          <shop-sidebar :shop_full="full_width" :shop_1600="shop_1600" />
+          <shop-sidebar :shop_full="full_width"
+                        :shop_1600="shop_1600" />
           <!-- shop sidebar end -->
         </div>
         <div :class="`${shop_no_side ? 'col-xl-12' : 'col-xl-9 col-lg-8'}`">
@@ -35,27 +31,22 @@
                   </div>
                 </div>
                 <div class="col-xl-6">
-                  <shop-sidebar-filter-select
-                    @handle-select-filter="store.handleSelectFilter"
-                  />
+                  <shop-sidebar-filter-select @handle-select-filter="store.handleSelectFilter" />
                 </div>
               </div>
             </div>
             <div class="tp-shop-items-wrapper tp-shop-item-primary">
               <div>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  
                   <p v-if="pending">loading...</p>
                   <template v-else>
-                    <product-item
-                      v-for="item in filteredProducts"
-                      :key="item.id"
-                      :item="item"
-                    />
+                    <product-item v-for="item in filteredProducts"
+                                  :key="item.id"
+                                  :item="item" />
 
-                    <div
-                      v-if="filteredProducts?.length === 0"
-                      class="w-full flex items-center pl-6"
-                    >
+                    <div v-if="filteredProducts?.length === 0"
+                         class="w-full flex items-center pl-6">
                       No Products Found
                     </div>
                   </template>
@@ -65,19 +56,18 @@
 
             <div class="tp-shop-pagination mt-20">
               <div class="tp-pagination">
-                <ui-pagination
-                  :total-items-count="data?.count"
-                  :totalPages="10"
-                  :items-per-page="15"
-                  :data="filteredProducts || []"
-                  @handle-paginate="handlePagination"
-                />
+                <ui-pagination :total-items-count="data?.count"
+                               :totalPages="10"
+                               :items-per-page="15"
+                               :data="filteredProducts || []"
+                               @handle-paginate="handlePagination" />
               </div>
             </div>
           </div>
         </div>
 
-        <div v-if="shop_right_side && !shop_no_side" class="col-xl-3 col-lg-4">
+        <div v-if="shop_right_side && !shop_no_side"
+             class="col-xl-3 col-lg-4">
           <!-- shop sidebar start -->
           <shop-sidebar :shop_right="shop_right_side" />
           <!-- shop sidebar end -->

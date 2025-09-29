@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   debug: true,
+
   devtools: {
     enabled: true,
 
@@ -8,12 +9,14 @@ export default defineNuxtConfig({
       enabled: true,
     },
   },
+
   runtimeConfig: {
     public: {
       apiBaseUrl: process.env.API_URL,
       googleMapsApiKey: process.env.GOOGLE_API_KEY,
     },
   },
+
   modules: [
     [
       "@pinia/nuxt",
@@ -23,6 +26,7 @@ export default defineNuxtConfig({
     ],
     "@nuxtjs/tailwindcss",
   ],
+
   app: {
     head: {
       title: "Fastduka Online The Best Meat In Kenya ",
@@ -35,6 +39,7 @@ export default defineNuxtConfig({
       ],
     },
   },
+
   css: [
     "bootstrap/scss/bootstrap.scss",
     "swiper/css/bundle",
@@ -42,4 +47,6 @@ export default defineNuxtConfig({
     "@/assets/css/flaticon_shofy.css",
     "@/assets/scss/main.scss",
   ],
+
+  compatibilityDate: "2025-09-20",
 });
