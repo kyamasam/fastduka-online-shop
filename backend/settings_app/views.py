@@ -17,6 +17,8 @@ class SiteSettingsViewSet(viewsets.GenericViewSet):
         Only allow admin users to modify settings
         Allow authenticated users to retrieve settings
         """
+        if self.action == 'list':
+            return []
         if self.action in ['retrieve', 'public']:
             return [IsAuthenticated()]
         return [IsAdminUser()]

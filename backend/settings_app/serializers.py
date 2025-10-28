@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import SiteSettings
+from .models import SiteSettings, HeroSlider
 
 class SiteSettingsSerializer(serializers.ModelSerializer):
     class Meta:

@@ -77,7 +77,11 @@
                 <div class="tp-slider-btn-3">
                   <nuxt-link
                     href="/shop"
-                    class="tp-btn tp-btn-border tp-btn-border-white"
+                    class="tp-btn tp-btn-border"
+                    :style="{
+                      borderColor: siteSettingsStore.primaryColor,
+                      color: siteSettingsStore.primaryColor
+                    }"
                   >
                     Shop Now
                   </nuxt-link>
@@ -105,6 +109,14 @@
 <script setup lang="ts">
 import { EffectFade, Navigation, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
+import { useSiteSettingsStore } from "@/pinia/useSiteSettingsStore";
+
+const siteSettingsStore = useSiteSettingsStore();
+
+// Fetch settings on component mount
+onMounted(() => {
+  siteSettingsStore.fetchSettings();
+});
 
 // slider data type
 type ISlider = {

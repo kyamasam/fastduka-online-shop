@@ -15,7 +15,9 @@ class UtilColumnsModel(models.Model):
 class SiteSettings(UtilColumnsModel):
     # Site Information
     title = models.CharField(max_length=255)
+    site_link = models.CharField(max_length=255, default="https://store.fastduka.co.ke")
     description = models.TextField(blank=True, null=True)
+    footer_description = models.TextField(blank=True, null=True)
     industry = models.CharField(max_length=255, blank=True, null=True)
     contact_email = models.EmailField(max_length=255, null=True, blank=True)
     contact_phone = models.CharField(max_length=20, null=True, blank=True)
@@ -54,6 +56,11 @@ class SiteSettings(UtilColumnsModel):
     match_user_to_closest_vendor = models.BooleanField(default=False)
 
     
+    # Location Settings
+    location = models.CharField(max_length=255, blank=True, null=True)
+    location_link = models.CharField(max_length=1000, blank=True, null=True)
+
+    
     # Google Services
     google_maps_api_key = models.CharField(max_length=255)
     google_analytics_id = models.CharField(max_length=50, null=True, blank=True)
@@ -86,3 +93,21 @@ class SiteSettings(UtilColumnsModel):
         if not self.pk and SiteSettings.objects.exists():
             return SiteSettings.objects.first()
         return super().save(*args, **kwargs)
+
+
+class HeroSlider(UtilColumnsModel):
+    title = models.CharField(max_length=255)
+    subtitle = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    background_image = models.ImageField(upload_to='slider_images/', null=True, blank=True)
+    button_text = models.CharField(max_length=100, default="Shop Now")
+    button_link = models.CharField(max_length=255, default="/shop")
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Hero Slider"
+        verbose_name_plural = "Hero Sliders"
+        ordering = ['order', 'created_at']
+
+    def __str__(self):
+        return self.title

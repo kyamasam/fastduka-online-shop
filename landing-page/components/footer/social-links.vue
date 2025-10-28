@@ -1,39 +1,65 @@
 <template>
-  <a v-for="item in social_data" :key="item.id" :href="item.link">
-    <i :class="item.icon"></i>
-  </a>
+  <template v-for="item in social_data"
+            :key="item.id">
+    <a v-if="item.link"
+       :href="item.link"
+       target="_blank"
+       rel="noopener noreferrer">
+      <i :class="item.icon"></i>
+    </a>
+  </template>
 </template>
 
 <script setup lang="ts">
-const social_data: {
-  id: number;
-  link: string;
-  icon: string;
-  title: string;
-}[] = [
-  {
-    id: 1,
-    link: "https://www.facebook.com/",
-    icon: "fa-brands fa-facebook-f",
-    title: "Facebook",
-  },
-  {
-    id: 2,
-    link: "https://twitter.com/",
-    icon: "fa-brands fa-twitter",
-    title: "Twitter",
-  },
-  {
-    id: 3,
-    link: "https://www.linkedin.com/",
-    icon: "fa-brands fa-linkedin-in",
-    title: "Linkedin",
-  },
-  {
-    id: 4,
-    link: "https://vimeo.com/",
-    icon: "fa-brands fa-vimeo-v",
-    title: "Vimeo",
-  },
-];
+import { computed } from 'vue';
+import { useSiteSettingsStore } from "@/pinia/useSiteSettingsStore";
+
+const siteSettingsStore = useSiteSettingsStore();
+
+const social_data = computed(() => {
+  // Add safety check for settings
+  if (!siteSettingsStore.settings) {
+    return [];
+  }
+
+  const links = [];
+
+  if (siteSettingsStore.settings.facebook_url) {
+    links.push({
+      id: 1,
+      link: siteSettingsStore.settings.facebook_url,
+      icon: "fa-brands fa-facebook-f",
+      title: "Facebook",
+    });
+  }
+
+  if (siteSettingsStore.settings.twitter_url) {
+    links.push({
+      id: 2,
+      link: siteSettingsStore.settings.twitter_url,
+      icon: "fa-brands fa-twitter",
+      title: "Twitter",
+    });
+  }
+
+  if (siteSettingsStore.settings.instagram_url) {
+    links.push({
+      id: 3,
+      link: siteSettingsStore.settings.instagram_url,
+      icon: "fa-brands fa-instagram",
+      title: "Instagram",
+    });
+  }
+
+  if (siteSettingsStore.settings.youtube_url) {
+    links.push({
+      id: 4,
+      link: siteSettingsStore.settings.youtube_url,
+      icon: "fa-brands fa-youtube",
+      title: "YouTube",
+    });
+  }
+
+  return links;
+});
 </script>

@@ -1,25 +1,20 @@
 <template>
   <footer>
-    <div
-      :class="`tp-footer-area ${
-        primary_style
-          ? 'tp-footer-style-2 tp-footer-style-primary tp-footer-style-6'
-          : ''
-      } ${
-        style_2
-          ? 'tp-footer-style-2'
-          : style_3
+    <div :class="`tp-footer-area ${primary_style
+      ? 'tp-footer-style-2 tp-footer-style-primary tp-footer-style-6'
+      : ''
+      } ${style_2
+        ? 'tp-footer-style-2'
+        : style_3
           ? 'tp-footer-style-2 tp-footer-style-3'
           : ''
       }`"
-      :data-bg-color="`${
-        style_2
+         :data-bg-color="`${style_2
           ? 'footer-bg-white'
           : style_3
-          ? 'footer-bg-white'
-          : 'footer-bg-grey'
-      }`"
-    >
+            ? 'footer-bg-white'
+            : 'footer-bg-grey'
+          }`">
       <div class="tp-footer-top pt-95 pb-40">
         <div class="container">
           <div class="row">
@@ -28,13 +23,18 @@
                 <div class="tp-footer-widget-content">
                   <div class="tp-footer-logo">
                     <nuxt-link href="/">
-                      <img src="/img/logo/logo.svg" alt="logo" />
+                      <img :src="siteSettingsStore.logo"
+                           class="w-12"
+                           alt="logo" />
                     </nuxt-link>
                   </div>
-                  <p class="tp-footer-desc">Get the Best Cuts in Kenya</p>
+                  <p class="tp-footer-desc">
+                    <!-- {{ siteSettingsStore.settings }} -->
+                    {{ siteSettingsStore.settings?.footer_description || siteSettingsStore?.settings?.description }}
+                  </p>
                   <div class="tp-footer-social">
                     <!-- social links -->
-                    <footer-social-links />
+                    <footer-social-links :settings="siteSettingsStore?.settings" />
                     <!-- social links -->
                   </div>
                 </div>
@@ -76,10 +76,16 @@
                 <div class="tp-footer-widget-content">
                   <div class="tp-footer-talk mb-20">
                     <span>Got Questions? Call us</span>
-                    <h4><a href="tel:+254720296923">+254 720 296 923</a></h4>
+                    <h4><a
+                         :href="`tel:${siteSettingsStore.settings?.contact_phone}`">{{ siteSettingsStore.settings?.contact_phone }}</a>
+                    </h4>
+                    <span>Or Email</span>
+                    <h4><a
+                         :href="`mailto:${siteSettingsStore.settings?.contact_email}`">{{ siteSettingsStore.settings?.contact_email }}</a>
+                    </h4>
                   </div>
                   <!-- footer contact start -->
-                  <footer-contact />
+                  <footer-contact :settings="siteSettingsStore.settings" />
                   <!-- footer contact end -->
                 </div>
               </div>
@@ -88,13 +94,16 @@
         </div>
       </div>
       <!-- bottom area start -->
-      <footer-bottom-area />
+      <footer-bottom-area :settings="siteSettingsStore.settings" />
       <!-- bottom area end -->
     </div>
   </footer>
 </template>
 
 <script setup lang="ts">
+import { useSiteSettingsStore } from "@/pinia/useSiteSettingsStore";
+const siteSettingsStore = useSiteSettingsStore();
+
 defineProps<{
   primary_style?: boolean;
   style_2?: boolean;
