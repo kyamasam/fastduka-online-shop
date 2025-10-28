@@ -11,11 +11,11 @@ export const menu_data: IMenuItem[] = [
     link: "/shop",
     title: "Shop",
   },
-  {
-    id: 3,
-    link: "/shop-liquor",
-    title: "Liquor Shop",
-  },
+  // {
+  //   id: 3,
+  //   link: "/shop-liquor",
+  //   title: "Liquor Shop",
+  // },
   {
     id: 5,
     link: "/cart",

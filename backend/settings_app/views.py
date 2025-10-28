@@ -1,10 +1,10 @@
-from rest_framework import viewsets, status,parsers
+from rest_framework import viewsets, status, parsers
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from django.utils import timezone
-from .models import SiteSettings
-from .serializers import SiteSettingsSerializer
+from .models import SiteSettings, HeroSlider
+from .serializers import SiteSettingsSerializer, HeroSliderSerializer
 
 class SiteSettingsViewSet(viewsets.GenericViewSet):
     serializer_class = SiteSettingsSerializer
@@ -179,6 +179,75 @@ class SiteSettingsViewSet(viewsets.GenericViewSet):
             instance.site_logo = None
             instance.updated_at = timezone.now()
             instance.save()
-            
+
         serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+
+class HeroSliderViewSet(viewsets.ModelViewSet):
+    serializer_class = HeroSliderSerializer
+    queryset = HeroSlider.objects.filter(is_active=True)
+    parser_classes = [parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser]
+
+    def get_permissions(self):
+        """
+        Only allow admin users to modify sliders
+        Allow all users to view sliders
+        """
+        if self.action in ['list', 'retrieve']:
+            return []
+        return [IsAdminUser()]
+
+    def get_queryset(self):
+        """
+        Return active sliders ordered by their order field
+        """
+        return HeroSlider.objects.filter(is_active=True).order_by('order', 'created_at')
+
+    def perform_create(self, serializer):
+        """
+        Save with timestamp
+        """
+        serializer.save()
+
+    def perform_update(self, serializer):
+        """
+        Update with timestamp
+        """
+        serializer.save(updated_at=timezone.now())
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAdminUser])
+    def upload_image(self, request, pk=None):
+        """
+        Upload background image for slider
+        """
+        slider = self.get_object()
+
+        if 'background_image' not in request.FILES:
+            return Response(
+                {'error': 'No file provided. Please upload a file with key "background_image".'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        slider.background_image = request.FILES['background_image']
+        slider.updated_at = timezone.now()
+        slider.save()
+
+        serializer = self.get_serializer(slider, context={'request': request})
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['delete'], permission_classes=[IsAdminUser])
+    def remove_image(self, request, pk=None):
+        """
+        Remove background image from slider
+        """
+        slider = self.get_object()
+
+        if slider.background_image:
+            slider.background_image.delete(save=False)
+            slider.background_image = None
+            slider.updated_at = timezone.now()
+            slider.save()
+
+        serializer = self.get_serializer(slider, context={'request': request})
         return Response(serializer.data)

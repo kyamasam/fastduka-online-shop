@@ -9,7 +9,7 @@
             </span>
             <h1 class="tp-section-title-2">Our Offers For</h1>
             <h2 class="text-sm text-thin text-gray-400">
-              For the best meat offers in Kenya
+              For the best offers in Kenya
             </h2>
           </div>
         </div>

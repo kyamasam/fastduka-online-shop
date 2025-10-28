@@ -5,7 +5,7 @@
         <div class="col-xl-12">
           <div class="tp-section-title-wrapper-2 mb-50">
             <span class="tp-section-title-pre-2">
-              Shop by Category
+              Shop Featured Items
               <svg-section-line-2 />
             </span>
             <h3 class="tp-section-title-2">This Week's Featured</h3>
@@ -15,42 +15,36 @@
       <div class="row">
         <div class="col-xl-12">
           <div class="tp-featured-slider">
-            <Swiper
-              :slidesPerView="3"
-              :spaceBetween="10"
-              :navigation="{
-                nextEl: '.tp-featured-slider-button-next',
-                prevEl: '.tp-featured-slider-button-prev',
-              }"
-              :modules="[Navigation]"
-              :breakpoints="{
-                '1200': {
-                  slidesPerView: 3,
-                },
-                '992': {
-                  slidesPerView: 3,
-                },
-                '768': {
-                  slidesPerView: 2,
-                },
-                '576': {
-                  slidesPerView: 1,
-                },
-                '0': {
-                  slidesPerView: 1,
-                },
-              }"
-              class="tp-featured-slider-active swiper-container"
-            >
-              <SwiperSlide
-                v-for="item in filteredProducts"
-                :key="item.id"
-                class="tp-featured-item white-bg p-relative z-index-1"
-              >
-                <div
-                  class="tp-featured-thumb include-bg"
-                  :style="`background-image:url(${item?.primary_photo})`"
-                ></div>
+            <Swiper :slidesPerView="3"
+                    :spaceBetween="10"
+                    :navigation="{
+                      nextEl: '.tp-featured-slider-button-next',
+                      prevEl: '.tp-featured-slider-button-prev',
+                    }"
+                    :modules="[Navigation]"
+                    :breakpoints="{
+                      '1200': {
+                        slidesPerView: 3,
+                      },
+                      '992': {
+                        slidesPerView: 3,
+                      },
+                      '768': {
+                        slidesPerView: 2,
+                      },
+                      '576': {
+                        slidesPerView: 1,
+                      },
+                      '0': {
+                        slidesPerView: 1,
+                      },
+                    }"
+                    class="tp-featured-slider-active swiper-container">
+              <SwiperSlide v-for="item in filteredProducts"
+                           :key="item.id"
+                           class="tp-featured-item white-bg p-relative z-index-1">
+                <div class="tp-featured-thumb include-bg"
+                     :style="`background-image:url(${item?.primary_photo})`"></div>
                 <div class="tp-featured-content">
                   <h3 class="tp-featured-title">
                     <nuxt-link :href="`/product-details/${item.id}`">{{
@@ -58,10 +52,8 @@
                     }}</nuxt-link>
                   </h3>
                   <div class="tp-featured-price-wrapper">
-                    <div
-                      class="flex md:flex-row flex-col gap-2"
-                      v-if="item.sale_price > 0"
-                    >
+                    <div class="flex md:flex-row flex-col gap-2"
+                         v-if="item.sale_price > 0">
                       <span class="tp-featured-price old-price">{{
                         formatCurrency(item.selling_price)
                       }}</span>
@@ -69,9 +61,10 @@
                         {{ formatCurrency(item?.sale_price) }}
                       </span>
                     </div>
-                    <span v-else class="tp-featured-price new-price">{{
-                      formatCurrency(item?.selling_price)
-                    }}</span>
+                    <span v-else
+                          class="tp-featured-price new-price">{{
+                            formatCurrency(item?.selling_price)
+                          }}</span>
                   </div>
                   <div class="tp-product-rating-icon tp-product-rating-icon-2">
                     <span><i class="fa-solid fa-star"></i></span>
@@ -81,10 +74,8 @@
                     <span><i class="fa-solid fa-star"></i></span>
                   </div>
                   <div class="tp-featured-btn">
-                    <nuxt-link
-                      :href="`/product-details/${item.id}`"
-                      class="tp-btn tp-btn-border tp-btn-border-sm flex gap-1 items-center w-[120px] md:w-[150px]"
-                    >
+                    <nuxt-link :href="`/product-details/${item.id}`"
+                               class="tp-btn tp-btn-border tp-btn-border-sm flex gap-1 items-center w-[120px] md:w-[150px]">
                       <span>Shop Now</span> <svg-right-arrow />
                     </nuxt-link>
                   </div>

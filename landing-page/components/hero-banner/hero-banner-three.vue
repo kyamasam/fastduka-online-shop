@@ -1,36 +1,41 @@
 <template>
-  <section class="tp-slider-area p-relative z-index-1">
-    <Swiper
-      :slidesPerView="1"
-      :spaceBetween="30"
-      :loop="true"
-      :effect="'fade'"
-      :modules="[Pagination, Navigation, EffectFade]"
-      :navigation="{
-        nextEl: '.tp-slider-3-button-next',
-        prevEl: '.tp-slider-3-button-prev',
-      }"
-      :pagination="{
-        el: '.tp-slider-3-dot',
-        clickable: true,
-      }"
-      class="tp-slider-active-3 swiper-container"
-    >
-      <SwiperSlide
-        v-for="item in slider_data"
-        :key="item.id"
-        class="tp-slider-item-3 tp-slider-height-3 p-relative swiper-slide black-bg d-flex align-items-center"
-      >
-        <div
-          class="tp-slider-thumb-3 include-bg"
-          :style="`background-image:url(${item.bg})`"
-        ></div>
-        <div class="container">
-          <div class="row align-items-center">
-            <div class="col-xl-6 col-lg-6 col-md-8">
-              <div class="tp-slider-content-3">
-                <span>{{ item?.subtitle }}</span>
-                <h3 class="tp-slider-title-3">{{ item?.title }}</h3>
+  <section class="relative z-10">
+
+    <Swiper :slidesPerView="1"
+            :spaceBetween="30"
+            :loop="true"
+            :effect="'fade'"
+            :modules="[Pagination, Navigation, EffectFade, Autoplay]"
+            :autoplay="{
+              delay: 5000,
+              disableOnInteraction: false,
+            }"
+            :navigation="{
+              nextEl: '.tp-slider-3-button-next',
+              prevEl: '.tp-slider-3-button-prev',
+            }"
+            :pagination="{
+              el: '.tp-slider-3-dot',
+              clickable: true,
+            }"
+            class="swiper-container">
+      <SwiperSlide v-for="item in heroSliderStore.orderedSliders"
+                   :key="item.id"
+                   class="relative bg-black flex items-center min-h-[700px] lg:min-h-[650px] md:min-h-[600px] sm:min-h-[400px]">
+        <div class="absolute inset-0 bg-cover bg-center"
+             :style="`background-image:url(${item.background_image_url || item.background_image})`">
+          <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent"></div>
+        </div>
+        <div class="container mx-auto px-4 relative z-10">
+          <div class="flex items-center">
+            <div class="w-full xl:w-1/2 lg:w-1/2 md:w-2/3">
+              <div class="text-white space-y-6">
+                <span class="text-3xl font-normal text-white block mb-2 font-serif italic">{{ item?.subtitle }}</span>
+                <h3 class="text-7xl lg:text-6xl md:text-5xl sm:text-6xl xs:text-4xl font-normal text-white mb-6 leading-tight">{{ item?.title }}</h3>
+                <div v-if="item?.description"
+                     class="mb-8">
+                  <p class="text-white text-lg">{{ item.description }}</p>
+                </div>
                 <!-- <div
                   class="tp-slider-feature-3 d-flex flex-wrap align-items-center p-relative z-index-1 mb-15"
                 >
@@ -74,16 +79,14 @@
                     </div>
                   </div>
                 </div> -->
-                <div class="tp-slider-btn-3">
-                  <nuxt-link
-                    href="/shop"
-                    class="tp-btn tp-btn-border"
-                    :style="{
-                      borderColor: siteSettingsStore.primaryColor,
-                      color: siteSettingsStore.primaryColor
-                    }"
-                  >
-                    Shop Now
+                <div class="mt-8">
+                  <nuxt-link :href="item?.button_link || '/shop'"
+                             class="inline-block px-8 py-3 border-2 text-white hover:bg-white hover:text-black transition-all duration-300 rounded-md"
+                             :style="{
+                              borderColor: siteSettingsStore.primaryColor,
+                              color: siteSettingsStore.primaryColor
+                            }">
+                    {{ item?.button_text || 'Shop Now' }}
                   </nuxt-link>
                 </div>
               </div>
@@ -91,59 +94,63 @@
           </div>
         </div>
       </SwiperSlide>
-      <!-- dot style -->
-      <div class="tp-swiper-dot tp-slider-3-dot d-sm-none"></div>
-      <!-- arrow style -->
-      <div class="tp-slider-arrow-3 d-none d-sm-block">
-        <button type="button" class="tp-slider-3-button-prev">
-          <svg-slider-btn-prev-2 />
-        </button>
-        <button type="button" class="tp-slider-3-button-next">
-          <svg-slider-btn-next-2 />
-        </button>
+      <!-- Pagination dots -->
+      <div class="tp-slider-3-dot absolute right-6 lg:right-12 top-1/2 transform -translate-y-1/2 z-20 flex flex-col space-y-2">
+        <!-- Swiper will auto-generate pagination bullets here -->
       </div>
+
+      <!-- Navigation arrows -->
+      <button type="button"
+              class="tp-slider-3-button-prev absolute left-4 lg:left-8 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-all duration-300 z-20 backdrop-blur-sm">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+
+      <button type="button"
+              class="tp-slider-3-button-next absolute right-4 lg:right-8 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-all duration-300 z-20 backdrop-blur-sm">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
     </Swiper>
   </section>
 </template>
 
 <script setup lang="ts">
-import { EffectFade, Navigation, Pagination } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/vue";
+import { useHeroSliderStore } from "@/pinia/useHeroSliderStore";
 import { useSiteSettingsStore } from "@/pinia/useSiteSettingsStore";
+import { Autoplay, EffectFade, Navigation, Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/vue";
 
 const siteSettingsStore = useSiteSettingsStore();
+const heroSliderStore = useHeroSliderStore();
+// const sliders = ref([])
 
-// Fetch settings on component mount
-onMounted(() => {
-  siteSettingsStore.fetchSettings();
+// Fetch settings and sliders on component mount
+onMounted(async () => {
+  console.log("Fetching site settings and hero sliders...");
+  await heroSliderStore.fetchSliders();
+  // const { data } = await getDataUnauthed("/hero-sliders/");
+  // console.log("Sliders data fetched:", data.value);
+  // sliders.value = data.value?.results || [];
+
 });
-
-// slider data type
-type ISlider = {
-  id: number;
-  bg: string;
-  subtitle: string;
-  title: string;
-};
-// slider data
-const slider_data: ISlider[] = [
-  {
-    id: 1,
-    bg: "/img/slider/slider-img-1.jpg",
-    subtitle: "Premium meats",
-    title: "Savor the flavor, experience the quality",
-  },
-  {
-    id: 2,
-    bg: "/img/slider/slider-img-2.jpg",
-    subtitle: "Customize your order",
-    title: "Your meat, your way",
-  },
-  {
-    id: 3,
-    bg: "/img/slider/slider-img-3.jpg",
-    subtitle: "Exceptional quality, every time",
-    title: "Cut above the rest.",
-  },
-];
 </script>
+
+<style scoped>
+/* Custom pagination bullet styles */
+:deep(.tp-slider-3-dot .swiper-pagination-bullet) {
+  @apply w-3 h-3 bg-white/30 rounded-full transition-all duration-300 opacity-100 m-0;
+}
+
+:deep(.tp-slider-3-dot .swiper-pagination-bullet-active) {
+  @apply bg-white scale-125;
+}
+
+/* Navigation button hover effects */
+.tp-slider-3-button-prev:hover,
+.tp-slider-3-button-next:hover {
+  @apply scale-110;
+}
+</style>

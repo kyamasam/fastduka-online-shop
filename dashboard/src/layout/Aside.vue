@@ -33,6 +33,15 @@
       </router-link>
     </a-menu-item>
 
+    <a-menu-item key="categories" @click="toggleCollapsed">
+      <template #icon>
+        <scale-to-original class="h-8 w-8"/>
+      </template>
+      <router-link to="/dashboard/categories">
+        {{ 'Categories' }}
+      </router-link>
+    </a-menu-item>
+
     <a-menu-item key="orders" @click="toggleCollapsed">
       <template #icon>
         <promotion @click="routeTo('orders')"/>

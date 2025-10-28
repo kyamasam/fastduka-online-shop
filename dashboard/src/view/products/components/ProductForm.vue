@@ -1,107 +1,105 @@
 <template>
-  <BaseLoader v-if="productLoader"/>
-  <el-form
-      ref="formRef"
-      :model="formState"
-      v-if="!productLoader"
-      class="md:mt-0 grid gap-2 grid-cols-1 md:grid-cols-2"
-      label-position="top"
-      @submit.native.prevent="handleSubmit"
-  >
+  <BaseLoader v-if="productLoader" />
+  <el-form ref="formRef"
+           :model="formState"
+           v-if="!productLoader"
+           class="md:mt-0 grid gap-2 grid-cols-1 md:grid-cols-2"
+           label-position="top"
+           @submit.native.prevent="handleSubmit">
     <!-- Name Field -->
-    <el-form-item
-        :rules="[{ required: true, message: 'Please input the product name!' }]"
-        label="Name"
-        prop="name"
-    >
-      <el-input v-model="formState.name" class="rounded-none" placeholder="Product name" size="large"
-                style="border-radius:0"/>
+    <el-form-item :rules="[{ required: true, message: 'Please input the product name!' }]"
+                  label="Name"
+                  prop="name">
+      <el-input v-model="formState.name"
+                class="rounded-none"
+                placeholder="Product name"
+                size="large"
+                style="border-radius:0" />
     </el-form-item>
 
     <!-- Description Field -->
-    <el-form-item
-        label="Description"
-        prop="description"
-    >
-      <el-input v-model="formState.description" class="rounded-none" placeholder="Product Description" size="small"
-                type="textarea"/>
+    <el-form-item label="Description"
+                  prop="description">
+      <el-input v-model="formState.description"
+                class="rounded-none"
+                placeholder="Product Description"
+                size="small"
+                type="textarea" />
     </el-form-item>
 
     <!-- Selling Price Field -->
-    <el-form-item
-        :rules="[{ required: true, message: 'Selling Price is required' }]"
-        label="Selling Price"
-        prop="selling_price"
-    >
-      <el-input-number v-model="formState.selling_price" class="rounded-none w-full" placeholder="Price"
-                       size="large"/>
+    <el-form-item :rules="[{ required: true, message: 'Selling Price is required' }]"
+                  label="Selling Price"
+                  prop="selling_price">
+      <el-input-number v-model="formState.selling_price"
+                       class="rounded-none w-full"
+                       placeholder="Price"
+                       size="large" />
     </el-form-item>
 
     <!-- Buying Price Field -->
-    <el-form-item
-        label="Buying Price"
-        prop="buying_price"
-    >
-      <el-input-number v-model="formState.buying_price" class="rounded-none w-full" placeholder="Price" size="large"/>
+    <el-form-item label="Buying Price"
+                  prop="buying_price">
+      <el-input-number v-model="formState.buying_price"
+                       class="rounded-none w-full"
+                       placeholder="Price"
+                       size="large" />
     </el-form-item>
 
     <!-- Sale / Offer Price Field -->
-    <el-form-item
-        label="Sale / Offer Price"
-        prop="sale_price"
-    >
-      <el-input-number v-model="formState.sale_price" class="rounded-none w-full" placeholder="Price" size="large"/>
+    <el-form-item label="Sale / Offer Price"
+                  prop="sale_price">
+      <el-input-number v-model="formState.sale_price"
+                       class="rounded-none w-full"
+                       placeholder="Price"
+                       size="large" />
     </el-form-item>
 
     <!-- Allowable Discount Field -->
-    <el-form-item
-        label="Allowable Discount"
-        prop="allowable_discount"
-    >
-      <el-input-number v-model="formState.allowable_discount" class="rounded-none w-full" placeholder="100"
-                       size="large"/>
+    <el-form-item label="Allowable Discount"
+                  prop="allowable_discount">
+      <el-input-number v-model="formState.allowable_discount"
+                       class="rounded-none w-full"
+                       placeholder="100"
+                       size="large" />
     </el-form-item>
 
     <!-- Category Field -->
     <div class="z-50">
-      <el-form-item
-          :rules="[{ required: true, message: 'Please select a product category', trigger: 'blur' }]"
-          label="Category"
-          prop="category_id"
-      >
-        <el-select
-            v-model="formState.category_id"
-            :loading="categoryLoader"
-            class="w-full rounded-none z-50"
-            placeholder="Select Category"
-            size="large"
-            @focus="fetchCategories"
-        >
-          <el-option v-for="category in categories" :key="category.value" :label="category.label"
-                     :value="category.value"/>
+      <el-form-item :rules="[{ required: true, message: 'Please select a product category', trigger: 'blur' }]"
+                    label="Category"
+                    prop="category_id">
+        <el-select v-model="formState.category_id"
+                   :loading="categoryLoader"
+                   class="w-full rounded-none z-50"
+                   placeholder="Select Category"
+                   size="large"
+                   @focus="fetchCategories">
+          <el-option v-for="category in categories"
+                     :key="category.value"
+                     :label="category.label"
+                     :value="category.value" />
         </el-select>
       </el-form-item>
     </div>
 
-    <el-form-item class="col-span-2 w-full" label="Product Image" prop="primary_photo">
-      <a-upload
-          v-model:file-list="fileList"
-          :progress="{
-                showInfo: true,
-              }"
-          :show-upload-list="{
-                showPreviewIcon: true,
-                showRemoveIcon: false,
-              }"
-          accept=".jpg,.png,.jpeg"
-          class="avatar-uploader w-full flex flex-col justify-center bg-gray-100 border border-dashed border-blue-400 p-4 rounded-lg"
-          list-type="picture"
-          name="teaser"
-          @remove="handleRemove"
-      >
-        <div
-            class="ant-upload-drag-icon text-blue-400 w-full flex justify-center py-4"
-        >
+    <el-form-item class="col-span-2 w-full"
+                  label="Product Image"
+                  prop="primary_photo">
+      <a-upload v-model:file-list="fileList"
+                :progress="{
+                  showInfo: true,
+                }"
+                :show-upload-list="{
+                  showPreviewIcon: true,
+                  showRemoveIcon: false,
+                }"
+                accept=".jpg,.png,.jpeg"
+                class="avatar-uploader w-full flex flex-col justify-center bg-gray-100 border border-dashed border-blue-400 p-4 rounded-lg"
+                list-type="picture"
+                name="teaser"
+                @remove="handleRemove">
+        <div class="ant-upload-drag-icon text-blue-400 w-full flex justify-center py-4">
           <upload class="h-8 w-8"></upload>
         </div>
         <div class="flex flex-col items-center">
@@ -115,7 +113,7 @@
           </p>
         </div>
 
-        <base-loader v-if="loadingCoverPhotoUpload"/>
+        <base-loader v-if="loadingCoverPhotoUpload" />
       </a-upload>
 
       <!--        <div class="file-upload-container w-full hidden">-->
@@ -139,13 +137,11 @@
 
     <!-- Submit Button -->
     <el-form-item class="md:col-span-2">
-      <el-button
-          :loading="registerLoading"
-          class="w-full bg-red-400 border-none hover:bg-red-500 focus:bg-red-500 rounded-none p-0 my-6 text-sm font-medium"
-          size="large"
-          type="primary"
-          @click="handleSubmit"
-      >
+      <el-button :loading="registerLoading"
+                 class="w-full bg-red-400 border-none hover:bg-red-500 focus:bg-red-500 rounded-none p-0 my-6 text-sm font-medium"
+                 size="large"
+                 type="primary"
+                 @click="handleSubmit">
         Submit
       </el-button>
     </el-form-item>
@@ -153,14 +149,13 @@
 </template>
 
 <script>
+import BaseDrawer from "@/BaseDrawer.vue";
 import BaseDialog from "@/components/BaseDialog.vue";
 import BaseLoader from "@/components/BaseLoader";
+import { baseUrl } from "@/utility/constants";
 import store from "@/vuex/store";
-import {notification} from "ant-design-vue";
 import axios from "axios";
-import {baseUrl} from "@/utility/constants";
-import router from "@/routes";
-import BaseDrawer from "@/BaseDrawer.vue";
+import { ElNotification } from "element-plus";
 
 export default {
   name: "ProductForm",
@@ -171,7 +166,8 @@ export default {
   },
   data() {
     return {
-      formState: {},
+      formState: {
+      },
       formStateCopy: {},
       registerLoading: false,
       categories: [],
@@ -191,30 +187,30 @@ export default {
   methods: {
     fetchCategories() {
       this.categoryLoader = true;
-      store.dispatch("fetchList", {url: "category"})
-          .then((res) => {
-            this.categories = res.data.results.map((category) => ({
-              label: category.name,
-              value: category.id
-            }));
-            this.categoryLoader = false;
-          })
-          .catch(() => {
-            this.categoryLoader = false;
-          });
+      store.dispatch("fetchList", { url: "category" })
+        .then((res) => {
+          this.categories = res.data.results.map((category) => ({
+            label: category.name,
+            value: category.id
+          }));
+          this.categoryLoader = false;
+        })
+        .catch(() => {
+          this.categoryLoader = false;
+        });
     },
     fetchProduct() {
       this.productLoader = true;
       const productId = this.$route.params.productId;
-      store.dispatch("fetchSingleItem", {url: "product", id: productId})
-          .then((res) => {
-            this.formState = res.data
-            this.formStateCopy = res.data
-            this.productLoader = false;
-          })
-          .catch(() => {
-            this.productLoader = false;
-          });
+      store.dispatch("fetchSingleItem", { url: "product", id: productId })
+        .then((res) => {
+          this.formState = res.data
+          this.formStateCopy = res.data
+          this.productLoader = false;
+        })
+        .catch(() => {
+          this.productLoader = false;
+        });
     },
     handlePhotoChange(event) {
       this.fileList = event.target.files[0];
@@ -254,9 +250,10 @@ export default {
           if (attachment?.originFileObj.size <= 4 * 1024 * 1024) {
             formData.append('primary_photo', attachment?.originFileObj);
           } else {
-            notification["error"]({
-              message: "Error",
-              description: `${attachment?.name} exceeds 4MB size limit and won't be uploaded`,
+            ElNotification({
+              title: "Error",
+              message: `${attachment?.name} exceeds 4MB size limit and won't be uploaded`,
+              type: "error",
             });
             continue;
           }
@@ -269,6 +266,9 @@ export default {
       }
 
       for (let key in this.formState) {
+        if (this.formState[key] === null || this.formState[key] === undefined) {
+          continue; // Skip null or undefined values
+        }
         formData.append(key, this.formState[key]);
       }
 
@@ -290,12 +290,24 @@ export default {
               Authorization: "Bearer " + authData?.access, // Include authorization token
             },
           });
-        }else {
+          ElNotification({
+            title: "Success",
+            message: "Product updated successfully",
+            type: "success",
+            position: "bottom-right",
+
+          });
+        } else {
           const resp = await axios.post(`${baseUrl}product/`, formData, {
             headers: {
               "Content-Type": "multipart/form-data", // Ensure multipart form-data header
               Authorization: "Bearer " + authData?.access, // Include authorization token
             },
+          });
+          ElNotification({
+            title: "Success",
+            message: "Product created successfully",
+            type: "success",
           });
         }
 
@@ -345,7 +357,8 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  pointer-events: none; /* Prevent clicks on styled content */
+  pointer-events: none;
+  /* Prevent clicks on styled content */
 }
 
 .file-upload-text {
@@ -358,4 +371,3 @@ export default {
   color: #999;
 }
 </style>
-
