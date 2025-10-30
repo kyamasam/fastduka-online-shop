@@ -14,7 +14,9 @@ services:
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     networks:
-      - app-network
+      app-network:
+        aliases:
+          - web
     depends_on:
       - db
     environment:
