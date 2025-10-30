@@ -1,34 +1,42 @@
 # Multi-stage build for Nuxt 3 landing page
-FROM node:18 AS build
+FROM node:20 AS build
 
 WORKDIR /app
 
+# Enable Corepack for Yarn
+RUN corepack enable
+
 # Copy package files
-COPY package*.json ./
+COPY package*.json yarn.lock* ./
 
 # Install dependencies with clean cache
-RUN npm cache clean --force && \
-    npm install --no-optional --legacy-peer-deps
+RUN yarn cache clean && \
+    yarn install --frozen-lockfile --non-interactive
 
 # Copy source code
 COPY . .
 
 # Build the application
-RUN npm run build
+RUN yarn build
 
 # Production stage
-FROM node:18-slim AS production
+FROM node:20-slim AS production
 
 WORKDIR /app
+
+# Enable Corepack for Yarn
+RUN corepack enable
 
 # Copy built application
 COPY --from=build /app/.output ./.output
 
 # Copy package files for runtime dependencies
 COPY --from=build /app/package*.json ./
+COPY --from=build /app/yarn.lock* ./
 
-# Install only production dependencies (if needed at runtime)
-RUN npm ci --production --omit=dev && npm cache clean --force
+# Install only production dependencies
+RUN yarn install --production --frozen-lockfile --non-interactive && \
+    yarn cache clean
 
 # Create non-root user
 RUN groupadd -g 1001 nodejs && \
