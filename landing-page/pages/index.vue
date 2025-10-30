@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import ProductsSection from "~/components/product/products-section.vue";
+import ProductsSection from "@/components/product/products-section.vue";
 
 definePageMeta({
   layout: false,

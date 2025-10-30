@@ -45,11 +45,7 @@ export const mobile_menu: IMobileType[] = [
     link: "/shop",
     title: "Shop",
   },
-  {
-    id: 2,
-    link: "/shop-liquor",
-    title: "Liquor Shop",
-  },
+
   {
     id: 5,
     link: "/cart",
