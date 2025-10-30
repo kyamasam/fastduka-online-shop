@@ -99,5 +99,3 @@ volumes:
     driver: local
   media_volume:
     driver: local
-  dashboard_assets:
-    driver: local
