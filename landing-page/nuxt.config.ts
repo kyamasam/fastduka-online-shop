@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import tailwindcss from "@tailwindcss/vite";
+
 export default defineNuxtConfig({
   debug: true,
 
@@ -24,7 +26,13 @@ export default defineNuxtConfig({
         autoImports: ["defineStore", ["defineStore", "definePiniaStore"]],
       },
     ],
-    "@nuxtjs/tailwindcss",
+    [
+      "@nuxtjs/tailwindcss",
+      {
+        cssPath: "~/assets/css/tailwind.css",
+        configPath: "tailwind.config.js",
+      },
+    ],
   ],
 
   app: {
@@ -41,12 +49,16 @@ export default defineNuxtConfig({
   },
 
   css: [
+    "@/assets/css/tw.css",
     "bootstrap/scss/bootstrap.scss",
     "swiper/css/bundle",
     "@/assets/css/font-awesome-pro.css",
     "@/assets/css/flaticon_shofy.css",
     "@/assets/scss/main.scss",
   ],
+  vite: {
+    plugins: [tailwindcss()],
+  },
 
   compatibilityDate: "2025-09-20",
 });
