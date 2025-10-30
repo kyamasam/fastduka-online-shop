@@ -1,59 +1,55 @@
 <template>
   <div class="tp-checkout-verify">
     <div class="tp-checkout-verify-item">
-      <p v-if="currentUserData === undefined || Object.keys(currentUserData).length===0" class="tp-checkout-verify-reveal">
+      <p v-if="currentUserData === undefined || Object.keys(currentUserData).length === 0"
+         class="tp-checkout-verify-reveal">
         Returning customer?
-        <button
-          @click="openLogin = !openLogin"
-          type="button"
-          class="tp-checkout-login-form-reveal-btn"
-        >
+        <button @click="openLogin = !openLogin"
+                type="button"
+                class="tp-checkout-login-form-reveal-btn">
           Click here to login
         </button>
       </p>
-      <p v-else class="tp-checkout-verify-reveal">
+      <p v-else
+         class="tp-checkout-verify-reveal">
         {{ currentUserData?.first_name || currentUserData?.email }}
         Welcome Back
-        <button
-          @click="logout"
-          type="button"
-          class="tp-checkout-login-form-reveal-btn"
-        >
+        <button @click="logout"
+                type="button"
+                class="tp-checkout-login-form-reveal-btn">
           Logout
         </button>
       </p>
 
-      <div
+      <!-- <div
         v-if="currentUserData === undefined || Object.keys(currentUserData).length===0"
         id="tpReturnCustomerLoginForm"
         class="tp-return-customer"
       >
         <forms-login-form />
-      </div>
+      </div> -->
     </div>
     <div class="tp-checkout-verify-item">
       <p class="tp-checkout-verify-reveal">
         Have a coupon?
-        <button
-          @click="openCoupon = !openCoupon"
-          type="button"
-          class="tp-checkout-coupon-form-reveal-btn"
-        >
+        <button @click="openCoupon = !openCoupon"
+                type="button"
+                class="tp-checkout-coupon-form-reveal-btn">
           Click here to enter your code
         </button>
       </p>
 
-      <div
-        v-if="openCoupon"
-        id="tpCheckoutCouponForm"
-        class="tp-return-customer"
-      >
+      <div v-if="openCoupon"
+           id="tpCheckoutCouponForm"
+           class="tp-return-customer">
         <form @submit.prevent="handleSubmit">
           <div class="tp-return-customer-input">
             <label>Coupon Code :</label>
-            <input type="text" placeholder="Coupon" />
+            <input type="text"
+                   placeholder="Coupon" />
           </div>
-          <button type="submit" class="tp-return-customer-btn tp-checkout-btn">
+          <button type="submit"
+                  class="tp-return-customer-btn tp-checkout-btn">
             Apply
           </button>
         </form>
