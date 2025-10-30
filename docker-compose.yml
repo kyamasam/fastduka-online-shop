@@ -31,7 +31,7 @@ services:
     networks:
       - app-network
     ports:
-      - "${PG_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     environment:
       - POSTGRES_DB=${PG_NAME}
       - POSTGRES_USER=${PG_USER}
@@ -51,7 +51,7 @@ services:
     networks:
       - app-network
     ports:
-      - "8001:80"
+      - "${NGINX_PORT:-8001}:80"
     depends_on:
       - backend
     restart: unless-stopped
@@ -64,7 +64,7 @@ services:
       dockerfile: Dockerfile
     image: fastduka_dashboard/webapp
     ports:
-      - "3001:80"
+      - "${DASHBOARD_PORT:-3001}:80"
     networks:
       - app-network
     volumes:
@@ -78,7 +78,7 @@ services:
       dockerfile: Dockerfile
     image: fastduka_landing_page/webapp
     ports:
-      - "3000:3000"
+      - "${LANDING_PAGE_PORT:-3000}:3000"
     networks:
       - app-network
     environment:
