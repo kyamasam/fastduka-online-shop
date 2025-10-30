@@ -18,17 +18,26 @@ export default defineNuxtConfig({
       },
     ],
     "@nuxtjs/tailwindcss",
+    [
+      "@nuxtjs/google-fonts",
+      {
+        families: {
+          Jost: [300, 400, 500, 600, 700, 800, 900],
+        },
+        display: "swap",
+      },
+    ],
   ],
 
-
-
   css: [
+    "glightbox/dist/css/glightbox.min.css",
     "@/assets/css/tailwind.css",
     "bootstrap/scss/bootstrap.scss",
     "swiper/css/bundle",
     "@/assets/css/font-awesome-pro.css",
     "@/assets/css/flaticon_shofy.css",
     "@/assets/scss/main.scss",
+    "@fortawesome/fontawesome-free/css/all.min.css",
   ],
 
   app: {

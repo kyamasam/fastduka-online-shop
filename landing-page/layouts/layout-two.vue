@@ -6,6 +6,6 @@
     </main>
     <footer-one :style_2="true" />
     <back-to-top />
-    <!-- <modal-product /> -->
+    <modal-product />
   </div>
 </template>
