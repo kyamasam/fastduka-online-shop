@@ -1,7 +1,17 @@
 <template>
   <section class="relative z-10">
+    <!-- Loader -->
+    <div v-if="heroSliderStore.loading" 
+         class="flex items-center justify-center min-h-[700px] lg:min-h-[650px] md:min-h-[600px] sm:min-h-[400px] bg-gray-900">
+      <div class="flex flex-col items-center space-y-4">
+        <div class="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+        <p class="text-white text-lg">Loading slides...</p>
+      </div>
+    </div>
 
-    <Swiper :slidesPerView="1"
+    <!-- Swiper Slider -->
+    <Swiper v-else
+            :slidesPerView="1"
             :spaceBetween="30"
             :loop="true"
             :effect="'fade'"
@@ -140,16 +150,11 @@ import { Swiper, SwiperSlide } from "swiper/vue";
 
 const siteSettingsStore = useSiteSettingsStore();
 const heroSliderStore = useHeroSliderStore();
-// const sliders = ref([])
 
 // Fetch settings and sliders on component mount
 onMounted(async () => {
   console.log("Fetching site settings and hero sliders...");
   await heroSliderStore.fetchSliders();
-  // const { data } = await getDataUnauthed("/hero-sliders/");
-  // console.log("Sliders data fetched:", data.value);
-  // sliders.value = data.value?.results || [];
-
 });
 </script>
 
@@ -167,5 +172,12 @@ onMounted(async () => {
 .tp-slider-3-button-prev:hover,
 .tp-slider-3-button-next:hover {
   @apply scale-110;
+}
+
+/* Spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

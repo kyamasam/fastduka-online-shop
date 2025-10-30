@@ -17,10 +17,8 @@ export const useWishlistStore = defineStore("wishlist_product", () => {
       wishlists.value.push(payload);
       toast.success(`${payload.title} added to wishlist`);
     }
-    const wishlist_products_cookie:any = useCookie('wishlist_products')
-    wishlist_products_cookie.value = wishlists.value
-    
-   
+    const wishlist_products_cookie: any = useCookie("wishlist_products");
+    wishlist_products_cookie.value = wishlists.value;
   };
   // removeWishlist
   const removeWishlist = (payload: IProduct) => {
@@ -29,16 +27,32 @@ export const useWishlistStore = defineStore("wishlist_product", () => {
     const wishlist_products_cookie = useCookie("wishlist_products");
 
     const compareData: any = wishlist_products_cookie.value;
-    
   };
 
   // cart product initialize
+  // In useWishlistStore.ts
   const initializeWishlistProducts = () => {
-    const compare_products_cookie = useCookie("wishlist_products");
+    if (import.meta.client) {
+      const storedWishlists = localStorage.getItem("wishlists");
 
-    const wishlistData = compare_products_cookie?.value;
-    if (wishlistData) {
-      wishlists.value = JSON.parse(wishlistData);
+      if (storedWishlists) {
+        try {
+          const parsed = JSON.parse(storedWishlists);
+
+          // Make sure it's an array
+          if (Array.isArray(parsed)) {
+            wishlists.value = parsed;
+          } else {
+            console.warn("Stored wishlists is not an array, resetting");
+            wishlists.value = [];
+            localStorage.setItem("wishlists", JSON.stringify([]));
+          }
+        } catch (error) {
+          console.error("Failed to parse wishlists from localStorage:", error);
+          wishlists.value = [];
+          localStorage.removeItem("wishlists"); // Clear corrupted data
+        }
+      }
     }
   };
 

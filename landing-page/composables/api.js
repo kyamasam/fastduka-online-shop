@@ -1,6 +1,5 @@
 import { toast } from "vue3-toastify";
 
-
 export const getData = async (request, opts) => {
   const user = useCookie("currentUser");
 
@@ -61,13 +60,57 @@ export const getData = async (request, opts) => {
   });
 };
 
+// export const getDataUnauthed = (request, opts) => {
+//   const config = useRuntimeConfig();
+//   const defaultHeaders = {
+//     "Content-Type": "application/json",
+//     ...opts?.headers, // Allow overriding or adding custom headers from the options
+//   };
+//   return useFetch(request, {
+//     baseURL: config.public.apiBaseUrl,
+//     headers: defaultHeaders,
+//     ...opts,
+//     onResponseError: async ({ response }) => {
+//       console.log("err", response);
+//       if (response?.status < 500 && response?.status !== 401) {
+//         console.log("server err", response);
+//         showServerErrors(response?._data);
+//         throw response;
+//       } else if (response?.status === 401) {
+//         // toast.error("Please Login");
+//         //clear the token
+//         if (response?._data?.errors) {
+//           response?._data?.errors?.forEach((error) => {
+//             toast.error(error?.attr + ": " + error.detail);
+//           });
+//           throw response;
+//         } else {
+//           throw {
+//             errors: [
+//               {
+//                 code: "error",
+//                 detail: "Something went wrong",
+//                 attr: "",
+//               },
+//             ],
+//           };
+//         }
+//       } else {
+//         toast.error("An Unknown Error occured");
+//         return response._data;
+//       }
+//     },
+//   });
+// };
+
 export const getDataUnauthed = (request, opts) => {
   const config = useRuntimeConfig();
   const defaultHeaders = {
     "Content-Type": "application/json",
-    ...opts?.headers, // Allow overriding or adding custom headers from the options
+    ...opts?.headers,
   };
-  return useFetch(request, {
+
+  return useLazyFetch(request, {
     baseURL: config.public.apiBaseUrl,
     headers: defaultHeaders,
     ...opts,
@@ -76,29 +119,16 @@ export const getDataUnauthed = (request, opts) => {
       if (response?.status < 500 && response?.status !== 401) {
         console.log("server err", response);
         showServerErrors(response?._data);
-        throw response;
       } else if (response?.status === 401) {
-        // toast.error("Please Login");
-        //clear the token
         if (response?._data?.errors) {
           response?._data?.errors?.forEach((error) => {
             toast.error(error?.attr + ": " + error.detail);
           });
-          throw response;
         } else {
-          throw {
-            errors: [
-              {
-                code: "error",
-                detail: "Something went wrong",
-                attr: "",
-              },
-            ],
-          };
+          toast.error("Unauthorized");
         }
       } else {
-        toast.error("An Unknown Error occured");
-        return response._data;
+        toast.error("An Unknown Error occurred");
       }
     },
   });

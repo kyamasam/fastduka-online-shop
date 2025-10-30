@@ -114,12 +114,18 @@ const fetchProducts = async () => {
   pending.value = true;
 
   try {
-    const response = await getDataUnauthed(`/product/${filterString.value}`);
-    data.value = response.data.value; // Directly set new data
-    error.value = response.error.value;
-    filteredProducts.value = response.data.value.results;
+    // const {
+    //   data,
+    //   error: fetchError,
+    //   execute,
+    // } = getDataUnauthed("/hero-sliders/");
+    const { data, error, execute } = await getDataUnauthed(`/product/${filterString.value}`);
+    await execute();
+    // data.value = response.data.value; // Directly set new data
+    // error.value = response.error.value;
+    filteredProducts.value = data.value.results;
 
-    refreshProducts = response.refresh; // Update the refresh reference
+    // refreshProducts = response.refresh; // Update the refresh reference
   } catch (err) {
     console.error("Error fetching products:", err);
     error.value = err;

@@ -35,21 +35,28 @@ export const useHeroSliderStore = defineStore("heroSlider", () => {
 
   // Actions
   const fetchSliders = async () => {
-    // Only fetch if not already loaded
-    // if (sliders.value.length > 0) return sliders.value;
-
     loading.value = true;
     error.value = null;
 
     try {
-      const response = await getDataUnauthed("/hero-sliders/");
-      console.log("Hero sliders response:", response);
-      console.log("Hero sliders data:", response.data?.results);
+      const {
+        data,
+        error: fetchError,
+        execute,
+      } = getDataUnauthed("/hero-sliders/");
+      await execute(); 
 
-      // Handle both possible response structures
-      const slidersData = response.data.value?.results || [];
+      console.log("Hero sliders response:", data.value?.results);
 
+      // Check for errors
+      if (fetchError.value) {
+        throw fetchError.value;
+      }
+
+      // Extract results from the response
+      const slidersData = data.value?.results || [];
       sliders.value = Array.isArray(slidersData) ? slidersData : [];
+      console.log("sliders data", sliders.value)
 
       return sliders.value;
     } catch (err: any) {
@@ -66,12 +73,17 @@ export const useHeroSliderStore = defineStore("heroSlider", () => {
     error.value = null;
 
     try {
-      const response = await getData("/hero-sliders/", {
+      const { data, error: fetchError } = await getData("/hero-sliders/", {
         method: "POST",
         body: sliderData,
       });
-      sliders.value.push(response.data.value);
-      return response.data.value;
+
+      if (fetchError.value) {
+        throw fetchError.value;
+      }
+
+      sliders.value.push(data.value);
+      return data.value;
     } catch (err: any) {
       error.value = err.message || "Failed to create hero slider";
       console.error("Error creating hero slider:", err);
@@ -86,16 +98,23 @@ export const useHeroSliderStore = defineStore("heroSlider", () => {
     error.value = null;
 
     try {
-      const response = await getData(`/hero-sliders/${id}/`, {
-        method: "PATCH",
-        body: sliderData,
-      });
+      const { data, error: fetchError } = await getData(
+        `/hero-sliders/${id}/`,
+        {
+          method: "PATCH",
+          body: sliderData,
+        }
+      );
+
+      if (fetchError.value) {
+        throw fetchError.value;
+      }
 
       const index = sliders.value.findIndex((slider) => slider.id === id);
       if (index !== -1) {
-        sliders.value[index] = response.data.value;
+        sliders.value[index] = data.value;
       }
-      return response.data.value;
+      return data.value;
     } catch (err: any) {
       error.value = err.message || "Failed to update hero slider";
       console.error("Error updating hero slider:", err);
@@ -110,9 +129,13 @@ export const useHeroSliderStore = defineStore("heroSlider", () => {
     error.value = null;
 
     try {
-      await getData(`/hero-sliders/${id}/`, {
+      const { error: fetchError } = await getData(`/hero-sliders/${id}/`, {
         method: "DELETE",
       });
+
+      if (fetchError.value) {
+        throw fetchError.value;
+      }
 
       sliders.value = sliders.value.filter((slider) => slider.id !== id);
     } catch (err: any) {
@@ -132,16 +155,23 @@ export const useHeroSliderStore = defineStore("heroSlider", () => {
       const formData = new FormData();
       formData.append("background_image", file);
 
-      const response = await getData(`/hero-sliders/${id}/upload_image/`, {
-        method: "POST",
-        body: formData,
-      });
+      const { data, error: fetchError } = await getData(
+        `/hero-sliders/${id}/upload_image/`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (fetchError.value) {
+        throw fetchError.value;
+      }
 
       const index = sliders.value.findIndex((slider) => slider.id === id);
       if (index !== -1) {
-        sliders.value[index] = response.data.value;
+        sliders.value[index] = data.value;
       }
-      return response.data.value;
+      return data.value;
     } catch (err: any) {
       error.value = err.message || "Failed to upload slider image";
       console.error("Error uploading slider image:", err);
@@ -156,15 +186,22 @@ export const useHeroSliderStore = defineStore("heroSlider", () => {
     error.value = null;
 
     try {
-      const response = await getData(`/hero-sliders/${id}/remove_image/`, {
-        method: "DELETE",
-      });
+      const { data, error: fetchError } = await getData(
+        `/hero-sliders/${id}/remove_image/`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (fetchError.value) {
+        throw fetchError.value;
+      }
 
       const index = sliders.value.findIndex((slider) => slider.id === id);
       if (index !== -1) {
-        sliders.value[index] = response.data.value;
+        sliders.value[index] = data.value;
       }
-      return response.data.value;
+      return data.value;
     } catch (err: any) {
       error.value = err.message || "Failed to remove slider image";
       console.error("Error removing slider image:", err);

@@ -168,9 +168,14 @@ export const useSiteSettingsStore = defineStore("siteSettings", () => {
     error.value = null;
 
     try {
-      const response = await getDataUnauthed("/settings/");
-      console.log("Site settings response:", response);
-      settings.value = response.data.value as SiteSettings;
+       const {
+        data,
+        error: fetchError,
+        execute,
+      } = getDataUnauthed("/settings/");
+      await execute(); 
+      console.log("Site settings response:", data);
+      settings.value = data.value as SiteSettings;
       return settings.value;
     } catch (err) {
       error.value = err;
