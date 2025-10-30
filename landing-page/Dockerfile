@@ -24,19 +24,8 @@ FROM node:20-slim AS production
 
 WORKDIR /app
 
-# Enable Corepack for Yarn
-RUN corepack enable
-
-# Copy built application
+# Copy built application (this is all we need!)
 COPY --from=build /app/.output ./.output
-
-# Copy package files for runtime dependencies
-COPY --from=build /app/package*.json ./
-COPY --from=build /app/yarn.lock* ./
-
-# Install only production dependencies
-RUN yarn install --production --frozen-lockfile --non-interactive && \
-    yarn cache clean
 
 # Create non-root user
 RUN groupadd -g 1001 nodejs && \
