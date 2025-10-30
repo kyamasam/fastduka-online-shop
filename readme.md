@@ -90,3 +90,15 @@ This repo uses pre-commit hooks for code quality:
 ## License
 
 [MIT](LICENSE)
+
+
+# github deploy secrets
+# GitHub Secrets Required:**
+
+Add these in your repository settings (Settings → Secrets and variables → Actions → New repository secret):
+
+DEPLOY_HOST          # Your server IP or domain (e.g., 192.168.1.100 or myserver.com)
+DEPLOY_USER          # SSH username (e.g., ubuntu, root, admin)
+DEPLOY_SSH_KEY       # Your private SSH key (entire content)
+DEPLOY_PORT          # SSH port (optional, defaults to 22)
+DEPLOY_PATH          # Path to your app (optional, defaults to /opt/fastduka-online-shop)
