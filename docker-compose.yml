@@ -1,0 +1,96 @@
+services:
+  # Backend Services
+  backend:
+    container_name: fastduka_shop_backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: fastduka_shop_backend/webapp
+    command: gunicorn ${WEB_DIR_NAME}.wsgi -b 0.0.0.0:8000
+    volumes:
+      - static_volume:/home/app/webapp/static
+      - media_volume:/home/app/webapp/media
+      - ./backend/.env:/home/app/webapp/.env
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+    depends_on:
+      - db
+    environment:
+      - IN_DOCKER=1
+    restart: unless-stopped
+
+  db:
+    container_name: fastduka_postgres
+    image: postgres:15.1-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/15.1/data
+    networks:
+      - app-network
+    environment:
+      - POSTGRES_DB=${PG_NAME}
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+    restart: unless-stopped
+
+  nginx:
+    container_name: fastduka_nginx
+    build:
+      context: ./backend/nginx
+      dockerfile: Dockerfile
+    volumes:
+      - static_volume:/home/app/webapp/static
+      - media_volume:/home/app/webapp/media
+    networks:
+      - app-network
+    ports:
+      - "8001:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Frontend Services
+  dashboard:
+    container_name: fastduka_dashboard
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    image: fastduka_dashboard/webapp
+    ports:
+      - "3001:80"
+    networks:
+      - app-network
+    volumes:
+      - dashboard_assets:/usr/share/nginx/html/assets
+    restart: unless-stopped
+
+  landing-page:
+    container_name: fastduka_landing_page
+    build:
+      context: ./landing-page
+      dockerfile: Dockerfile
+    image: fastduka_landing_page/webapp
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    environment:
+      - NODE_ENV=production
+      - NUXT_HOST=0.0.0.0
+      - NUXT_PORT=3000
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  static_volume:
+    driver: local
+  media_volume:
+    driver: local
+  dashboard_assets:
+    driver: local

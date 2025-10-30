@@ -1,0 +1,84 @@
+# Development docker-compose with hot reload and development settings
+services:
+  # Backend Services
+  backend:
+    container_name: fastduka_shop_backend_dev
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: fastduka_shop_backend/webapp
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/home/app/webapp
+      - static_volume:/home/app/webapp/static
+      - media_volume:/home/app/webapp/media
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+    depends_on:
+      - db
+    environment:
+      - DEBUG=1
+      - IN_DOCKER=1
+    restart: unless-stopped
+
+  db:
+    container_name: fastduka_postgres_dev
+    image: postgres:15.1-alpine
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/15.1/data
+    networks:
+      - app-network
+    environment:
+      - POSTGRES_DB=${PG_NAME}
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  # Frontend Services (Development mode with hot reload)
+  dashboard:
+    container_name: fastduka_dashboard_dev
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./dashboard:/app
+      - /app/node_modules
+    ports:
+      - "3001:5173"
+    networks:
+      - app-network
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+
+  landing-page:
+    container_name: fastduka_landing_page_dev
+    build:
+      context: ./landing-page
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./landing-page:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data_dev:
+    driver: local
+  static_volume:
+    driver: local
+  media_volume:
+    driver: local
