@@ -31,7 +31,9 @@
             <div class="w-full xl:w-1/2 lg:w-1/2 md:w-2/3">
               <div class="text-white space-y-6">
                 <span class="text-3xl font-normal text-white block mb-2 font-serif italic">{{ item?.subtitle }}</span>
-                <h3 class="text-7xl lg:text-6xl md:text-5xl sm:text-6xl xs:text-4xl font-normal text-white mb-6 leading-tight">{{ item?.title }}</h3>
+                <h3
+                    class="text-7xl lg:text-6xl md:text-5xl sm:text-6xl xs:text-4xl font-normal text-white mb-6 leading-tight">
+                  {{ item?.title }}</h3>
                 <div v-if="item?.description"
                      class="mb-8">
                   <p class="text-white text-lg">{{ item.description }}</p>
@@ -95,22 +97,35 @@
         </div>
       </SwiperSlide>
       <!-- Pagination dots -->
-      <div class="tp-slider-3-dot absolute right-6 lg:right-12 top-1/2 transform -translate-y-1/2 z-20 flex flex-col space-y-2">
+      <div
+           class="tp-slider-3-dot absolute right-6 lg:right-12 top-1/2 transform -translate-y-1/2 z-20 flex flex-col space-y-2">
         <!-- Swiper will auto-generate pagination bullets here -->
       </div>
 
       <!-- Navigation arrows -->
       <button type="button"
               class="tp-slider-3-button-prev absolute left-4 lg:left-8 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-all duration-300 z-20 backdrop-blur-sm">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        <svg class="w-6 h-6"
+             fill="none"
+             stroke="currentColor"
+             viewBox="0 0 24 24">
+          <path stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7" />
         </svg>
       </button>
 
       <button type="button"
               class="tp-slider-3-button-next absolute right-4 lg:right-8 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-all duration-300 z-20 backdrop-blur-sm">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        <svg class="w-6 h-6"
+             fill="none"
+             stroke="currentColor"
+             viewBox="0 0 24 24">
+          <path stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7" />
         </svg>
       </button>
     </Swiper>
@@ -141,7 +156,7 @@ onMounted(async () => {
 <style scoped>
 /* Custom pagination bullet styles */
 :deep(.tp-slider-3-dot .swiper-pagination-bullet) {
-  @apply w-3 h-3 bg-white/30 rounded-full transition-all duration-300 opacity-100 m-0;
+  @apply w-2 h-2 bg-white/30 rounded-full transition-all duration-300 opacity-100 m-0;
 }
 
 :deep(.tp-slider-3-dot .swiper-pagination-bullet-active) {

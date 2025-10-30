@@ -1,16 +1,7 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
-import tailwindcss from "@tailwindcss/vite";
-
 export default defineNuxtConfig({
   debug: true,
 
-  devtools: {
-    enabled: true,
-
-    timeline: {
-      enabled: true,
-    },
-  },
+  devtools: { enabled: true },
 
   runtimeConfig: {
     public: {
@@ -26,38 +17,26 @@ export default defineNuxtConfig({
         autoImports: ["defineStore", ["defineStore", "definePiniaStore"]],
       },
     ],
-    [
-      "@nuxtjs/tailwindcss",
-      {
-        cssPath: "~/assets/css/tailwind.css",
-        configPath: "tailwind.config.js",
-      },
-    ],
+    "@nuxtjs/tailwindcss",
   ],
 
-  app: {
-    head: {
-      title: "Fastduka Online The Best Meat In Kenya ",
-      charset: "utf-8",
-      viewport: "width=device-width, initial-scale=1",
-      script: [
-        {
-          src: "https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js",
-        },
-      ],
-    },
-  },
+
 
   css: [
-    "@/assets/css/tw.css",
+    "@/assets/css/tailwind.css",
     "bootstrap/scss/bootstrap.scss",
     "swiper/css/bundle",
     "@/assets/css/font-awesome-pro.css",
     "@/assets/css/flaticon_shofy.css",
     "@/assets/scss/main.scss",
   ],
-  vite: {
-    plugins: [tailwindcss()],
+
+  app: {
+    head: {
+      title: "Fastduka Online - The Best Meat In Kenya",
+      charset: "utf-8",
+      viewport: "width=device-width, initial-scale=1",
+    },
   },
 
   compatibilityDate: "2025-09-20",
