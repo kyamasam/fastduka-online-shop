@@ -6,8 +6,9 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies with clean cache
+RUN npm cache clean --force && \
+    npm install --no-optional --legacy-peer-deps
 
 # Copy source code
 COPY . .
