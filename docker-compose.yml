@@ -12,13 +12,15 @@ services:
       - media_volume:/home/app/webapp/media
       - ./backend/.env:/home/app/webapp/.env
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT:-8000}:8000"
     networks:
       - app-network
     depends_on:
       - db
     environment:
       - IN_DOCKER=1
+    env_file:
+      - ./backend/.env
     restart: unless-stopped
 
   db:
@@ -28,10 +30,14 @@ services:
       - postgres_data:/var/lib/postgresql/15.1/data
     networks:
       - app-network
+    ports:
+      - "${PG_PORT:-5432}:5432"
     environment:
       - POSTGRES_DB=${PG_NAME}
       - POSTGRES_USER=${PG_USER}
       - POSTGRES_PASSWORD=${PG_PASSWORD}
+    env_file:
+      - ./backend/.env
     restart: unless-stopped
 
   nginx:
