@@ -1,5 +1,5 @@
 # Multi-stage build for Vue 3 + Vite dashboard
-FROM node:18-alpine AS build
+FROM node:18 AS build
 
 WORKDIR /app
 
