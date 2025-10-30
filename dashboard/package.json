@@ -38,7 +38,7 @@
     "tailwindcss": "^3",
     "unplugin-element-plus": "^0.7.2",
     "vite": "^4.4.2",
-    "vue": "3.2.45",
+    "vue": "^3.5.0",
     "vue-html-to-paper": "^2.0.3",
     "vue-html2pdf": "^1.8.0",
     "vue-i18n": "9",
