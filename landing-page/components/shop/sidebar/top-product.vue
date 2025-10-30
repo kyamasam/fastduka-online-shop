@@ -3,7 +3,7 @@
     <div class="tp-shop-widget-product">
       <div v-for="item in topRatedProducts" :key="item.product.id" class="tp-shop-widget-product-item d-flex align-items-center">
         <div class="tp-shop-widget-product-thumb">
-          <nuxt-link :href="`/product-details/${item.product.id}`">
+          <nuxt-link :href="`/product-details/${item.product.slug || item.product.title}/${item.product.id}`">
             <img :src="item.product.img" alt="product-img" />
           </nuxt-link>
         </div>
@@ -33,7 +33,7 @@
             </div>
           </div>
           <h4 class="tp-shop-widget-product-title">
-            <nuxt-link :href="`/product-details/${item.product.id}`">{{item.product.title}}</nuxt-link>
+            <nuxt-link :href="`/product-details/${item.product.slug || item.product.title}/${item.product.id}`">{{item.product.title}}</nuxt-link>
           </h4>
           <div class="tp-shop-widget-product-price-wrapper">
             <span class="tp-shop-widget-product-price">${{item.product.price.toFixed(2)}}</span>

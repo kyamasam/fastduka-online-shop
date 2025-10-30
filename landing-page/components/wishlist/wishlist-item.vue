@@ -2,13 +2,13 @@
   <tr>
     <!-- img -->
     <td class="tp-cart-img">
-      <nuxt-link :href="`/product-details/${item.id}`" style="background-color: #F2F3F5;display: block;">
-        <img :src="item.img" alt="image"/>
+      <nuxt-link :href="`/product-details/${item?.name}/${item.id}`" style="background-color: #F2F3F5;display: block;">
+        <img :src="item?.primary_photo || item.img" alt="image"/>
       </nuxt-link>
     </td>
     <!-- title -->
     <td class="tp-cart-title">
-      <nuxt-link :href="`/product-details/${item.id}`">{{item.title}}</nuxt-link>
+      <nuxt-link :href="`/product-details/${item?.name}/${item.id}`">{{item?.name}}</nuxt-link>
     </td>
     <!-- price -->
     <td class="tp-cart-price"><span>${{item.price.toFixed(2)}}</span></td>

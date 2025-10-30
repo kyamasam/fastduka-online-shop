@@ -18,7 +18,7 @@
       <!-- all products end -->
 
       <!-- featured products start -->
-      <!-- <product-featured-items /> -->
+      <product-featured-items />
       <!-- featured products end -->
 
       <!-- testimonial start -->

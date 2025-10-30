@@ -21,33 +21,18 @@ const route = useRoute();
 const config = useRuntimeConfig();
 
 const productStore = useProductStore();
-const data = ref();
-const error = ref();
-const pending = ref();
 
 const baseUrl =
   config.public.siteUrl || "https://fastduka.netlify.app";
 const currentUrl = `${baseUrl}/product-details/${route.params.name}/${route.params.id}`;
 
-// Fetch product data
-const fetchProduct = async () => {
-  pending.value = true;
-  try {
-    const response = await getDataUnauthed(`/product/${route?.params?.id}`);
-    data.value = response.data.value;
-    error.value = response.error.value;
-
-    // Once we have the product data, set up SEO
-    if (data.value) {
-      setupSEO(data.value);
-    }
-  } catch (err) {
-    console.error("Error fetching products:", err);
-    error.value = err;
-  } finally {
-    pending.value = false;
-  }
-};
+// Fetch product data using composable pattern
+const {
+  data,
+  error,
+  pending,
+  execute,
+} = getDataUnauthed(`/product/${route?.params?.id}`);
 
 // SEO setup function
 const setupSEO = (product) => {
@@ -145,9 +130,8 @@ const setupSEO = (product) => {
     meta: [
       {
         name: "description",
-        content: `Buy ${
-          product.name
-        } online in Kenya. ${product.description?.slice(0, 150)}...`,
+        content: `Buy ${product.name
+          } online in Kenya. ${product.description?.slice(0, 150)}...`,
       },
       {
         name: "keywords",
@@ -210,14 +194,21 @@ const setupSEO = (product) => {
 };
 
 // Initial fetch
-await fetchProduct();
+await execute();
+
+// Set up SEO after data is loaded
+watch(data, (newData) => {
+  if (newData) {
+    setupSEO(newData);
+  }
+}, { immediate: true });
 
 // Watch for route changes to refetch data
 watch(
   () => route.params.id,
-  (newId) => {
+  async (newId) => {
     if (newId) {
-      fetchProduct();
+      await execute();
     }
   }
 );

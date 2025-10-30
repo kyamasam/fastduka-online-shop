@@ -30,12 +30,12 @@ export default defineNuxtConfig({
   ],
 
   css: [
-    "glightbox/dist/css/glightbox.min.css",
-    "@/assets/css/tailwind.css",
     "bootstrap/scss/bootstrap.scss",
+    "glightbox/dist/css/glightbox.min.css",
     "swiper/css/bundle",
     "@/assets/css/font-awesome-pro.css",
     "@/assets/css/flaticon_shofy.css",
+    "@/assets/css/tailwind.css",
     "@/assets/scss/main.scss",
     "@fortawesome/fontawesome-free/css/all.min.css",
   ],
