@@ -1,11 +1,16 @@
 import AddUpdateInventory from "@/view/inventory/AddUpdateInventory.vue";
 import UploadProductImages from "@/view/inventory/UploadProductImages.vue";
+import OnboardingFlow from "@/view/onboarding/OnboardingFlow.vue";
 import OrderList from "@/view/orders/OrderList.vue";
 import OrderManagement from "@/view/orders/OrderManagement.vue";
 import CreateProductView from "@/view/products/CreateProductView.vue";
 import ProductList from "@/view/products/ProductList.vue";
 import ProductManagement from "@/view/products/ProductManagement.vue";
 import ProductForm from "@/view/products/components/ProductForm.vue";
+import CategoryList from "@/view/categories/CategoryList.vue";
+import CategoryManagement from "@/view/categories/CategoryManagement.vue";
+import CreateCategoryView from "@/view/categories/CreateCategoryView.vue";
+import CategoryForm from "@/view/categories/components/CategoryForm.vue";
 import UserProfile from "@/view/profile/UserProfile.vue";
 import MiniRiderList from "@/view/riders/MiniRiderList.vue";
 import RegisterRiderView from "@/view/riders/RegisterRiderView.vue";
@@ -20,15 +25,13 @@ import VendorMembers from "@/view/vendors/VendorMembers.vue";
 import MemberShipForm from "@/view/vendors/components/MemberShipForm.vue";
 import VendorForm from "@/view/vendors/components/VendorForm.vue";
 import CustomerPayments from "@/view/wallet/CustomerPayments.vue";
+import SiteSettings from "@/view/settings/index.vue";
 import WalletIndex from "@/view/wallet/WalletIndex";
 import payments from "@/view/wallet/payments";
 import withdrawals from "@/view/wallet/withdrawals";
 import { createRouter, createWebHistory } from "vue-router";
 import Dashboard from "../layout/Dashboard.vue";
 import BlankPage from "../view/auth/BlankPage.vue";
-import CategoryList from "@/view/categories/CategoryList.vue";
-import CreateCategory from "@/view/categories/CreateCategory.vue";
-
 const routes = [
   {
     path: "/:pathMatch(.*)",
@@ -87,6 +90,15 @@ const routes = [
     meta: {
       requiresAuth: false,
       allowed_roles: ["photographer", "admin", "owner", "client"],
+    },
+  },
+  {
+    path: "/onboarding",
+    name: "onboarding",
+    component: OnboardingFlow,
+    meta: {
+      title: "Onboarding",
+      showInSideBar: false,
     },
   },
   {
@@ -233,7 +245,7 @@ const routes = [
         component: CategoryList,
         meta: {
           showInSideBar: false,
-          verboseName: "Home",
+          verboseName: "Categories",
           requiresAuth: true,
           allowed_roles: ["photographer", "admin", "owner", "client"],
           level: 1,
@@ -246,7 +258,7 @@ const routes = [
           {
             path: "create-category",
             name: "create-category",
-            component: CreateCategory,
+            component: CreateCategoryView,
             meta: {
               showInSideBar: false,
               verboseName: "Create Category",
@@ -258,7 +270,42 @@ const routes = [
                 '<path d="M12.8864 0.25H0.613636C0.274219 0.25 0 0.465458 0 0.732143V13.2679C0 13.5345 0.274219 13.75 0.613636 13.75H12.8864C13.2258 13.75 13.5 13.5345 13.5 13.2679V0.732143C13.5 0.465458 13.2258 0.25 12.8864 0.25ZM1.38068 1.33482H12.1193V4.46875H1.38068V1.33482ZM12.1193 8.56696H1.38068V5.43304H12.1193V8.56696ZM12.1193 12.6652H1.38068V9.53125H12.1193V12.6652ZM6.44318 2.41964H2.91477C2.8304 2.41964 2.76136 2.47388 2.76136 2.54018V3.26339C2.76136 3.32969 2.8304 3.38393 2.91477 3.38393H6.44318C6.52756 3.38393 6.59659 3.32969 6.59659 3.26339V2.54018C6.59659 2.47388 6.52756 2.41964 6.44318 2.41964ZM2.91477 7.48214H6.44318C6.52756 7.48214 6.59659 7.4279 6.59659 7.36161V6.63839C6.59659 6.5721 6.52756 6.51786 6.44318 6.51786H2.91477C2.8304 6.51786 2.76136 6.5721 2.76136 6.63839V7.36161C2.76136 7.4279 2.8304 7.48214 2.91477 7.48214ZM9.20455 11.1585C9.20455 11.3183 9.28536 11.4716 9.42921 11.5846C9.57306 11.6977 9.76816 11.7612 9.97159 11.7612C10.175 11.7612 10.3701 11.6977 10.514 11.5846C10.6578 11.4716 10.7386 11.3183 10.7386 11.1585C10.7386 10.9986 10.6578 10.8453 10.514 10.7323C10.3701 10.6193 10.175 10.5558 9.97159 10.5558C9.76816 10.5558 9.57306 10.6193 9.42921 10.7323C9.28536 10.8453 9.20455 10.9986 9.20455 11.1585Z" fill="currentColor"/>\n' +
                 "</svg>\n",
             },
-          }]
+          },
+          {
+            path: "management/:categoryId",
+            name: "category-management",
+            component: CategoryManagement,
+            meta: {
+              showInSideBar: false,
+              verboseName: "Manage Category",
+              requiresAuth: true,
+              allowed_roles: ["photographer", "admin", "owner", "client"],
+              level: 1,
+              icon:
+                '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">\n' +
+                '<path d="M12.8864 0.25H0.613636C0.274219 0.25 0 0.465458 0 0.732143V13.2679C0 13.5345 0.274219 13.75 0.613636 13.75H12.8864C13.2258 13.75 13.5 13.5345 13.5 13.2679V0.732143C13.5 0.465458 13.2258 0.25 12.8864 0.25ZM1.38068 1.33482H12.1193V4.46875H1.38068V1.33482ZM12.1193 8.56696H1.38068V5.43304H12.1193V8.56696ZM12.1193 12.6652H1.38068V9.53125H12.1193V12.6652ZM6.44318 2.41964H2.91477C2.8304 2.41964 2.76136 2.47388 2.76136 2.54018V3.26339C2.76136 3.32969 2.8304 3.38393 2.91477 3.38393H6.44318C6.52756 3.38393 6.59659 3.32969 6.59659 3.26339V2.54018C6.59659 2.47388 6.52756 2.41964 6.44318 2.41964ZM2.91477 7.48214H6.44318C6.52756 7.48214 6.59659 7.4279 6.59659 7.36161V6.63839C6.59659 6.5721 6.52756 6.51786 6.44318 6.51786H2.91477C2.8304 6.51786 2.76136 6.5721 2.76136 6.63839V7.36161C2.76136 7.4279 2.8304 7.48214 2.91477 7.48214ZM9.20455 11.1585C9.20455 11.3183 9.28536 11.4716 9.42921 11.5846C9.57306 11.6977 9.76816 11.7612 9.97159 11.7612C10.175 11.7612 10.3701 11.6977 10.514 11.5846C10.6578 11.4716 10.7386 11.3183 10.7386 11.1585C10.7386 10.9986 10.6578 10.8453 10.514 10.7323C10.3701 10.6193 10.175 10.5558 9.97159 10.5558C9.76816 10.5558 9.57306 10.6193 9.42921 10.7323C9.28536 10.8453 9.20455 10.9986 9.20455 11.1585Z" fill="currentColor"/>\n' +
+                "</svg>\n",
+            },
+            children: [
+              {
+                path: "edit-category",
+                name: "edit-category",
+                component: CategoryForm,
+                meta: {
+                  showInSideBar: false,
+                  verboseName: "Edit Category",
+                  requiresAuth: true,
+                  allowed_roles: ["photographer", "admin", "owner", "client"],
+                  level: 1,
+                  icon:
+                    '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">\n' +
+                    '<path d="M12.8864 0.25H0.613636C0.274219 0.25 0 0.465458 0 0.732143V13.2679C0 13.5345 0.274219 13.75 0.613636 13.75H12.8864C13.2258 13.75 13.5 13.5345 13.5 13.2679V0.732143C13.5 0.465458 13.2258 0.25 12.8864 0.25ZM1.38068 1.33482H12.1193V4.46875H1.38068V1.33482ZM12.1193 8.56696H1.38068V5.43304H12.1193V8.56696ZM12.1193 12.6652H1.38068V9.53125H12.1193V12.6652ZM6.44318 2.41964H2.91477C2.8304 2.41964 2.76136 2.47388 2.76136 2.54018V3.26339C2.76136 3.32969 2.8304 3.38393 2.91477 3.38393H6.44318C6.52756 3.38393 6.59659 3.32969 6.59659 3.26339V2.54018C6.59659 2.47388 6.52756 2.41964 6.44318 2.41964ZM2.91477 7.48214H6.44318C6.52756 7.48214 6.59659 7.4279 6.59659 7.36161V6.63839C6.59659 6.5721 6.52756 6.51786 6.44318 6.51786H2.91477C2.8304 6.51786 2.76136 6.5721 2.76136 6.63839V7.36161C2.76136 7.4279 2.8304 7.48214 2.91477 7.48214ZM9.20455 11.1585C9.20455 11.3183 9.28536 11.4716 9.42921 11.5846C9.57306 11.6977 9.76816 11.7612 9.97159 11.7612C10.175 11.7612 10.3701 11.6977 10.514 11.5846C10.6578 11.4716 10.7386 11.3183 10.7386 11.1585C10.7386 10.9986 10.6578 10.8453 10.514 10.7323C10.3701 10.6193 10.175 10.5558 9.97159 10.5558C9.76816 10.5558 9.57306 10.6193 9.42921 10.7323C9.28536 10.8453 9.20455 10.9986 9.20455 11.1585Z" fill="currentColor"/>\n' +
+                    "</svg>\n",
+                },
+              },
+            ],
+          },
+        ],
       },
       {
         path: "orders",
@@ -639,6 +686,22 @@ const routes = [
             '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">\n' +
             '<path d="M12.8864 0.25H0.613636C0.274219 0.25 0 0.465458 0 0.732143V13.2679C0 13.5345 0.274219 13.75 0.613636 13.75H12.8864C13.2258 13.75 13.5 13.5345 13.5 13.2679V0.732143C13.5 0.465458 13.2258 0.25 12.8864 0.25ZM1.38068 1.33482H12.1193V4.46875H1.38068V1.33482ZM12.1193 8.56696H1.38068V5.43304H12.1193V8.56696ZM12.1193 12.6652H1.38068V9.53125H12.1193V12.6652ZM6.44318 2.41964H2.91477C2.8304 2.41964 2.76136 2.47388 2.76136 2.54018V3.26339C2.76136 3.32969 2.8304 3.38393 2.91477 3.38393H6.44318C6.52756 3.38393 6.59659 3.32969 6.59659 3.26339V2.54018C6.59659 2.47388 6.52756 2.41964 6.44318 2.41964ZM2.91477 7.48214H6.44318C6.52756 7.48214 6.59659 7.4279 6.59659 7.36161V6.63839C6.59659 6.5721 6.52756 6.51786 6.44318 6.51786H2.91477C2.8304 6.51786 2.76136 6.5721 2.76136 6.63839V7.36161C2.76136 7.4279 2.8304 7.48214 2.91477 7.48214ZM9.20455 11.1585C9.20455 11.3183 9.28536 11.4716 9.42921 11.5846C9.57306 11.6977 9.76816 11.7612 9.97159 11.7612C10.175 11.7612 10.3701 11.6977 10.514 11.5846C10.6578 11.4716 10.7386 11.3183 10.7386 11.1585C10.7386 10.9986 10.6578 10.8453 10.514 10.7323C10.3701 10.6193 10.175 10.5558 9.97159 10.5558C9.76816 10.5558 9.57306 10.6193 9.42921 10.7323C9.28536 10.8453 9.20455 10.9986 9.20455 11.1585Z" fill="currentColor"/>\n' +
             "</svg>\n",
+        },
+      },
+      {
+        path: "settings",
+        name: "settings",
+        component: SiteSettings,
+        meta: {
+          showInSideBar: false,
+          verboseName: "Settings",
+          requiresAuth: true,
+          allowed_roles: ["photographer", "admin", "owner", "client"],
+          level: 1,
+          icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            </svg>`,
         },
       },
     ],

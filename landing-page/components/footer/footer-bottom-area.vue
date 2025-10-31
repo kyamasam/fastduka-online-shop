@@ -22,3 +22,10 @@
     </div>
   </div>
 </template>
+
+<script lang="ts" setup>
+import  type { SiteSettings } from "@/pinia/useSiteSettingsStore";
+defineProps<{
+  settings: SiteSettings;
+}>();
+</script>

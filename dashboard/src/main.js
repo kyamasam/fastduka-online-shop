@@ -12,6 +12,7 @@ import 'element-plus/dist/index.css'
 import {defaultConfig, plugin} from '@formkit/vue'
 import 'element-plus/dist/index.css'
 
+import { initTheme } from "./utility/theme";
 
 import '@/i18n/config';
 import './assets/tailwind.css'
@@ -63,6 +64,7 @@ api.interceptors.response.use(undefined, function (err) {
     });
 })
 
+initTheme();
 
 app.config.productionTip = false;
 app.use(plugin, defaultConfig);

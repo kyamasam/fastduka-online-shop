@@ -1,9 +1,9 @@
 services:
 
   web:
-    container_name: meat_world_backend
+    container_name: fastduka_shop_backend
     build: .
-    image: meat_world_backend/webapp
+    image: fastduka_shop_backend/webapp
     command: gunicorn ${WEB_DIR_NAME}.wsgi -b 0.0.0.0:8000
     volumes:
       - static_volume:/home/app/webapp/static

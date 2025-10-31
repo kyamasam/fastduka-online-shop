@@ -1,109 +1,178 @@
 <template>
-  <form @submit.prevent="updateRegisterUser">
+  <form @submit.prevent="handleSubmit">
     <div class="tp-checkout-bill-form">
       <div class="tp-checkout-bill-inner">
-        <div class="row">
-          <div class="col-md-6">
-            <div class="tp-checkout-input">
-              <label>First Name </label>
-              <input
-                v-model="formData['first_name']"
-                type="text"
-                placeholder="First Name"
-                @input="hasUserTyped = true"
-              />
+        <!-- Step Indicator -->
+        <div class="checkout-steps mb-4">
+          <div class="steps-container d-flex justify-content-between align-items-center">
+            <div class="step-item"
+                 :class="{ active: currentStep === 1, completed: currentStep > 1 }"
+                 @click="currentStep = 1">
+              <div class="step-number">1</div>
+              <div class="step-label">Account Information</div>
+            </div>
+            <div class="step-divider"></div>
+            <div class="step-item"
+                 :class="{ active: currentStep === 2, completed: currentStep > 2 }">
+              <div class="step-number">2</div>
+              <div class="step-label">Delivery Information</div>
             </div>
           </div>
-          <div class="col-md-6">
-            <div class="tp-checkout-input">
-              <label>Last Name </label>
-              <input
-                v-model="formData['last_name']"
-                type="text"
-                placeholder="Last Name"
-                @input="hasUserTyped = true"
-              />
-            </div>
-          </div>
-          <div class="col-md-12">
-            <div class="tp-checkout-input">
-              <label>Delivery Location <span>*</span></label>
-              <LocationSearch
-                :default_latitude="formData?.profile?.latitude"
-                :default_longitude="formData?.profile?.longitude"
-                :location_address="formData?.profile?.address"
-                @location-selected="handleLocationSelected"
-              />
-            </div>
-          </div>
-          <div class="col-md-12">
-            <div class="tp-checkout-input">
-              <label>House No / Office No. <span>*</span></label>
+        </div>
 
-              <input
-                required
-                v-model="formData['profile']['suite_number']"
-                type="text"
-                placeholder="Apartment, suite, unit, etc. (optional)"
-                @input="hasUserTyped = true"
-              />
-            </div>
-          </div>
-          <div class="col-md-12">
-            <div class="tp-checkout-input">
-              <label>Email<span>*</span></label>
-
-              <input
-                required
-                v-model="formData['email']"
-                type="email"
-                placeholder="Email"
-                @input="hasUserTyped = true"
-              />
-            </div>
-          </div>
-          <div
-            v-if="
-              currentUserData === undefined ||
-              Object.keys(currentUserData).length === 0
-            "
-            class="col-md-12"
-          >
-            <div class="tp-checkout-input">
-              <label>Password<span>*</span></label>
-
-              <input
-                required
-                v-model="formData['password']"
-                type="password"
-                placeholder="******"
-                @input="hasUserTyped = true"
-              />
+        <!-- Step 1: Account Information -->
+        <div v-show="currentStep === 1"
+             class="checkout-step">
+          <!-- Login/Create Account Toggle -->
+          <div class="auth-mode-toggle mb-4">
+            <div class="toggle-buttons">
+              <button type="button"
+                      :class="{ active: !isLoginMode }"
+                      @click="isLoginMode = false">
+                Create Account
+              </button>
+              <button type="button"
+                      :class="{ active: isLoginMode }"
+                      @click="isLoginMode = true">
+                Login
+              </button>
             </div>
           </div>
 
-          <div class="col-md-12">
-            <div class="tp-checkout-input">
-              <label>Phone <span>*</span></label>
-              <div class="flex">
-                <select
-                  required
-                  v-model="formData['phone_code']"
-                  class="border"
-                  type="select"
-                  @change="hasUserTyped = true"
-                >
-                  <option value="+254" label="+254" />
-                </select>
+          <!-- Login Mode -->
+          <div v-if="isLoginMode"
+               class="login-form">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="tp-checkout-input">
+                  <label>Your Email</label>
+                  <input v-model="loginData.email"
+                         type="email"
+                         placeholder="yourname@mail.com"
+                         required
+                         @input="hasUserTyped = true" />
+                </div>
+              </div>
+              <div class="col-md-12">
+                <div class="tp-checkout-input">
+                  <label>Password</label>
+                  <input v-model="loginData.password"
+                         type="password"
+                         placeholder="Min. 6 character"
+                         required
+                         @input="hasUserTyped = true" />
+                </div>
+              </div>
+              <div class="col-md-12">
+                <div class="login-options d-flex justify-content-between align-items-center">
+                  <div class="remember-me">
+                    <input type="checkbox"
+                           id="remember-me"
+                           v-model="loginData.rememberMe" />
+                    <label for="remember-me"
+                           class="ml-2">Remember me</label>
+                  </div>
+                  <a href="#"
+                     class="forgot-password"
+                     @click.prevent="handleForgotPassword">
+                    Forgot Password?
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                <input
-                  required
-                  v-model="formData['phone_number']"
-                  type="text"
-                  placeholder=""
-                  maxlength="9"
-                  @input="hasUserTyped = true"
-                />
+          <!-- Create Account Mode -->
+          <div v-else
+               class="create-account-form">
+            <div class="row">
+            <div class="col-md-6">
+              <div class="tp-checkout-input">
+                <label>First Name <span>*</span></label>
+                <input v-model="formData['first_name']"
+                       type="text"
+                       placeholder="First Name"
+                       required
+                       @input="hasUserTyped = true" />
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="tp-checkout-input">
+                <label>Last Name <span>*</span></label>
+                <input v-model="formData['last_name']"
+                       type="text"
+                       placeholder="Last Name"
+                       required
+                       @input="hasUserTyped = true" />
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="tp-checkout-input">
+                <label>Email <span>*</span></label>
+                <input required
+                       v-model="formData['email']"
+                       type="email"
+                       placeholder="Email"
+                       @input="hasUserTyped = true" />
+              </div>
+            </div>
+            <div v-if="currentUserData === undefined || Object.keys(currentUserData).length === 0"
+                 class="col-md-12">
+              <div class="tp-checkout-input">
+                <label>Password <span>*</span></label>
+                <input required
+                       v-model="formData['password']"
+                       type="password"
+                       placeholder="******"
+                       @input="hasUserTyped = true" />
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="tp-checkout-input">
+                <label>Phone <span>*</span></label>
+                <div class="flex">
+                  <select required
+                          v-model="formData['phone_code']"
+                          class="border"
+                          type="select"
+                          @change="hasUserTyped = true">
+                    <option value="+254"
+                            label="+254" />
+                  </select>
+                  <input required
+                         v-model="formData['phone_number']"
+                         type="text"
+                         placeholder=""
+                         maxlength="9"
+                         @input="hasUserTyped = true" />
+                </div>
+              </div>
+            </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Delivery Information -->
+        <div v-show="currentStep === 2"
+             class="checkout-step">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="tp-checkout-input">
+                <label>Delivery Location <span>*</span></label>
+                <LocationSearch :default_latitude="formData?.profile?.latitude"
+                                :default_longitude="formData?.profile?.longitude"
+                                :location_address="formData?.profile?.address"
+                                @location-selected="handleLocationSelected" />
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="tp-checkout-input">
+                <label>House No / Office No. <span>*</span></label>
+                <input required
+                       v-model="formData['profile']['suite_number']"
+                       type="text"
+                       placeholder="Apartment, suite, unit, etc."
+                       @input="hasUserTyped = true" />
               </div>
             </div>
           </div>
@@ -111,23 +180,48 @@
       </div>
     </div>
 
-    <button
-      v-if="
-        currentUserData === undefined ||
-        Object.keys(currentUserData).length === 0
-      "
-      type="submit"
-      class="tp-checkout-btn w-100"
-    >
-      Create Account
-    </button>
-    <button v-else type="submit" class="tp-checkout-btn w-100">
-      Update Profile
-    </button>
-    <div v-if="isUpdating" class="text-center mt-2 text-gray-600">
+    <!-- Navigation Buttons -->
+    <div class="checkout-navigation">
+      <button v-if="currentStep === 2"
+              type="button"
+              class="tp-checkout-btn tp-checkout-btn-secondary w-100 mb-2"
+              @click="currentStep = 1">
+        Back
+      </button>
+
+      <button v-if="currentStep === 1 && isLoginMode"
+              type="button"
+              class="tp-checkout-btn w-100"
+              @click="handleLogin">
+        Login
+      </button>
+
+      <button v-if="currentStep === 1 && !isLoginMode"
+              type="button"
+              class="tp-checkout-btn w-100"
+              @click="goToNextStep">
+        Continue to Delivery
+      </button>
+
+      <button v-if="currentStep === 2 && (currentUserData === undefined || Object.keys(currentUserData).length === 0)"
+              type="submit"
+              class="tp-checkout-btn w-100">
+        Create Account
+      </button>
+
+      <button v-else-if="currentStep === 2"
+              type="submit"
+              class="tp-checkout-btn w-100">
+        Update Profile
+      </button>
+    </div>
+
+    <div v-if="isUpdating"
+         class="text-center mt-2 text-gray-600">
       <p>Automatically saving changes...</p>
     </div>
-    <div v-if="lastUpdated" class="text-center mt-2 text-green-600">
+    <div v-if="lastUpdated"
+         class="text-center mt-2 text-green-600">
       <p>Last updated: {{ lastUpdated }}</p>
     </div>
   </form>
@@ -138,6 +232,15 @@ import { useUserStore } from "@/pinia/useUserDataStore";
 import _ from "lodash";
 import { toast } from "vue3-toastify";
 const store = useUserStore();
+
+const currentStep = ref(1);
+const isLoginMode = ref(false);
+
+const loginData = ref({
+  email: "",
+  password: "",
+  rememberMe: false,
+});
 
 const formData = ref({
   first_name: "",
@@ -159,12 +262,68 @@ const isUpdating = ref(false);
 const lastUpdated = ref("");
 const hasUserTyped = ref(false);
 
+const handleLogin = async () => {
+  // Validate login fields
+  if (!loginData.value.email || !loginData.value.password) {
+    toast.error("Please enter your email and password");
+    return;
+  }
+
+  try {
+    const { data, error } = await getDataUnauthed("/token/", {
+      method: "POST",
+      body: {
+        email: loginData.value.email,
+        password: loginData.value.password,
+      },
+    });
+
+    if (!error.value) {
+      const loginToken = useCookie("currentUser");
+      loginToken.value = data.value;
+      await getUserWithToken(loginToken?.value?.access);
+      toast.success("Login successful");
+
+      // Move to step 2
+      currentStep.value = 2;
+    } else {
+      toast.error("Invalid email or password");
+    }
+  } catch (e) {
+    console.error(e);
+    toast.error("Login failed. Please try again");
+  }
+};
+
+const handleForgotPassword = () => {
+  toast.info("Password reset functionality coming soon");
+  // TODO: Implement forgot password functionality
+};
+
+const goToNextStep = () => {
+  // Validate step 1 fields
+  if (!formData.value.first_name || !formData.value.last_name ||
+    !formData.value.email || !formData.value.phone_number) {
+    toast.error("Please fill in all required fields");
+    return;
+  }
+
+  // Check password for new users
+  if ((currentUserData.value === undefined || Object.keys(currentUserData.value).length === 0)
+    && !formData.value.password) {
+    toast.error("Please enter a password");
+    return;
+  }
+
+  currentStep.value = 2;
+};
+
 const handleLocationSelected = (location) => {
-  console.log("Selected location:", location);
+  console.log("Selected location: *****", location);
   formData.value.profile.address = location?.address;
   formData.value.profile.latitude = location?.lat;
   formData.value.profile.longitude = location?.lng;
-  hasUserTyped.value = true; // Treat location selection as a user input
+  hasUserTyped.value = true;
 };
 
 const logout = () => {
@@ -175,9 +334,9 @@ const logout = () => {
     console.error(e);
   }
 };
+
 const updateUser = async (isAutomaticUpdate = false) => {
   const url = `/users/${currentUserData?.value?.id}/`;
-
   isUpdating.value = true;
 
   const method = "PATCH";
@@ -219,12 +378,22 @@ const updateUser = async (isAutomaticUpdate = false) => {
     return;
   }
 };
-// Create a debounced function to update the user profile
+
 const debouncedUpdateProfile = _.debounce(async () => {
   if (currentUserData?.value?.id) {
     updateUser();
   }
-}, 2000); // Wait for 2 seconds of inactivity before updating
+}, 2000);
+
+const handleSubmit = async () => {
+  // Validate step 2 fields
+  if (!formData.value.profile.address || !formData.value.profile.suite_number) {
+    toast.error("Please fill in all delivery information");
+    return;
+  }
+
+  await updateRegisterUser();
+};
 
 const updateRegisterUser = async () => {
   let url = "/users/";
@@ -255,13 +424,11 @@ const updateRegisterUser = async () => {
       },
     }));
 
-    // creating account failed, show error
     if (error?.value) {
       error.value?.cause?.errors?.map((e) => {
         toast.error(`${e?.attr?.replace("_", " ")} ${e?.detail}`);
       });
     } else {
-      // succeeded
       toast.success("Account Created Successfully");
       autoLoginUser(formData?.value?.email, formData?.value?.password);
     }
@@ -269,7 +436,6 @@ const updateRegisterUser = async () => {
 };
 
 const autoLoginUser = async (email, password) => {
-  // proceed to login the user
   const email_field = email;
   const password_field = password;
   const { data, error } = await getDataUnauthed("/token/", {
@@ -283,7 +449,6 @@ const autoLoginUser = async (email, password) => {
   if (!error.value) {
     const loginData = useCookie("currentUser");
     loginData.value = data.value;
-
     await getUserWithToken(loginData?.value?.access);
   } else {
     console.log("we hare ");
@@ -304,17 +469,15 @@ watch(
   }
 );
 
-// Watch for changes to form data to trigger auto-update
 watch(
   formData,
   () => {
     console.log("formdata changed", currentUserData.value);
     Object.assign(currentUserData.value, formData.value);
 
-    // If user is logged in and has typed something, trigger the debounced update
     if (currentUserData?.value?.id && hasUserTyped.value) {
       debouncedUpdateProfile();
-      hasUserTyped.value = false; // Reset after triggering update
+      hasUserTyped.value = false;
     }
   },
   { deep: true }
@@ -356,3 +519,173 @@ watch(currentUserData, () => {
   }
 });
 </script>
+
+<style scoped>
+.checkout-steps {
+  padding: 20px 0;
+}
+
+.steps-container {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  flex: 1;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+
+.step-label {
+  font-size: 14px;
+  color: #999;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.step-item.active .step-number {
+  background-color: #0989ff;
+  color: white;
+}
+
+.step-item.active .step-label {
+  color: #0989ff;
+  font-weight: 600;
+}
+
+.step-item.completed .step-number {
+  background-color: #28a745;
+  color: white;
+}
+
+.step-item.completed .step-label {
+  color: #28a745;
+}
+
+.step-divider {
+  flex: 1;
+  height: 2px;
+  background-color: #e0e0e0;
+  margin: 0 10px;
+  margin-bottom: 30px;
+}
+
+.checkout-step {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tp-checkout-btn-secondary {
+  background-color: #6c757d;
+}
+
+.tp-checkout-btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.checkout-navigation {
+  margin-top: 20px;
+}
+
+/* Auth Mode Toggle */
+.auth-mode-toggle {
+  margin-bottom: 30px;
+}
+
+.toggle-buttons {
+  display: flex;
+  gap: 10px;
+  max-width: 400px;
+  margin: 0 auto;
+  background: #f5f5f5;
+  padding: 5px;
+  border-radius: 8px;
+}
+
+.toggle-buttons button {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.toggle-buttons button.active {
+  background: #0989ff;
+  color: white;
+  box-shadow: 0 2px 4px rgba(9, 137, 255, 0.2);
+}
+
+.toggle-buttons button:hover:not(.active) {
+  background: rgba(9, 137, 255, 0.1);
+}
+
+/* Login Form */
+.login-options {
+  margin-top: 15px;
+  padding-top: 10px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+}
+
+.remember-me input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.remember-me label {
+  margin: 0;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+}
+
+.forgot-password {
+  color: #ff0000;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.forgot-password:hover {
+  color: #cc0000;
+  text-decoration: underline;
+}
+</style>

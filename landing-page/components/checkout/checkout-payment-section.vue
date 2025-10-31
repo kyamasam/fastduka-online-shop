@@ -9,11 +9,9 @@
           <h4>Total</h4>
         </li>
         <!-- item list -->
-        <li
-          v-for="item in cartStore.cart_products"
-          :key="item.id"
-          class="tp-order-info-list-desc"
-        >
+        <li v-for="item in cartStore.cart_products"
+            :key="item.id"
+            class="tp-order-info-list-desc">
           <p>
             {{ item.title }} <span> x {{ item.orderQuantity }}</span>
           </p>
@@ -63,13 +61,11 @@
 
     <p @click="clear()">clear</p>
 
-    <div
-      v-if="
-        cartStore?.activeOrder?.payment_transaction_obj?.transaction_status ===
-        'processed'
-      "
-      class="flex flex-col"
-    >
+    <div v-if="
+      cartStore?.activeOrder?.payment_transaction_obj?.transaction_status ===
+      'processed'
+    "
+         class="flex flex-col">
       <p class="font-semibold">Payment Processed Successfully</p>
       <p class="font-semibold text-green-500">
         Mpesa Code :
@@ -78,42 +74,40 @@
       <p>Your Order Has Been Placed. Click Proceed to view more details</p>
     </div>
 
-    <div
-      v-if="
-        cartStore?.activeOrder?.payment_transaction_obj?.transaction_status !==
-        'processed'
-      "
-      class="tp-checkout-payment"
-    >
+    <div v-if="
+      cartStore?.activeOrder?.payment_transaction_obj?.transaction_status !==
+      'processed'
+    "
+         class="tp-checkout-payment">
       <div class="col-md-12">
         <div class="tp-checkout-input">
           <label>Mpesa Phone <span>*</span></label>
           <div class="flex">
-            <select required v-model="phone_code" class="border" type="select">
-              <option value="+254" label="+254" />
+            <select required
+                    v-model="phone_code"
+                    class="border"
+                    type="select">
+              <option value="+254"
+                      label="+254" />
             </select>
 
-            <input required v-model="phone_number" type="text" placeholder="" />
+            <input required
+                   v-model="phone_number"
+                   type="text"
+                   placeholder="" />
           </div>
         </div>
       </div>
       <div class="tp-checkout-payment-item">
-        <input
-          type="radio"
-          v-model="payment_method_name"
-          value="mpesa_payment_paybill"
-          id="mpesa_payment_paybill"
-          name="mpesa_payment"
-        />
-        <label
-          @click="handlePayment('mpesa_payment_paybill')"
-          for="mpesa_payment_paybill"
-          >MPesa Paybill</label
-        >
-        <div
-          v-if="payment_method_name === 'mpesa_payment_paybill'"
-          class="cheque-payment w-full flex flex-col items-start bg-gray-50 p-4"
-        >
+        <input type="radio"
+               v-model="payment_method_name"
+               value="mpesa_payment_paybill"
+               id="mpesa_payment_paybill"
+               name="mpesa_payment" />
+        <label @click="handlePayment('mpesa_payment_paybill')"
+               for="mpesa_payment_paybill">MPesa Paybill</label>
+        <div v-if="payment_method_name === 'mpesa_payment_paybill'"
+             class="cheque-payment w-full flex flex-col items-start bg-gray-50 p-4">
           <p>Make Payment to</p>
 
           <p class="font-semibold">Paybill Number : 23778</p>
@@ -124,21 +118,14 @@
         </div>
       </div>
       <div class="tp-checkout-payment-item">
-        <input
-          type="radio"
-          v-model="payment_method_name"
-          id="mpesa_payment_express"
-          value="mpesa_payment_express"
-        />
-        <label
-          @click="handlePayment('mpesa_payment_express')"
-          for="mpesa_payment_express"
-          >MPesa Express (Prompt)</label
-        >
-        <div
-          v-if="payment_method_name === 'mpesa_payment_express'"
-          class="cheque-payment w-full flex flex-col items-start bg-gray-50 p-4"
-        >
+        <input type="radio"
+               v-model="payment_method_name"
+               id="mpesa_payment_express"
+               value="mpesa_payment_express" />
+        <label @click="handlePayment('mpesa_payment_express')"
+               for="mpesa_payment_express">MPesa Express (Prompt)</label>
+        <div v-if="payment_method_name === 'mpesa_payment_express'"
+             class="cheque-payment w-full flex flex-col items-start bg-gray-50 p-4">
           <!-- <p>Make Payment to</p>
 
           <p class="font-semibold">Paybill Number : 23778</p>
@@ -147,17 +134,23 @@
           <p class="font-semibold">You will receive a prompt on your device</p>
           <p class="font-semibold">Enter your pin to complete payment</p>
 
+          <!-- Polling status message -->
+          <p v-if="isPolling"
+             class="text-blue-600 font-semibold mt-2">
+            Verifying payment automatically... ({{ pollingAttempts }}/{{ MAX_POLLING_ATTEMPTS }})
+          </p>
+
           <div class="flex flex-row gap-2">
-            <button @click.prevent="createOrder" class="tp-btn w-40">
+            <button @click.prevent="createOrder"
+                    class="tp-btn w-40"
+                    :disabled="loadingCreateOrder || loadingSendPrompt">
               Send Prompt
-              <span v-if="loadingCreateOrder || loadingSendPrompt"
-                >loading...</span
-              >
+              <span v-if="loadingCreateOrder || loadingSendPrompt">loading...</span>
             </button>
-            <button
-              @click.prevent="verifyPayment"
-              class="tp-btn-green rounded-sm py-2 text-xs w-40"
-            >
+            <button v-if="showManualVerifyButton"
+                    @click.prevent="verifyPayment"
+                    class="tp-btn-green rounded-sm py-2 text-xs w-40"
+                    :disabled="loadingConfirmPayment">
               Verify Payment
               <span v-if="loadingConfirmPayment">loading...</span>
             </button>
@@ -174,11 +167,9 @@
       </div>
     </div> -->
     <div class="tp-checkout-btn-wrapper">
-      <button
-        :disabled="currentUserData?.value !== undefined"
-        @click="proceedToOrders()"
-        class="tp-checkout-btn w-100 disabled:bg-red-300 disabled:cursor-not-allowed"
-      >
+      <button :disabled="currentUserData?.value !== undefined"
+              @click="proceedToOrders()"
+              class="tp-checkout-btn w-100 disabled:bg-red-300 disabled:cursor-not-allowed">
         Proceed
       </button>
     </div>
@@ -221,6 +212,16 @@ const promptSent = ref(false);
 const loadingCreateOrder = ref(false);
 const loadingSendPrompt = ref(false);
 const loadingConfirmPayment = ref(false);
+
+// Polling system variables
+const POLLING_INTERVAL = 5000; // 5 seconds between each attempt
+const MAX_POLLING_ATTEMPTS = 5; // Try 5 times (25 seconds total)
+const INITIAL_DELAY = 3000; // Wait 3 seconds before first attempt
+let pollingInterval: any = null;
+const pollingAttempts = ref(0);
+const isPolling = ref(false);
+const showManualVerifyButton = ref(false);
+
 const checkAllRequiredFields = () => {
   console.log("deli", currentUserData?.value?.profile?.address);
   if (!currentUserData?.value?.profile?.address) {
@@ -231,6 +232,7 @@ const checkAllRequiredFields = () => {
   }
   return true;
 };
+
 const createOrder = async () => {
   loadingCreateOrder.value = true;
   if (checkAllRequiredFields()) {
@@ -302,7 +304,12 @@ const sendPrompt = async () => {
     cartStore.setActiveOrder(transactionData?.value);
 
     toast.success(`Prompt sent. Check your Phone and Enter Pin`);
-    // startPolling();
+
+    // Hide manual verify button initially
+    showManualVerifyButton.value = false;
+
+    // Start automatic polling after initial delay
+    startPolling();
   } else {
     loadingSendPrompt.value = false;
     showErrors(transactionError);
@@ -324,18 +331,20 @@ const verifyPayment = async () => {
   );
   if (!verifyPaymentError?.value) {
     loadingConfirmPayment.value = false;
-    // toast.success(`Payment Verified`);
 
     if (
       verifyPaymentData?.value?.payment_transaction_obj?.transaction_status ===
       "failed"
     ) {
       toast.error(`Payment Failed, Please try again`);
+      stopPolling();
+      showManualVerifyButton.value = true;
     } else if (
       verifyPaymentData?.value?.payment_transaction_obj?.transaction_status ===
       "processed"
     ) {
-      toast.success(`Payment Verified`);
+      toast.success(`Payment Verified Successfully!`);
+      stopPolling();
     }
     cartStore.setActiveOrder(verifyPaymentData?.value);
   } else {
@@ -343,51 +352,62 @@ const verifyPayment = async () => {
     showErrors(verifyPaymentError);
   }
 };
-const POLLING_INTERVAL = 5000; // 5 seconds
-const MAX_POLLING_ATTEMPTS = 12; // 1 minute total (12 * 5 seconds)
-let pollingInterval: any;
 
 const startPolling = () => {
-  let attempts = 0;
-
   // Clear any existing polling interval
-  if (pollingInterval) {
-    clearInterval(pollingInterval);
+  stopPolling();
+
+  // Reset counter and show polling status
+  pollingAttempts.value = 0;
+  isPolling.value = true;
+
+  // Wait initial delay before first attempt
+  setTimeout(() => {
+    // Verify immediately after initial delay
+    attemptVerification();
+
+    // Then set up interval for subsequent attempts
+    pollingInterval = setInterval(() => {
+      attemptVerification();
+    }, POLLING_INTERVAL);
+  }, INITIAL_DELAY);
+};
+
+const attemptVerification = async () => {
+  pollingAttempts.value++;
+
+  console.log(`Polling attempt ${pollingAttempts.value}/${MAX_POLLING_ATTEMPTS}`);
+
+  await verifyPayment();
+
+  // Check if payment is processed or failed
+  const status = cartStore?.activeOrder?.payment_transaction_obj?.transaction_status;
+
+  if (status === "processed") {
+    stopPolling();
+    return;
+  } else if (status === "failed") {
+    stopPolling();
+    return;
   }
 
-  pollingInterval = setInterval(async () => {
-    attempts++;
-
-    await verifyPayment();
-
-    // Check payment status after verification
-    if (
-      cartStore?.activeOrder?.payment_transaction_obj?.transaction_status ===
-      "processed"
-    ) {
-      stopPolling();
-    } else if (
-      cartStore?.activeOrder?.payment_transaction_obj?.transaction_status ===
-      "failed"
-    ) {
-      stopPolling();
-    }
-
-    // Stop polling after max attempts
-    if (attempts >= MAX_POLLING_ATTEMPTS) {
-      toast.info(
-        "Payment verification timed out. Please check your order status or try again."
-      );
-      stopPolling();
-    }
-  }, POLLING_INTERVAL);
+  // Stop polling after max attempts
+  if (pollingAttempts.value >= MAX_POLLING_ATTEMPTS) {
+    toast.info(
+      "Automatic verification complete. Click 'Verify Payment' if payment was successful."
+    );
+    stopPolling();
+    showManualVerifyButton.value = true;
+  }
 };
 
 const stopPolling = () => {
   if (pollingInterval) {
-    window.clearInterval(pollingInterval);
+    clearInterval(pollingInterval);
     pollingInterval = null;
   }
+  isPolling.value = false;
+  pollingAttempts.value = 0;
 };
 
 const router = useRouter();
@@ -399,13 +419,16 @@ const proceedToOrders = () => {
 
   router.push("/orders");
 };
+
 const clear = () => {
   console.log("clearing");
   cartStore.activeOrder = {};
   cartStore.setActiveOrder({}, true);
-  // cartStore.setActiveOrder({});
-  // Object.assign(cartStore.activeOrder, {});
   console.log("cleared", cartStore.activeOrder);
+
+  // Reset polling state
+  stopPolling();
+  showManualVerifyButton.value = false;
 };
 
 onUnmounted(() => {

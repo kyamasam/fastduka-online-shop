@@ -59,7 +59,7 @@
                 <div class="tp-category-content-2">
                   <span>From ${{ item.price.toFixed(2) }}</span>
                   <h3 class="tp-category-title-2">
-                    <nuxt-link :href="`/product-details/${item.id}`">{{
+                    <nuxt-link :href="`/product-details/${item.slug || item.title}/${item.id}`">{{
                       item.title
                     }}</nuxt-link>
                   </h3>

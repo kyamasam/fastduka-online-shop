@@ -5,12 +5,16 @@
       <hero-banner-three />
       <!-- hero banner end -->
 
+      <!-- products section start -->
+      <ProductsSection />
+      <!-- products section end -->
+
       <!-- popular product items start -->
       <!-- <product-popular-items /> -->
       <!-- popular product items end -->
 
       <!-- all products start -->
-      <product-all-products />
+      <!-- <product-all-products /> -->
       <!-- all products end -->
 
       <!-- featured products start -->
@@ -25,9 +29,12 @@
 </template>
 
 <script setup lang="ts">
+import ProductsSection from "@/components/product/products-section.vue";
+
 definePageMeta({
   layout: false,
 });
+
 useSeoMeta({
   title: "Fastduka: Order Meat In Kenya Order Beer in Kenya",
   ogTitle: "Fastduka: Order Meat in Kenya and Order Liquor Kenya",

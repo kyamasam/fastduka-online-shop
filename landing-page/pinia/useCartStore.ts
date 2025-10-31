@@ -1,19 +1,19 @@
+// pinia/useCartStore.ts
 import { defineStore } from "pinia";
 import type { IProduct } from "@/types/product-type";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import { toast } from "vue3-toastify";
 
 export const useCartStore = defineStore("cart_product", () => {
   const route = useRoute();
-  let cart_products = ref<IProduct[]>([]);
-  let orderQuantity = ref<number>(1);
-  let cartOffcanvas = ref<boolean>(false);
+  const cart_products = ref<IProduct[]>([]);
+  const orderQuantity = ref<number>(1);
+  const cartOffcanvas = ref<boolean>(false);
+  const activeOrder = ref({});
 
-  let activeOrder = ref({});
-
-  const setActiveOrder = (order, isClear = false) => {
+  const setActiveOrder = (order: any, isClear = false) => {
     if (isClear) {
-      console.log("clearning");
+      console.log("clearing");
       Object.assign(activeOrder.value, {});
     } else {
       console.log("setting", order);
@@ -21,11 +21,12 @@ export const useCartStore = defineStore("cart_product", () => {
     }
     return;
   };
+
   function clearActiveOrder() {
     console.log("calling");
-    activeOrder = ref({});
+    activeOrder.value = {};
   }
-  // add_cart_product
+
   // add_cart_product
   const addCartProduct = (payload: IProduct) => {
     const isExist = cart_products.value.some((i) => i.id === payload.id);
@@ -45,7 +46,6 @@ export const useCartStore = defineStore("cart_product", () => {
         if (item.id === payload.id) {
           if (typeof item.orderQuantity !== "undefined") {
             if (item.inventory > item.orderQuantity) {
-              // Increment by 1 instead of setting to orderQuantity.value
               item.orderQuantity = item.orderQuantity + 1;
               toast.success(`Added another ${item?.name} to cart`);
             } else {
@@ -58,54 +58,48 @@ export const useCartStore = defineStore("cart_product", () => {
     }
     const cart_products_cookie = useCookie("cart_products");
     cart_products_cookie.value = cart_products.value;
-    // No need to reset product count for the "+" button in cart
-    // orderQuantity.value = 1;
   };
+
   const getNetPriceOfProductInCart = (id: number) => {
-    let item: IProduct = null;
+    let item: IProduct | undefined = undefined;
     let totalCost: number = 0;
     item = cart_products?.value.find((i: IProduct) => i?.id === id);
     if (item?.on_sale) {
-      // is on sale
       totalCost = item?.sale_price;
-    } else {
+    } else if (item) {
       totalCost = item?.selling_price;
     }
-
     return totalCost;
   };
 
   const getTotalPriceOfProductInCart = (id: number) => {
-    let item: IProduct = null;
+    let item: IProduct | undefined = undefined;
     let totalCost: number = 0;
     item = cart_products?.value.find((i: IProduct) => i?.id === id);
     console.log("qty", orderQuantity, item);
     if (item?.on_sale) {
-      // is on sale
-      totalCost = item?.sale_price * item?.orderQuantity;
-    } else {
-      totalCost = item?.selling_price * item?.orderQuantity;
+      totalCost = item?.sale_price * (item?.orderQuantity || 1);
+    } else if (item) {
+      totalCost = item?.selling_price * (item?.orderQuantity || 1);
     }
-
     return totalCost;
   };
 
   // quantity increment
   const increment = () => {
-    return (orderQuantity.value = orderQuantity.value + 1);
+    orderQuantity.value = orderQuantity.value + 1;
+    return orderQuantity.value;
   };
 
   // quantity decrement
   const decrement = () => {
-    return (orderQuantity.value =
-      orderQuantity.value > 1
-        ? orderQuantity.value - 1
-        : (orderQuantity.value = 1));
+    orderQuantity.value = orderQuantity.value > 1 ? orderQuantity.value - 1 : 1;
+    return orderQuantity.value;
   };
 
   // quantityDecrement
   const quantityDecrement = (payload: IProduct) => {
-    cart_products.value.map((item) => {
+    cart_products.value = cart_products.value.map((item) => {
       if (item.id === payload.id) {
         if (typeof item.orderQuantity !== "undefined") {
           if (item.orderQuantity > 1) {
@@ -133,10 +127,9 @@ export const useCartStore = defineStore("cart_product", () => {
   // cart product initialize
   const initializeCartProducts = () => {
     const cart_products_cookie = useCookie("cart_products");
-
     const cartData = cart_products_cookie?.value;
     if (cartData) {
-      cart_products.value = cartData;
+      cart_products.value = cartData as IProduct[];
     }
   };
 
@@ -158,7 +151,8 @@ export const useCartStore = defineStore("cart_product", () => {
 
   // initialOrderQuantity
   const initialOrderQuantity = () => {
-    return (orderQuantity.value = 1);
+    orderQuantity.value = 1;
+    return orderQuantity.value;
   };
 
   // totalPriceQuantity
@@ -166,12 +160,12 @@ export const useCartStore = defineStore("cart_product", () => {
     let totalCost = 0;
     let totalQuantity = 0;
 
-    cart_products.value.map((item: IProduct) => {
+    cart_products.value.forEach((item: IProduct) => {
       totalQuantity += item?.orderQuantity || 0;
       if (item?.sale_price !== null && item.sale_price > 0) {
-        totalCost += item.sale_price * item?.orderQuantity || 1;
+        totalCost += item.sale_price * (item?.orderQuantity || 1);
       } else {
-        totalCost += item.selling_price * item?.orderQuantity || 1;
+        totalCost += item.selling_price * (item?.orderQuantity || 1);
       }
     });
 
@@ -198,6 +192,7 @@ export const useCartStore = defineStore("cart_product", () => {
       orderQuantity.value = 1;
     }
   );
+
   return {
     addCartProduct,
     cart_products,

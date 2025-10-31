@@ -1,176 +1,59 @@
-<template>
-  <PageHeaders class="ninjadash-page-header-main" title="Orders" />
-  <router-view />
-
-  <CategoryForm :visible="showDialog"/>
-  
-
-  <BaseTable
-    :columns="columns"
-    show0ther-items
-    create-route-name="create-category"
-    :show-expanded-items="false"
-    fetchUrl="category"
-    title="Orders"
-  >
-    <template v-slot:bodyCell="slotProps">
-      <template v-if="slotProps.column.key === 'photo'">
-        <div class="flex items-center gap-2">
-          <template v-if="editableId !== slotProps.text.id">
-            <img
-              height="40"
-              width="40"
-              class="rounded object-cover"
-              :src="slotProps?.text?.photo"
-              :alt="slotProps?.text?.name"
-            />
-          </template>
-          <input
-            v-else
-            type="file"
-            accept="image/*"
-            @change="handleFileUpload($event, slotProps.text)"
-            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-          />
-        </div>
-      </template>
-
-      <template v-if="slotProps.column.key === 'name'">
-        <template v-if="editableId !== slotProps.text.id">
-          {{ slotProps.text.name }}
-        </template>
-        <el-input
-          v-else
-          v-model="editableData.name"
-          placeholder="Category name"
-          size="defailt"
-        />
-      </template>
-
-      <template v-if="slotProps.column.key === 'children'">
-        <div
-          class="flex items-center gap-2 cursor-pointer text-blue-600 hover:text-blue-800 transition-colors"
-          @click="openChildrenModal(slotProps.text)"
-        >
-          <el-icon>
-            <Document />
-          </el-icon>
-          <span class="font-medium">
-            View Categories ({{ slotProps?.text?.children?.length || 0 }})
-          </span>
-        </div>
-      </template>
-
-      <template v-if="slotProps.column.key === 'actions'">
-        <div class="flex gap-2">
-          <template v-if="editableId !== slotProps.text.id">
-            <el-button
-              class="bg-blue-500 text-white hover:bg-blue-600 border-none hover:ring-none rounded-md"
-              type="primary"
-              size="large"
-              @click="startEditing(slotProps.text)"
-            >
-              <el-icon><Edit /></el-icon>
-            </el-button>
-            <el-button
-              class="bg-red-500 text-white hover:bg-red-600 border-none hover:ring-none rounded-md"
-              type="primary"
-              size="large"
-              @click="handleDelete(slotProps.text.id)"
-            >
-              <el-icon><Delete /></el-icon>
-            </el-button>
-          </template>
-          <template v-else>
-            <el-button
-              class="bg-green-500 text-white hover:bg-green-600 border-none hover:ring-none rounded-md"
-              type="primary"
-              size="large"
-              @click="saveChanges(slotProps.text)"
-            >
-              <el-icon><Check /></el-icon>
-            </el-button>
-            <el-button
-              class="bg-gray-500 text-white hover:bg-gray-600 border-none hover:ring-none rounded-md"
-              type="primary"
-              size="large"
-              @click="cancelEditing"
-            >
-              <el-icon><Close /></el-icon>
-            </el-button>
-          </template>
-        </div>
-      </template>
-    </template>
-  </BaseTable>
-
-  <!-- Children Modal -->
-  <el-dialog
-    v-model="childrenModalVisible"
-    :title="selectedParent?.name || 'Items'"
-    width="80%"
-    center
-    :close-on-click-modal="false"
-  >
-    <a-table
-      :columns="innerColumns"
-      :data-source="selectedChildren"
-      :pagination="false"
-      class="rounded-lg shadow-sm"
-    >
-      <template #bodyCell="{ column, text }">
-        <template v-if="column.key === 'photo'">
-          <div class="flex items-center gap-2">
-            <img
-              height="40"
-              width="40"
-              class="rounded object-cover"
-              :src="text?.photo"
-              :alt="text?.name"
-            />
-          </div>
-        </template>
-      </template>
-    </a-table>
-
-    <template #footer>
-      <el-button
-        type="primary"
-        @click="childrenModalVisible = false"
-        class="px-6 py-3"
-      >
-        Close
-      </el-button>
-    </template>
-  </el-dialog>
-</template>
-
 <script setup>
-import { ref, reactive } from "vue";
-import { Document, Edit, Delete, Check, Close } from "@element-plus/icons-vue";
 import BaseTable from "@/components/BaseTable.vue";
-import PageHeaders from "@/components/pageHeaders/PageHeaders.vue";
 import router from "@/routes";
+import { Edit, Delete, Picture } from "@element-plus/icons-vue";
+import { ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import axios from "axios";
-import { baseUrl } from "@/utility/constants";
 import store from "@/vuex/store";
+
+const selectAction = (action, categoryId) => {
+  router.push({ name: action, params: { categoryId: categoryId } });
+};
+
+const deleteCategory = async (categoryId, categoryName) => {
+  try {
+    await ElMessageBox.confirm(
+      `Are you sure you want to delete "${categoryName}"? This action cannot be undone.`,
+      'Delete Category',
+      {
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
+        confirmButtonClass: 'el-button--danger'
+      }
+    );
+
+    await store.dispatch('deleteData', {
+      url: 'category',
+      id: categoryId
+    });
+
+    ElMessage.success('Category deleted successfully');
+    window.location.reload();
+
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('Failed to delete category');
+      console.error('Delete error:', error);
+    }
+  }
+};
 
 const columns = ref([
   {
     title: "Name",
-    dataIndex: "",
+    dataIndex: "name",
     key: "name",
   },
   {
-    title: "Photo",
-    dataIndex: "",
-    key: "photo",
+    title: "Type",
+    dataIndex: "category_type",
+    key: "category_type",
   },
   {
-    title: "Sub Categories",
-    dataIndex: "",
-    key: "children",
+    title: "Parent Category",
+    dataIndex: "parent",
+    key: "parent",
   },
   {
     title: "Actions",
@@ -178,142 +61,75 @@ const columns = ref([
     key: "actions",
   },
 ]);
-
-const innerColumns = ref([
-  {
-    title: "Name",
-    dataIndex: "name",
-    key: "name",
-    width: "30%",
-  },
-  {
-    title: "Photo",
-    dataIndex: "",
-    key: "photo",
-    width: "70%",
-  },
-]);
-
-const childrenModalVisible = ref(false);
-const selectedChildren = ref([]);
-const selectedParent = ref(null);
-const editableId = ref(null);
-const editableData = reactive({
-  name: "",
-  photo: null,
-});
-
-const openChildrenModal = (parent) => {
-  selectedParent.value = parent;
-  selectedChildren.value = parent.children || [];
-  childrenModalVisible.value = true;
-};
-
-const startEditing = (category) => {
-  editableId.value = category.id;
-  editableData.name = category.name;
-  editableData.photo = null;
-};
-
-const cancelEditing = () => {
-  editableId.value = null;
-  editableData.name = "";
-  editableData.photo = null;
-};
-
-const handleFileUpload = (event, category) => {
-  const file = event.target.files[0];
-  if (file) {
-    editableData.photo = file;
-  }
-};
-
-const showDialog = ref(false);
-const showCreateCategoryDialog = () => {
-  showDialog.value = true;
-};
-
-const saveChanges = async (category) => {
-  try {
-    const formData = new FormData();
-    formData.append("name", editableData.name);
-    if (editableData.photo) {
-      formData.append("photo", editableData.photo);
-    }
-
-    const authData = JSON.parse(localStorage.getItem("piczanguAuthData"));
-    
-    const response = await axios.patch(
-      `${baseUrl}category/${category.id}/`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: "Bearer " + authData?.access,
-        },
-      }
-    );
-
-    ElMessage.success("Category updated successfully");
-    store.dispatch("fetchList", { url: "category" });
-    cancelEditing();
-  } catch (error) {
-    console.error("Update error:", error);
-    ElMessage.error(error.response?.data?.message || "Failed to update category");
-  }
-};
-
-const handleDelete = (categoryId) => {
-  ElMessageBox.confirm(
-    "This will permanently delete the category. Continue?",
-    "Warning",
-    {
-      confirmButtonText: "Delete",
-      cancelButtonText: "Cancel",
-      type: "warning",
-    }
-  ).then(async () => {
-    try {
-      const authData = JSON.parse(localStorage.getItem("piczanguAuthData"));
-      await axios.delete(`${baseUrl}category/${categoryId}/`, {
-        headers: {
-          Authorization: "Bearer " + authData?.access,
-        },
-      });
-      
-      ElMessage.success("Category deleted successfully");
-      store.dispatch("fetchList", { url: "category" });
-    } catch (error) {
-      console.error("Delete error:", error);
-      ElMessage.error(error.response?.data?.message || "Failed to delete category");
-    }
-  }).catch(() => {});
-};
 </script>
 
-<style scoped>
-:deep(.el-dialog__header) {
-  @apply border-b border-gray-200 mb-4;
-}
+<template>
+  <router-view />
+  <BaseTable
+    :columns="columns"
+    create-route-name="create-category"
+    fetchUrl="category"
+    title="Categories"
+  >
+    <template v-slot:bodyCell="slotProps">
+      <template v-if="slotProps.column.key === 'name'">
+        <div class="flex items-center gap-2">
+          <img
+            v-if="slotProps.text?.photo"
+            :alt="slotProps.text?.name"
+            :src="slotProps.text?.photo"
+            class="h-8 w-8 object-cover rounded"
+          />
+          <div
+            v-else
+            class="h-8 w-8 bg-gray-200 rounded flex items-center justify-center text-gray-500 text-xs"
+          >
+            No Image
+          </div>
+          {{ slotProps.text?.name }}
+        </div>
+      </template>
 
-:deep(.el-dialog__title) {
-  @apply text-lg font-semibold text-gray-800;
-}
+      <template v-if="slotProps.column.key === 'category_type'">
+        <el-tag :type="slotProps.text === 'liquor' ? 'warning' : 'success'">
+          {{ slotProps.text?.toUpperCase() }}
+        </el-tag>
+      </template>
 
-:deep(.el-dialog__body) {
-  @apply py-6;
-}
+      <template v-if="slotProps.column.key === 'parent'">
+        <span v-if="slotProps.text?.name">{{ slotProps.text.name }}</span>
+        <span v-else class="text-gray-400">No Parent</span>
+      </template>
 
-.el-image {
-  border-radius: 4px;
-  overflow: hidden;
-}
+      <template v-if="slotProps.column.key === 'actions'">
+        <div class="flex gap-2">
+          <el-button
+            class="bg-blue-500 border-none hover:bg-blue-600 focus:bg-blue-600 rounded-none"
+            type="primary"
+            size="default"
+            @click="selectAction('edit-category', slotProps.text?.id)"
+            title="Edit Category"
+          >
+            <el-icon>
+              <Edit />
+            </el-icon>
+          </el-button>
 
-.flex.gap-2 .el-button {
-  padding: 8px 12px;
-}
+          <el-button
+            class="bg-red-500 border-none hover:bg-red-600 focus:bg-red-600 rounded-none"
+            type="danger"
+            size="default"
+            @click="deleteCategory(slotProps.text?.id, slotProps.text?.name)"
+            title="Delete Category"
+          >
+            <el-icon>
+              <Delete />
+            </el-icon>
+          </el-button>
+        </div>
+      </template>
+    </template>
+  </BaseTable>
+</template>
 
-.el-icon {
-  vertical-align: middle;
-}
-</style>
+<style scoped></style>

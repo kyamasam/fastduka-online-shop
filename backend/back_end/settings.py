@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 import os
+from xmlrpc.client import boolean
 from dotenv import load_dotenv
 load_dotenv()  # loads the configs from .env
 
@@ -19,10 +20,8 @@ SECRET_KEY = str(os.getenv('SECRET_KEY'))
 
 GOOGLE_MAPS_API_KEY = str(os.getenv('GOOGLE_MAPS_API_KEY'))
 ENVIRONMENT = str(os.getenv('ENVIRONMENT'))
-if ENVIRONMENT == 'dev' or  ENVIRONMENT == 'staging':
-    DEBUG = True
-else:
-    DEBUG = False
+DEBUG = True if str(os.getenv('DEBUG')).upper() =='TRUE' else False
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -34,7 +33,7 @@ CSRF_TRUSTED_ORIGINS=['https://shopapi.fastduka.co.ke']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',') or ['*']
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -152,7 +151,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-IN_DOCKER = os.environ.get('IN_DOCKER', False)
+IN_DOCKER = True if str(os.getenv('IN_DOCKER')).upper() =='TRUE' else False
 
 # Static files configuration
 STATIC_URL = '/static/'

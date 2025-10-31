@@ -70,8 +70,8 @@
           <a href="#">{{ item?.category?.name }}</a>
         </div>
         <h3 class="tp-product-title-2">
-          <nuxt-link :href="`/product-details/${item.id}`">{{
-            item.title
+          <nuxt-link :href="`/product-details/${item?.name}/${item.id}`">{{
+            item?.name
           }}</nuxt-link>
         </h3>
         <div class="tp-product-rating-icon tp-product-rating-icon-2">
