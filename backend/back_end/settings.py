@@ -58,6 +58,10 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_tiptap',
     'blogs',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'django_filters',
+    'drf_standardized_errors',
 
 ]
 
@@ -174,15 +178,25 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',  # Added for browsable API
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',  # Changed to allow read access
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 15,
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',  # Added for search functionality
+        'rest_framework.filters.OrderingFilter',  # Added for ordering
+    ],
+    'DEFAULT_RENDERER_CLASSES': [  # Added to control response formats
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',  # Enable browsable API
+    ],
     "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler"
 }
+
 DRF_STANDARDIZED_ERRORS = {"ENABLE_IN_DEBUG_FOR_UNHANDLED_EXCEPTIONS": True}
 
 SPECTACULAR_SETTINGS = {
