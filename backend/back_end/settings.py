@@ -56,6 +56,8 @@ INSTALLED_APPS = [
     'setup',
     'drf_spectacular',
     'corsheaders',
+    'django_tiptap',
+    'blogs',
 
 ]
 
@@ -197,3 +199,75 @@ SIMPLE_JWT = {
 
 AUTH_USER_MODEL = 'users.User'
 AUTHENTICATION_BACKENDS = ['users.backends.EmailBackend'] #updated
+
+DJANGO_TIPTAP_CONFIG = {
+    "width": "500px",
+    "height": "500px",
+    "extensions": [
+        # to see what each extension does, refer to [tiptap.dev](https://www.tiptap.dev/)
+        "bold",
+        "italic",
+        "underline",
+        "strikethrough",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "textAlign",
+        "indent",
+        "table",
+        "bulletList",
+        "orderedList",
+        "typography",
+        "clearFormat"
+    ],
+    "placeholderText": "Begin typing here...",  # set None to skip display
+    "unsavedChangesWarningText": "You have unsaved changes",  # set None to skip display
+    "lang": "EN",  # if you want to use default tooltips and translations, use this. Valid Options => EN/DE(for now)
+    "tooltips": {
+        # if you want to use your custom tooltips(maybe because you don't prefer default or the language you want isn't there)
+        "bold": "Bold | (ctrl / ⌘) + B",
+        "italic": "Italic | (ctrl / ⌘) + I",
+        "underline": "Underline | (ctrl / ⌘) + U",
+        "strike": "Strikethrough | (ctrl / ⌘) + shift + X",
+        "h1": "Header 1 | (ctrl + alt) / (⌘ + ⌥) + 1",
+        "h2": "Header 2 | (ctrl + alt) / (⌘ + ⌥) + 2",
+        "h3": "Header 3 | (ctrl + alt) / (⌘ + ⌥) + 3",
+        "h4": "Header 4 | (ctrl + alt) / (⌘ + ⌥) + 4",
+        "h5": "Header 5 | (ctrl + alt) / (⌘ + ⌥) + 5",
+        "h6": "Header 6 | (ctrl + alt) / (⌘ + ⌥) + 6",
+        "alignLeft": "Align Left | (ctrl + shift ⇧) / (⌘ + shift ⇧) + L",
+        "alignCenter": "Align Center | (ctrl + shift ⇧) / (⌘ + shift ⇧) + E",
+        "alignRight": "Align Right | (ctrl + shift ⇧) / (⌘ + shift ⇧) + R",
+        "alignJustify": "Justify | (ctrl + shift ⇧) / (⌘ + shift ⇧) + J",
+        "indent": "Indent (Tab ↹)",
+        "outdent": "Outdent (shift ⇧ + Tab ↹)",
+        "bulletList": "Bullet List | (ctrl + shift ⇧) / (⌘ + shift ⇧) + 8",
+        "orderedList": "Numbered List | (ctrl + shift ⇧) / (⌘ + shift ⇧) + 7",
+        "addTable": "Add Table",
+        "deleteTable": "Delete Table",
+        "addColumnBefore": "Add Column Before",
+        "addColumnAfter": "Add Column After",
+        "deleteColumn": "Delete Column",
+        "addRowBefore": "Add Row Before",
+        "addRowAfter": "Add Row After",
+        "deleteRow": "Delete Row",
+        "mergeCells": "Merge Cells",
+        "splitCell": "Split Cell",
+        "toggleHeaderColumn": "Toggle Header Column",
+        "toggleHeaderRow": "Toggle Header Row",
+        "toggleHeaderCell": "Toggle Header Cell",
+        "clearFormat": "Clear Format",
+    },
+    "translations": {
+        # if the lang you defined exists in the default langs, then no need to define translations
+        "row": "Row",
+        "column": "Column",
+        "add": "Add"
+    },
+    "custom_extensions": [],
+    "tiptapOutputFormat": "html",  # options : "html", "json"
+
+}
