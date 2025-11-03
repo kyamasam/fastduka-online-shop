@@ -115,24 +115,6 @@
 
         <base-loader v-if="loadingCoverPhotoUpload" />
       </a-upload>
-
-      <!--        <div class="file-upload-container w-full hidden">-->
-      <!--          <input-->
-      <!--              accept=".jpg,.png,.jpeg"-->
-      <!--              class="file-input w-full h-full"-->
-      <!--              type="file"-->
-      <!--              @change="handlePhotoChange"-->
-      <!--          />-->
-      <!--          <div class="file-upload-content">-->
-      <!--            <el-icon>-->
-      <!--              <upload-filled/>-->
-      <!--            </el-icon>-->
-      <!--            <div class="file-upload-text">-->
-      <!--              <span>Drop file here or <em>click to upload</em></span>-->
-      <!--              <div class="el-upload__tip">jpg/png files with a size less than 500kb</div>-->
-      <!--            </div>-->
-      <!--          </div>-->
-      <!--        </div>-->
     </el-form-item>
 
     <!-- Submit Button -->
@@ -146,6 +128,13 @@
       </el-button>
     </el-form-item>
   </el-form>
+
+  <!-- Category Form Popup -->
+  <CategoryForm 
+    :visible="showCategoryForm" 
+    @close="showCategoryForm = false"
+    @category-added="handleCategoryAdded"
+  />
 </template>
 
 <script>
@@ -162,7 +151,10 @@ export default {
   components: {
     BaseDrawer,
     BaseDialog,
-    BaseLoader
+    BaseLoader,
+    CategoryForm, // Register CategoryForm component
+    Plus, // Register Plus icon
+    Upload
   },
   data() {
     return {
@@ -181,10 +173,14 @@ export default {
           status: "uploading",
         },
       },
-      uploadUrl: ''
+      uploadUrl: '',
+      showCategoryForm: false, // Controls visibility of the category form popup - only shows when plus icon is clicked
     };
   },
   methods: {
+    /**
+     * Fetch all product categories
+     */
     fetchCategories() {
       this.categoryLoader = true;
       store.dispatch("fetchList", { url: "category" })
@@ -199,8 +195,11 @@ export default {
           this.categoryLoader = false;
         });
     },
+    
+    /**
+     * Fetch product details when editing an existing product
+     */
     fetchProduct() {
-      this.productLoader = true;
       const productId = this.$route.params.productId;
       store.dispatch("fetchSingleItem", { url: "product", id: productId })
         .then((res) => {
@@ -212,9 +211,17 @@ export default {
           this.productLoader = false;
         });
     },
-    handlePhotoChange(event) {
-      this.fileList = event.target.files[0];
+    
+    /**
+     * Handle file removal from upload component
+     */
+    handleRemove() {
+      this.fileList = [];
     },
+    
+    /**
+     * Track changes between original and current form state for PATCH requests
+     */
     saveChanges() {
       const changes = {};
 
@@ -241,7 +248,22 @@ export default {
 
       return changes;
     },
+    
+    /**
+     * Handle form submission (create or update product)
+     */
     async handleSubmit() {
+      // Validate the form
+      try {
+        await this.$refs.formRef.validate();
+      } catch (error) {
+        notification["error"]({
+          message: "Validation Error",
+          description: "Please fill in all required fields correctly.",
+        });
+        return;
+      }
+      
       const formData = new FormData();
 
       // Append each file to the formData if it meets the size condition
@@ -260,8 +282,11 @@ export default {
         }
       }
 
-      if (this.$route.name === 'edit-product') {
-        // this.formState = this.saveChanges();
+      const isEditMode = this.$route.name === 'edit-product';
+      
+      if (isEditMode) {
+        // In edit mode, we might only want to send changed fields
+        // Also, don't try to update primary_photo if not changed
         delete this.formState.primary_photo;
       }
 
@@ -280,14 +305,14 @@ export default {
       try {
         // Retrieve auth data from localStorage
         const authData = JSON.parse(localStorage.getItem("piczanguAuthData"));
-
-        const routeName = this.$route.name;
-        if (routeName === "edit-product") {
+        let resp;
+        
+        if (isEditMode) {
           const productId = this.$route?.params?.productId;
-          const resp = await axios.patch(`${baseUrl}product/${productId}/`, formData, {
+          resp = await axios.patch(`${baseUrl}product/${productId}/`, formData, {
             headers: {
-              "Content-Type": "multipart/form-data", // Ensure multipart form-data header
-              Authorization: "Bearer " + authData?.access, // Include authorization token
+              "Content-Type": "multipart/form-data",
+              Authorization: "Bearer " + authData?.access,
             },
           });
           ElNotification({
@@ -300,8 +325,8 @@ export default {
         } else {
           const resp = await axios.post(`${baseUrl}product/`, formData, {
             headers: {
-              "Content-Type": "multipart/form-data", // Ensure multipart form-data header
-              Authorization: "Bearer " + authData?.access, // Include authorization token
+              "Content-Type": "multipart/form-data",
+              Authorization: "Bearer " + authData?.access,
             },
           });
           ElNotification({
@@ -311,21 +336,62 @@ export default {
           });
         }
 
-
-
         console.log("Success:", resp);
+        
+        // Navigate back to product list
+        router.push({ name: 'products' });
       } catch (err) {
         console.error("Error:", err);
+        const errorMessage = err.response?.data?.message || "An error occurred while saving the product";
+        notification["error"]({
+          message: "Error",
+          description: errorMessage,
+        });
       } finally {
         this.registerLoading = false;
-        // router.go(-1)
       }
+    },
+    
+    /**
+     * Handle newly added category from CategoryForm
+     * @param {Object} newCategory - The newly created category
+     */
+    handleCategoryAdded(newCategory) {
+      // Add the new category to the dropdown options
+      this.categories.push({
+        label: newCategory.name,
+        value: newCategory.id
+      });
+      
+      // Select the newly created category
+      this.formState.category_id = newCategory.id;
+      
+      // Show success notification
+      notification["success"]({
+        message: "Success",
+        description: `Category "${newCategory.name}" has been added and selected`,
+      });
     }
-
-
   },
   mounted() {
-    this.fetchProduct();
+    // Initialize empty form state if not editing
+    if (!this.$route.params.productId) {
+      this.formState = {
+        name: '',
+        description: '',
+        selling_price: null,
+        buying_price: null,
+        sale_price: null,
+        allowable_discount: null,
+        category_id: null
+      };
+      this.productLoader = false;
+    } else {
+      // Fetch product data if editing
+      this.fetchProduct();
+    }
+    
+    // Note: Category form is NOT initialized here - it will only show when the plus icon is clicked
   }
 };
 </script>

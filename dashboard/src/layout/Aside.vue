@@ -63,12 +63,12 @@
     </a-menu-item>
 
     <a-menu-item
-        key="vendors" @click="toggleCollapsed">
+        key="shops" @click="toggleCollapsed">
       <template #icon>
-        <office-building @click="routeTo('vendors')"/>
+        <office-building @click="routeTo('shops')"/>
       </template>
-      <router-link to="/dashboard/vendors">
-        {{ t('Vendors') }}
+      <router-link to="/dashboard/shops">
+        {{ t('Shops') }}
       </router-link>
     </a-menu-item>
 
@@ -176,6 +176,7 @@ import {
   Message, OfficeBuilding,
   PriceTag,
   Promotion, ScaleToOriginal,
+  Tools,
   User,
   UserFilled, Van,
   Wallet,
@@ -209,7 +210,7 @@ export default defineComponent({
     HomeFilled,
     ArrowUp,
     NavTitle,
-    LogoutOutlined
+    LogoutOutlined,Tools
   },
   setup(props) {
     const {t} = useI18n();
