@@ -29,7 +29,7 @@ services:
     container_name: fastduka_postgres
     image: postgres:15.1-alpine
     volumes:
-      - postgres_data:/var/lib/postgresql/15.1/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
     ports:
