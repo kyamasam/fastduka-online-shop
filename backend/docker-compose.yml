@@ -29,17 +29,17 @@ services:
       - POSTGRES_USER=${PG_USER}
       - POSTGRES_PASSWORD=${PG_PASSWORD}
 
-  nginx:
-    build: ./nginx
-    volumes:
-      - static_volume:/home/app/webapp/static
-      - media_volume:/home/app/webapp/media
-    networks:
-      - backend-network
-    ports:
-      - 8001:80
-    depends_on:
-      - web
+  # nginx:
+  #   build: ./nginx
+  #   volumes:
+  #     - static_volume:/home/app/webapp/static
+  #     - media_volume:/home/app/webapp/media
+  #   networks:
+  #     - backend-network
+  #   ports:
+  #     - 8001:80
+  #   depends_on:
+  #     - web
 
 networks:
   backend-network:
