@@ -21,7 +21,8 @@
                          alt="logo" />
                   </nuxt-link>
                 </div>
-                <span class="ml-2 items-center flex text-lg font-semibold text-white">
+                <span
+                      class="ml-2 items-center flex text-sm sm:text-lg font-semibold text-white whitespace-nowrap overflow-hidden text-ellipsis">
                   {{ siteSettingsStore?.settings?.logo_text || siteSettingsStore?.logo_text }}
                 </span>
               </div>
@@ -100,7 +101,7 @@
                         <svg-profile />
                       </nuxt-link>
                     </div>
-                    <div class="tp-header-action-item tp-header-hamburger ml-12 md:mr-20 d-xl-none">
+                    <div class="tp-header-action-item tp-header-hamburger ml-10 md:mr-20 d-xl-none">
                       <button @click="utilsStore.handleOpenMobileMenu()"
                               type="button"
                               class="tp-offcanvas-open-btn">
