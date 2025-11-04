@@ -65,7 +65,7 @@ class ProductSerializer(serializers.ModelSerializer):
     inventory = serializers.SerializerMethodField(read_only=True)
     on_sale = serializers.SerializerMethodField(read_only=True)
     in_stock = serializers.SerializerMethodField(read_only=True)
-    buying_price = serializers.FloatField(write_only=True)
+    buying_price = serializers.FloatField(write_only=True, required=False)
     reviews = serializers.SerializerMethodField(read_only=True)
     review_stats = serializers.SerializerMethodField()
     class Meta:
