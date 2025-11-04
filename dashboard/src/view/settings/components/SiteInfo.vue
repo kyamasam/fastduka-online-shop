@@ -22,6 +22,16 @@
                            class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
                 </div>
                 <div>
+                    <label for="logo_text"
+                           class="block text-sm font-semibold text-gray-900 mb-2">Logo Text</label>
+                    <input id="logo_text"
+                           v-model="localSettings.logo_text"
+                           @input="updateSettings"
+                           type="text"
+                           placeholder="e.g., Your Store Tagline"
+                           class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
+                </div>
+                <div>
                     <label for="description"
                            class="block text-sm font-semibold text-gray-900 mb-2">Description</label>
                     <textarea id="description"

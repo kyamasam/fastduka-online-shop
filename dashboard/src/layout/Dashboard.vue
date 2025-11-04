@@ -32,6 +32,7 @@
                     :src="settingsData?.site_logo"
                   />
                   <p v-else>{{ siteData?.title }}</p>
+                  <p v-if="settingsData?.logo_text" class="text-white font-medium ml-2">{{ settingsData?.logo_text }}</p>
                 </div>
                 <div
                   v-if="!topMenu || innerWidth <= 991"

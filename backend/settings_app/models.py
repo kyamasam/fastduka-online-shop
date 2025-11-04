@@ -28,6 +28,7 @@ class SiteSettings(UtilColumnsModel):
     secondary_color = ColorField(default='#33C1FF')
     site_icon = models.ImageField(upload_to='site_icons/', null=True, blank=True)
     site_logo = models.ImageField(upload_to='site_logos/', null=True, blank=True)
+    logo_text = models.CharField(max_length=255, null=True, blank=True)
     
     # Social Media
     facebook_url = models.URLField(max_length=255, null=True, blank=True)
