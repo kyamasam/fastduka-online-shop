@@ -14,7 +14,7 @@ class CategoryType(UtilColumnsModel):
 
 class Category(UtilColumnsModel):
     name = models.CharField(max_length=255)
-    category_type = models.ForeignKey(CategoryType, on_delete=models.CASCADE)
+    category_type = models.ForeignKey(CategoryType, on_delete=models.SET_NULL, null=True, blank=True)
     parent = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, blank=True)
     photo = models.ImageField(null=True, blank=True)
     def __str__(self):
