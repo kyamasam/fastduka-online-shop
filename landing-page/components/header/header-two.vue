@@ -22,7 +22,7 @@
                   </nuxt-link>
                 </div>
                 <span class="ml-2 items-center flex text-lg font-semibold text-white">
-                  {{ siteSettingsStore?.settings.logo_text }}
+                  {{ siteSettingsStore?.settings?.logo_text || siteSettingsStore?.logo_text }}
                 </span>
               </div>
               <div class="col-xl-5 d-none d-xl-block">

@@ -40,6 +40,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 class BlogCategoryViewSet(viewsets.ModelViewSet):
     queryset = BlogCategory.objects.all()
     serializer_class = BlogCategorySerializer
+    authentication_classes=[]
     permission_classes = [IsAuthenticatedForWrite]  # Read for all, write for authenticated
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = BlogCategoryFilter
@@ -49,6 +50,7 @@ class BlogCategoryViewSet(viewsets.ModelViewSet):
 
 class BlogViewSet(viewsets.ModelViewSet):
     queryset = Blog.objects.all()
+    authentication_classes=[]
     permission_classes = [IsAuthenticatedForWrite, IsOwnerOrReadOnly]  # Combined permissions
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = BlogFilter

@@ -42,6 +42,17 @@
       </router-link>
     </a-menu-item>
 
+    <a-menu-item key="blogs" @click="toggleCollapsed">
+      <template #icon>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.5 3.5H2.5C2.08579 3.5 1.75 3.83579 1.75 4.25V15.75C1.75 16.1642 2.08579 16.5 2.5 16.5H17.5C17.9142 16.5 18.25 16.1642 18.25 15.75V4.25C18.25 3.83579 17.9142 3.5 17.5 3.5ZM16.5 14.75H3.5V5.25H16.5V14.75ZM4.75 7.5H11.25V9H4.75V7.5ZM4.75 10.5H15.25V12H4.75V10.5Z"/>
+        </svg>
+      </template>
+      <router-link to="/dashboard/blogs">
+        {{ 'Blogs' }}
+      </router-link>
+    </a-menu-item>
+
     <a-menu-item key="orders" @click="toggleCollapsed">
       <template #icon>
         <promotion @click="routeTo('orders')"/>

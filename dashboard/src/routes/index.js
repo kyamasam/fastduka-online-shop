@@ -30,6 +30,10 @@ import SiteSettings from "@/view/settings/index.vue";
 import WalletIndex from "@/view/wallet/WalletIndex";
 import payments from "@/view/wallet/payments";
 import withdrawals from "@/view/wallet/withdrawals";
+import BlogList from "@/view/blogs/BlogList.vue";
+import EditBlogView from "@/view/blogs/EditBlogView.vue";
+import BlogCategoryList from "@/view/blogs/BlogCategoryList.vue";
+import BlogForm from "@/view/blogs/components/BlogForm.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import Dashboard from "../layout/Dashboard.vue";
 import BlankPage from "../view/auth/BlankPage.vue";
@@ -307,6 +311,54 @@ const routes = [
             ],
           },
         ],
+      },
+      {
+        path: "blogs",
+        name: "blogs",
+        component: BlogList,
+        meta: {
+          showInSideBar: false,
+          verboseName: "Blogs",
+          requiresAuth: true,
+          allowed_roles: ["photographer", "admin", "owner", "client"],
+          level: 1,
+          icon:
+            '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">\n' +
+            '<path d="M12.25 2.25H1.75C1.33579 2.25 1 2.58579 1 3V11C1 11.4142 1.33579 11.75 1.75 11.75H12.25C12.6642 11.75 13 11.4142 13 11V3C13 2.58579 12.6642 2.25 12.25 2.25ZM11.5 10.25H2.5V3.75H11.5V10.25ZM3.25 5.25H7.75V6.75H3.25V5.25ZM3.25 7.5H10.75V9H3.25V7.5Z" fill="currentColor"/>\n' +
+            "</svg>\n",
+        },
+      },
+      {
+        path: "blogs/edit/:blogId",
+        name: "edit-blog",
+        component: EditBlogView,
+        meta: {
+          showInSideBar: false,
+          verboseName: "Edit Blog",
+          requiresAuth: true,
+          allowed_roles: ["photographer", "admin", "owner", "client"],
+          level: 1,
+          icon:
+            '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">\n' +
+            '<path d="M12.25 2.25H1.75C1.33579 2.25 1 2.58579 1 3V11C1 11.4142 1.33579 11.75 1.75 11.75H12.25C12.6642 11.75 13 11.4142 13 11V3C13 2.58579 12.6642 2.25 12.25 2.25ZM11.5 10.25H2.5V3.75H11.5V10.25ZM3.25 5.25H7.75V6.75H3.25V5.25ZM3.25 7.5H10.75V9H3.25V7.5Z" fill="currentColor"/>\n' +
+            "</svg>\n",
+        },
+      },
+      {
+        path: "blogs/categories",
+        name: "blog-categories",
+        component: BlogCategoryList,
+        meta: {
+          showInSideBar: false,
+          verboseName: "Blog Categories",
+          requiresAuth: true,
+          allowed_roles: ["photographer", "admin", "owner", "client"],
+          level: 1,
+          icon:
+            '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">\n' +
+            '<path d="M12.25 2.25H1.75C1.33579 2.25 1 2.58579 1 3V11C1 11.4142 1.33579 11.75 1.75 11.75H12.25C12.6642 11.75 13 11.4142 13 11V3C13 2.58579 12.6642 2.25 12.25 2.25ZM11.5 10.25H2.5V3.75H11.5V10.25ZM3.25 5.25H7.75V6.75H3.25V5.25ZM3.25 7.5H10.75V9H3.25V7.5Z" fill="currentColor"/>\n' +
+            "</svg>\n",
+        },
       },
       {
         path: "orders",

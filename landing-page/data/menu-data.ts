@@ -11,8 +11,13 @@ export const menu_data: IMenuItem[] = [
     link: "/shop",
     title: "Shop",
   },
+  {
+    id: 3,
+    link: "/blogs",
+    title: "Blog",
+  },
   // {
-  //   id: 3,
+  //   id: 4,
   //   link: "/shop-liquor",
   //   title: "Liquor Shop",
   // },
@@ -45,7 +50,11 @@ export const mobile_menu: IMobileType[] = [
     link: "/shop",
     title: "Shop",
   },
-
+  {
+    id: 3,
+    link: "/blog",
+    title: "Blog",
+  },
   {
     id: 5,
     link: "/cart",
