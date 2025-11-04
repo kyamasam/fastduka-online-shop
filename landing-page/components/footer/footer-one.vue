@@ -45,12 +45,12 @@
                 <h4 class="tp-footer-widget-title">My Account</h4>
                 <div class="tp-footer-widget-content">
                   <ul>
-                    <li><a href="#">Track Orders</a></li>
-                    <li><a href="#">Shipping</a></li>
-                    <li><a href="#">Wishlist</a></li>
-                    <li><a href="#">My Account</a></li>
-                    <li><a href="#">Order History</a></li>
-                    <li><a href="#">Returns</a></li>
+                    <li><a href="/orders">Track Orders</a></li>
+                    <!-- <li><a href="#">Shipping</a></li>
+                    <li><a href="#">Wishlist</a></li> -->
+                    <li><a href="/profile">My Account</a></li>
+                    <!-- <li><a href="#">Order History</a></li>
+                    <li><a href="#">Returns</a></li> -->
                   </ul>
                 </div>
               </div>
@@ -60,12 +60,12 @@
                 <h4 class="tp-footer-widget-title">Infomation</h4>
                 <div class="tp-footer-widget-content">
                   <ul>
-                    <li><a href="#">Our Story</a></li>
+                    <!-- <li><a href="#">Our Story</a></li>
                     <li><a href="#">Careers</a></li>
                     <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Terms & Conditions</a></li>
-                    <li><a href="#">Latest News</a></li>
-                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Terms & Conditions</a></li> -->
+                    <li><a href="/blogs">Latest News</a></li>
+                    <!-- <li><a href="#">Contact Us</a></li> -->
                   </ul>
                 </div>
               </div>

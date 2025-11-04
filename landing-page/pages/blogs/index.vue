@@ -28,7 +28,7 @@
             <!-- Blog List -->
             <div v-if="!currentBlog" class="min-h-screen">
                 <!-- Hero Section -->
-                <section class="relative bg-white py-28 border-b border-gray-100">
+                <section class="relative bg-white py-4 border-b border-gray-100">
                     <!-- Geometric background -->
                     <div class="absolute inset-0 overflow-hidden">
                         <div class="absolute -top-24 -right-24 w-48 h-48 bg-gray-50 rotate-45"></div>
