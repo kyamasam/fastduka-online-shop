@@ -164,6 +164,7 @@ import { Plus, Upload } from "@element-plus/icons-vue";
 import axios from "axios";
 import { ElNotification } from "element-plus";
 import CategoryForm from "./CategoryForm";
+import router from "@/routes";
 export default {
   name: "ProductForm",
   components: {
