@@ -16,7 +16,7 @@
               <div class="col-xl-2 col-lg-5 col-md-5 col-sm-4 col-6">
                 <div class="logo">
                   <nuxt-link href="/">
-                    <img class="w-12"
+                    <img :style="logoStyle"
                          :src="siteSettingsStore.logo"
                          alt="logo" />
                   </nuxt-link>
@@ -139,6 +139,22 @@ const siteSettingsStore = useSiteSettingsStore();
 // Settings are now fetched globally in app.vue
 
 defineProps({});
+
+// Logo size computed property
+const logoStyle = computed(() => {
+  const isMobile = process.client && window.innerWidth <= 768;
+  const sizeStr = isMobile
+    ? siteSettingsStore.logoSizeMobile || "48,48"
+    : siteSettingsStore.logoSizeDesktop || "48,48";
+
+  const [width, height] = sizeStr.split(',').map(s => s.trim());
+
+  return {
+    width: `${width}px`,
+    height: `${height}px`,
+    objectFit: 'contain'
+  };
+});
 
 let searchText = ref("");
 const data = ref({});

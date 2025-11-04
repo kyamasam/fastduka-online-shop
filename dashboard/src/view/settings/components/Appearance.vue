@@ -67,6 +67,34 @@
                         <img :src="getImageUrl(localSettings.site_icon)" alt="Site Icon" class="h-8 w-8 object-contain" />
                     </div>
                 </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="logo_size_desktop"
+                               class="block text-sm font-semibold text-gray-900 mb-2">Logo Size - Desktop</label>
+                        <input id="logo_size_desktop"
+                               v-model="localSettings.logo_size_desktop"
+                               @input="validateAndUpdateSettings('logo_size_desktop')"
+                               type="text"
+                               placeholder="64,64"
+                               class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                               :class="{ 'border-red-500': logoSizeErrors.desktop }" />
+                        <p class="mt-1.5 text-xs text-gray-600">Format: width,height in pixels (e.g., 64,64)</p>
+                        <p v-if="logoSizeErrors.desktop" class="mt-1 text-xs text-red-600">{{ logoSizeErrors.desktop }}</p>
+                    </div>
+                    <div>
+                        <label for="logo_size_mobile"
+                               class="block text-sm font-semibold text-gray-900 mb-2">Logo Size - Mobile</label>
+                        <input id="logo_size_mobile"
+                               v-model="localSettings.logo_size_mobile"
+                               @input="validateAndUpdateSettings('logo_size_mobile')"
+                               type="text"
+                               placeholder="48,48"
+                               class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                               :class="{ 'border-red-500': logoSizeErrors.mobile }" />
+                        <p class="mt-1.5 text-xs text-gray-600">Format: width,height in pixels (e.g., 48,48)</p>
+                        <p v-if="logoSizeErrors.mobile" class="mt-1 text-xs text-red-600">{{ logoSizeErrors.mobile }}</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -83,7 +111,11 @@ export default {
     },
     data() {
         return {
-            localSettings: { ...this.settings }
+            localSettings: { ...this.settings },
+            logoSizeErrors: {
+                desktop: '',
+                mobile: ''
+            }
         }
     },
     watch: {
@@ -97,6 +129,37 @@ export default {
     methods: {
         updateSettings() {
             this.$emit('update:settings', this.localSettings)
+        },
+        validateLogoSize(value) {
+            if (!value) return 'This field is required'
+
+            const pattern = /^\d+,\d+$/
+            if (!pattern.test(value)) {
+                return 'Format must be: width,height (e.g., 64,64)'
+            }
+
+            const [width, height] = value.split(',').map(v => parseInt(v.trim()))
+
+            if (width < 10 || width > 500) {
+                return 'Width must be between 10 and 500 pixels'
+            }
+
+            if (height < 10 || height > 500) {
+                return 'Height must be between 10 and 500 pixels'
+            }
+
+            return ''
+        },
+        validateAndUpdateSettings(field) {
+            const value = this.localSettings[field]
+            const errorKey = field === 'logo_size_desktop' ? 'desktop' : 'mobile'
+
+            this.logoSizeErrors[errorKey] = this.validateLogoSize(value)
+
+            // Only update if validation passes
+            if (!this.logoSizeErrors[errorKey]) {
+                this.updateSettings()
+            }
         },
         async handleFileUpload(event, field) {
             const file = event.target.files[0]

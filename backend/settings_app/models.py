@@ -29,6 +29,8 @@ class SiteSettings(UtilColumnsModel):
     site_icon = models.ImageField(upload_to='site_icons/', null=True, blank=True)
     site_logo = models.ImageField(upload_to='site_logos/', null=True, blank=True)
     logo_text = models.CharField(max_length=255, null=True, blank=True)
+    logo_size_mobile = models.CharField(max_length=20, default="64,64", help_text="Logo size for mobile in pixels: width,height")
+    logo_size_desktop = models.CharField(max_length=20, default="64,64", help_text="Logo size for desktop in pixels: width,height")
     
     # Social Media
     facebook_url = models.URLField(max_length=255, null=True, blank=True)

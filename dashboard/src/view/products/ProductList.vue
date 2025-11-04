@@ -1,10 +1,12 @@
 <script setup>
 import BaseTable from "@/components/BaseTable.vue";
 import router from "@/routes";
-import { ArrowRight, Edit, Delete, Picture, Star } from "@element-plus/icons-vue";
-import { ref } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
 import store from "@/vuex/store";
+import { ArrowRight, Delete, Edit, Picture, Star } from "@element-plus/icons-vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { ref } from "vue";
+
+const baseTableRef = ref(null);
 
 const selectAction = (action, productId) => {
   router.push({ name: action, params: { productId: productId } });
@@ -63,7 +65,7 @@ const toggleFeatured = async (productId, productName, currentFeaturedStatus) => 
       }
     );
 
-    await store.dispatch('updateItem', {
+    await store.dispatch('patchData', {
       url: 'product',
       id: productId,
       data: { featured: newStatus }
@@ -71,7 +73,7 @@ const toggleFeatured = async (productId, productName, currentFeaturedStatus) => 
 
     ElMessage.success(`Product ${newStatus ? 'featured' : 'unfeatured'} successfully`);
 
-    window.location.reload();
+    baseTableRef.value?.refresh();
 
   } catch (error) {
     if (error !== 'cancel') {
@@ -112,25 +114,22 @@ const columns = ref([
 
 <template>
   <router-view />
-  <BaseTable
-    :columns="columns"
-    create-route-name="create-product"
-    fetchUrl="product"
-    title="Products"
-  >
+  <BaseTable ref="baseTableRef"
+             :columns="columns"
+             create-route-name="create-product"
+             fetchUrl="product"
+             title="Products">
     <template v-slot:bodyCell="slotProps">
       <template v-if="slotProps.column.key === 'name'">
         <div class="flex items-center gap-2">
-          <img
-            :alt="slotProps.text?.name"
-            :src="slotProps.text?.primary_photo"
-            class="h-10 w-auto"
-          />
+          <img :alt="slotProps.text?.name"
+               :src="slotProps.text?.primary_photo"
+               class="h-10 w-auto" />
           {{ slotProps.text?.name }}
-          <el-tag v-if="!slotProps.text?.in_stock" type="danger"
-            >Out Of Stock</el-tag
-          >
-          <el-tag v-if="slotProps.text?.in_stock" type="success">
+          <el-tag v-if="!slotProps.text?.in_stock"
+                  type="danger">Out Of Stock</el-tag>
+          <el-tag v-if="slotProps.text?.in_stock"
+                  type="success">
             <span class="font-bold">{{ slotProps.text?.inventory }}</span>
             In Stock
           </el-tag>
@@ -143,10 +142,8 @@ const columns = ref([
       </template>
 
       <template v-if="slotProps.column.key === 'price'">
-        <div
-          v-if="slotProps.text?.on_sale && slotProps.text?.sale_price > 0"
-          class="flex items-center gap-2"
-        >
+        <div v-if="slotProps.text?.on_sale && slotProps.text?.sale_price > 0"
+             class="flex items-center gap-2">
           <div class="font-semibold">{{ slotProps.text?.sale_price }}</div>
           <div class="line-through text-primary-400">
             {{ slotProps.text?.selling_price }}
@@ -165,63 +162,53 @@ const columns = ref([
 
       <template v-if="slotProps.column.key === 'actions'">
         <div class="flex gap-2">
-          <el-button
-            class="bg-blue-500 border-none hover:bg-blue-600 focus:bg-blue-600 rounded-none"
-            type="primary"
-            size="default"
-            @click="selectAction('edit-product', slotProps.text?.id)"
-            title="Edit Product"
-          >
+          <el-button class="bg-blue-500 border-none hover:bg-blue-600 focus:bg-blue-600 rounded-none"
+                     type="primary"
+                     size="default"
+                     @click="selectAction('edit-product', slotProps.text?.id)"
+                     title="Edit Product">
             <el-icon>
               <Edit />
             </el-icon>
           </el-button>
 
-          <el-button
-            class="bg-green-500 border-none hover:bg-green-600 focus:bg-green-600 rounded-none"
-            type="primary"
-            size="default"
-            @click="manageProductImages(slotProps.text?.id)"
-            title="Manage Images"
-          >
+          <el-button class="bg-green-500 border-none hover:bg-green-600 focus:bg-green-600 rounded-none"
+                     type="primary"
+                     size="default"
+                     @click="manageProductImages(slotProps.text?.id)"
+                     title="Manage Images">
             <el-icon>
               <Picture />
             </el-icon>
           </el-button>
 
-          <el-button
-            class="bg-primary-400 border-none hover:bg-primary-500 focus:bg-primary-500 rounded-none"
-            type="primary"
-            size="default"
-            @click="selectAction('add-inventory', slotProps.text?.id)"
-            title="Add Inventory"
-          >
+          <el-button class="bg-primary-400 border-none hover:bg-primary-500 focus:bg-primary-500 rounded-none"
+                     type="primary"
+                     size="default"
+                     @click="selectAction('add-inventory', slotProps.text?.id)"
+                     title="Add Inventory">
             <el-icon>
               <arrow-right />
             </el-icon>
           </el-button>
 
-          <el-button
-            :class="slotProps.text?.featured
-              ? 'bg-yellow-500 border-none hover:bg-yellow-600 focus:bg-yellow-600 rounded-none'
-              : 'bg-gray-500 border-none hover:bg-yellow-500 focus:bg-yellow-500 rounded-none'"
-            type="primary"
-            size="default"
-            @click="toggleFeatured(slotProps.text?.id, slotProps.text?.name, slotProps.text?.featured)"
-            :title="slotProps.text?.featured ? 'Unfeature Product' : 'Feature Product'"
-          >
+          <el-button :class="slotProps.text?.featured
+            ? 'bg-yellow-500 border-none hover:bg-yellow-600 focus:bg-yellow-600 rounded-none'
+            : 'bg-gray-500 border-none hover:bg-yellow-500 focus:bg-yellow-500 rounded-none'"
+                     type="primary"
+                     size="default"
+                     @click="toggleFeatured(slotProps.text?.id, slotProps.text?.name, slotProps.text?.featured)"
+                     :title="slotProps.text?.featured ? 'Unfeature Product' : 'Feature Product'">
             <el-icon>
               <Star />
             </el-icon>
           </el-button>
 
-          <el-button
-            class="bg-red-500 border-none hover:bg-red-600 focus:bg-red-600 rounded-none"
-            type="danger"
-            size="default"
-            @click="deleteProduct(slotProps.text?.id, slotProps.text?.name)"
-            title="Delete Product"
-          >
+          <el-button class="bg-red-500 border-none hover:bg-red-600 focus:bg-red-600 rounded-none"
+                     type="danger"
+                     size="default"
+                     @click="deleteProduct(slotProps.text?.id, slotProps.text?.name)"
+                     title="Delete Product">
             <el-icon>
               <Delete />
             </el-icon>

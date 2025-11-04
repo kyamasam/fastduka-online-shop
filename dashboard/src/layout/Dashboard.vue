@@ -28,7 +28,7 @@
                   <img
                     v-if="settingsData?.site_logo"
                     alt="logo"
-                    class="w-16"
+                    :style="logoStyle"
                     :src="settingsData?.site_logo"
                   />
                   <p v-else>{{ siteData?.title }}</p>
@@ -280,6 +280,22 @@ const topMenu = computed(() => storeObj.state.themeLayout.topMenu);
 const vendorStore = computed({
   get: () => storeObj.state.mainRequests.vendor,
   set: (value) => (storeObj.state.mainRequests.vendor = value),
+});
+
+// Logo size computed property
+const logoStyle = computed(() => {
+  const isMobile = innerWidth.value <= 768;
+  const sizeStr = isMobile
+    ? settingsData.value?.logo_size_mobile || "64,64"
+    : settingsData.value?.logo_size_desktop || "64,64";
+
+  const [width, height] = sizeStr.split(',').map(s => s.trim());
+
+  return {
+    width: `${width}px`,
+    height: `${height}px`,
+    objectFit: 'contain'
+  };
 });
 
 // Set initial collapsed state based on window width
