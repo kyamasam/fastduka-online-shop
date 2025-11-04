@@ -11,7 +11,12 @@
 </template>
 
 <script setup lang="ts">
-useSeoMeta({ title: "Checkout Page" });
+// Use dynamic SEO with site settings
+useDynamicSeo({
+  title: "Checkout",
+  description: "Complete your order for fresh meat delivery. Secure checkout and fast delivery in Kenya.",
+  keywords: "checkout, meat delivery, online payment Kenya, butchery order",
+});
 </script>
 
 

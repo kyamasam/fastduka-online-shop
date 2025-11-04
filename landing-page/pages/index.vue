@@ -35,16 +35,9 @@ definePageMeta({
   layout: false,
 });
 
-useSeoMeta({
-  title: "Fastduka: Order Meat In Kenya Order Beer in Kenya",
-  ogTitle: "Fastduka: Order Meat in Kenya and Order Liquor Kenya",
-  keywords:
-    "Order Beef online, Fish online, Chicken online, Mutton online, Steak Nairobi, meat home delivery",
-  description:
-    "Online butchery in Kenya - Order fresh meat. Goat, Beef, pork, chicken",
-  ogDescription:
-    "Online butchery in Kenya - Order fresh meat. Goat, Beef, pork, chicken",
-  ogImage: "/public/images/logo-red.svg",
-  twitterCard: "summary_large_image",
+// Use dynamic SEO with site settings
+useDynamicSeo({
+  title: "Home",
+  keywords: "Order Beef online, Fish online, Chicken online, Mutton online, Steak Nairobi, meat home delivery",
 });
 </script>

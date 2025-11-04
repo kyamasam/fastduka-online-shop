@@ -1,7 +1,7 @@
 <script setup>
 import BaseTable from "@/components/BaseTable.vue";
 import router from "@/routes";
-import { ArrowRight, Edit, Delete, Picture } from "@element-plus/icons-vue";
+import { ArrowRight, Edit, Delete, Picture, Star } from "@element-plus/icons-vue";
 import { ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import store from "@/vuex/store";
@@ -48,6 +48,39 @@ const manageProductImages = (productId) => {
   });
 };
 
+const toggleFeatured = async (productId, productName, currentFeaturedStatus) => {
+  try {
+    const newStatus = !currentFeaturedStatus;
+    const action = newStatus ? 'feature' : 'unfeature';
+
+    await ElMessageBox.confirm(
+      `Are you sure you want to ${action} "${productName}"?`,
+      `${newStatus ? 'Feature' : 'Unfeature'} Product`,
+      {
+        confirmButtonText: newStatus ? 'Feature' : 'Unfeature',
+        cancelButtonText: 'Cancel',
+        type: 'warning'
+      }
+    );
+
+    await store.dispatch('updateItem', {
+      url: 'product',
+      id: productId,
+      data: { featured: newStatus }
+    });
+
+    ElMessage.success(`Product ${newStatus ? 'featured' : 'unfeatured'} successfully`);
+
+    window.location.reload();
+
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('Failed to update featured status');
+      console.error('Toggle featured error:', error);
+    }
+  }
+};
+
 const columns = ref([
   {
     title: "Name",
@@ -63,6 +96,11 @@ const columns = ref([
     title: "Price",
     dataIndex: "",
     key: "price",
+  },
+  {
+    title: "Featured",
+    dataIndex: "featured",
+    key: "featured",
   },
   {
     title: "Actions",
@@ -119,6 +157,12 @@ const columns = ref([
         </div>
       </template>
 
+      <template v-if="slotProps.column.key === 'featured'">
+        <el-tag :type="slotProps.text?.featured ? 'success' : 'info'">
+          {{ slotProps.text?.featured ? 'Featured' : 'Not Featured' }}
+        </el-tag>
+      </template>
+
       <template v-if="slotProps.column.key === 'actions'">
         <div class="flex gap-2">
           <el-button
@@ -154,6 +198,20 @@ const columns = ref([
           >
             <el-icon>
               <arrow-right />
+            </el-icon>
+          </el-button>
+
+          <el-button
+            :class="slotProps.text?.featured
+              ? 'bg-yellow-500 border-none hover:bg-yellow-600 focus:bg-yellow-600 rounded-none'
+              : 'bg-gray-500 border-none hover:bg-yellow-500 focus:bg-yellow-500 rounded-none'"
+            type="primary"
+            size="default"
+            @click="toggleFeatured(slotProps.text?.id, slotProps.text?.name, slotProps.text?.featured)"
+            :title="slotProps.text?.featured ? 'Unfeature Product' : 'Feature Product'"
+          >
+            <el-icon>
+              <Star />
             </el-icon>
           </el-button>
 

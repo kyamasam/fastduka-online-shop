@@ -151,7 +151,7 @@ if (!error.value) {
 
 // Fetch categories
 const { data: filtersData, error: filtersError } = await getDataUnauthed(
-  "/category?category_type=MEAT"
+  "/category"
 );
 console.log("Fetch categories", filtersData?.value?.results);
 if (filtersError.value) {

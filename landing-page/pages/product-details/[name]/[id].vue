@@ -17,13 +17,18 @@
 
 <script setup>
 import { useProductStore } from "@/pinia/useProductStore";
+import { useSiteSettingsStore } from "@/pinia/useSiteSettingsStore";
+
 const route = useRoute();
 const config = useRuntimeConfig();
-
 const productStore = useProductStore();
+const siteSettingsStore = useSiteSettingsStore();
+
+// Ensure site settings are loaded
+await siteSettingsStore.fetchSettings();
 
 const baseUrl =
-  config.public.siteUrl || "https://fastduka.netlify.app";
+  config.public.siteUrl || siteSettingsStore.settings?.site_link || "https://fastduka.netlify.app";
 const currentUrl = `${baseUrl}/product-details/${route.params.name}/${route.params.id}`;
 
 // Fetch product data using composable pattern
@@ -49,7 +54,7 @@ const setupSEO = (product) => {
     sku: product.id,
     brand: {
       "@type": "Brand",
-      name: product.category?.name || "Fastduka World",
+      name: product.category?.name || siteSettingsStore.settings?.title || "Fastduka",
     },
     offers: {
       "@type": "Offer",
@@ -124,62 +129,20 @@ const setupSEO = (product) => {
     ],
   };
 
-  // Set meta tags and schemas
+  // Use dynamic SEO with site settings
+  useDynamicSeo({
+    title: `Order ${product.name} online in Kenya`,
+    description: `Buy ${product.name} online in Kenya. ${product.description?.slice(0, 150)}...`,
+    keywords: `${product.name}, buy ${product.name}, ${product.category?.name}, meat delivery Kenya, online meat shop`,
+    ogTitle: `Order ${product.name} online in Kenya`,
+    ogDescription: product.description,
+    ogImage: product.primary_photo,
+    ogType: "product",
+    canonical: currentUrl,
+  });
+
+  // Set product-specific structured data
   useHead({
-    title: `Order ${product.name} online in Kenya | Fastduka World`,
-    meta: [
-      {
-        name: "description",
-        content: `Buy ${product.name
-          } online in Kenya. ${product.description?.slice(0, 150)}...`,
-      },
-      {
-        name: "keywords",
-        content: `${product.name}, buy ${product.name}, ${product.category?.name}, meat delivery Kenya, online meat shop`,
-      },
-      // Open Graph
-      {
-        property: "og:title",
-        content: `Order ${product.name} online in Kenya | Fastduka`,
-      },
-      {
-        property: "og:description",
-        content: product.description,
-      },
-      {
-        property: "og:image",
-        content: product.primary_photo,
-      },
-      {
-        property: "og:url",
-        content: currentUrl,
-      },
-      {
-        property: "og:type",
-        content: "product",
-      },
-      {
-        property: "og:site_name",
-        content: "Fastduka",
-      },
-      // Twitter
-      {
-        name: "twitter:card",
-        content: "summary_large_image",
-      },
-      {
-        name: "twitter:title",
-        content: `Order ${product.name} online in Kenya | Fastduka`,
-      },
-      {
-        name: "twitter:description",
-        content: product.description,
-      },
-      {
-        name: "twitter:image",
-        content: product.primary_photo,
-      },
-    ],
     script: [
       {
         type: "application/ld+json",

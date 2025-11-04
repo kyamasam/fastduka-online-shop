@@ -2,24 +2,52 @@ from django.db.models import Sum
 from rest_framework import serializers
 
 from inventory.models import Inventory
-from products.models import Category, Product, ProductPhoto, ProductVariant, ProductVariantPhoto, ProductReview
+from products.models import Category, Product, ProductPhoto, ProductVariant, ProductVariantPhoto, ProductReview, CategoryType
 from users.models import User
 from django.db import transaction
 from django.core.validators import EmailValidator
 from django.core.exceptions import ValidationError
 
+
+class CategoryTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoryType
+        fields = ["id", "name", "description", "is_active", "created_at", "updated_at"]
+
+
 class CategorySerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField(read_only=True)
-
+    category_type = CategoryTypeSerializer(read_only=True)
+    category_type_id = serializers.PrimaryKeyRelatedField(
+        queryset=CategoryType.objects.all(), 
+        write_only=True, 
+        source='category_type'
+    )
+    parent_obj = serializers.SerializerMethodField(read_only=True)
+    
+    def get_parent_obj(self, obj):
+        # Return the parent data if it exists
+        if obj.parent is not None:
+            val = Category.objects.filter(pk=obj.parent.id).first()
+            if val is not None:
+                return {
+                    
+                    "name":val.name,
+                    }
+            return None
+        return None
+    
     def get_children(self, obj):
         children = obj.category_set.all()
         return CategorySerializer(children, many=True).data
 
     class Meta:
         model = Category
-        fields = ["id", "name", "parent", "photo", "children", "created_at", "updated_at"]
-
-
+        fields = [
+            "id", "name", "parent", "parent_obj", "photo", 
+            "children", "category_type", "category_type_id", 
+            "created_at", "updated_at"
+        ]
 class ProductVariantSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductVariant
@@ -31,6 +59,8 @@ class ProductSerializer(serializers.ModelSerializer):
     variants = serializers.SerializerMethodField(read_only=True)
     category = CategorySerializer(read_only=True)
     category_id = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
+    product_type = CategoryTypeSerializer(read_only=True)
+    product_type_id = serializers.PrimaryKeyRelatedField(queryset=CategoryType.objects.all(), write_only=True, source='product_type')
     photos = serializers.SerializerMethodField(read_only=True)
     inventory = serializers.SerializerMethodField(read_only=True)
     on_sale = serializers.SerializerMethodField(read_only=True)
@@ -40,8 +70,8 @@ class ProductSerializer(serializers.ModelSerializer):
     review_stats = serializers.SerializerMethodField()
     class Meta:
         model = Product
-        fields = ["id", "name","featured", "description","additional_information","seo_description", "primary_photo", "category", "category_id", "selling_price",
-                  "sale_price", "allowable_discount", "on_sale", "in_stock", "variants", "photos", "inventory","reviews",
+        fields = ["id", "name","featured", "description","additional_information","seo_description", "primary_photo", "category", "category_id",
+                  "product_type", "product_type_id", "selling_price", "sale_price", "allowable_discount", "on_sale", "in_stock", "variants", "photos", "inventory","reviews",
                   "created_at", "updated_at", "buying_price", "review_stats"]
 
     def get_in_stock(self, obj):
@@ -64,11 +94,13 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         category = validated_data.pop("category_id")
-        product = Product.objects.create(category=category, **validated_data)
+        product_type = validated_data.pop("product_type")
+        product = Product.objects.create(category=category, product_type=product_type, **validated_data)
         return product
 
     def update(self, instance, validated_data):
         category = validated_data.pop("category_id", None)
+        product_type = validated_data.pop("product_type", None)
 
         # Update fields manually
         for attr, value in validated_data.items():
@@ -76,6 +108,8 @@ class ProductSerializer(serializers.ModelSerializer):
 
         if category:
             instance.category = category
+        if product_type:
+            instance.product_type = product_type
 
         instance.save()
         return instance

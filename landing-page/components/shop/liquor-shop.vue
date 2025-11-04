@@ -106,27 +106,26 @@ const filterString = ref("");
 const generateFilterString = () => {
   console.log("filter obj", store.filterObj);
   let tempFilterString = "";
+  let isFirstParam = true;
 
   Object.keys(store.filterObj).map((key, index) => {
-    let filter_prefix = "?";
-    if (index === 0) {
-      filter_prefix = "?";
-    } else {
-      filter_prefix = "&";
-    }
+    const filter_prefix = isFirstParam ? "?" : "&";
     if (key === "category") {
       store.filterObj.category.map((i: any) => {
         tempFilterString += `${filter_prefix}category_id=${i}`;
+        isFirstParam = false;
       });
     }
     if (key === "priceValue") {
       tempFilterString += `${filter_prefix}selling_price__gte=${store.filterObj.priceValue[0]}`;
       tempFilterString += `&selling_price__lte=${store.filterObj.priceValue[1]}`;
+      isFirstParam = false;
     }
     if (key === "status") {
       Object.keys(store.filterObj.status).map((key: any) => {
         if (store.filterObj.status[key]) {
-          tempFilterString += `${filter_prefix}${key}=` + true;
+          tempFilterString += `${isFirstParam ? "?" : "&"}${key}=` + true;
+          isFirstParam = false;
         }
       });
     }

@@ -64,6 +64,25 @@
                        size="large" />
     </el-form-item>
 
+    <!-- Product Type Field -->
+    <div class="z-50">
+      <el-form-item :rules="[{ required: true, message: 'Please select a product type', trigger: 'blur' }]"
+                    label="Product Type"
+                    prop="product_type_id">
+        <el-select v-model="formState.product_type_id"
+                   :loading="productTypeLoader"
+                   class="w-full rounded-none z-50"
+                   placeholder="Select Product Type"
+                   size="large"
+                   @focus="fetchProductTypes">
+          <el-option v-for="productType in productTypes"
+                     :key="productType.value"
+                     :label="productType.label"
+                     :value="productType.value" />
+        </el-select>
+      </el-form-item>
+    </div>
+
     <!-- Category Field -->
     <div class="z-50">
       <el-form-item :rules="[{ required: true, message: 'Please select a product category', trigger: 'blur' }]"
@@ -164,6 +183,8 @@ export default {
       registerLoading: false,
       categories: [],
       categoryLoader: false,
+      productTypes: [],
+      productTypeLoader: false,
       productLoader: false,
       counter: 0,
       loadingProfilePhotoUpload: false,
@@ -195,10 +216,20 @@ export default {
           this.categoryLoader = false;
         });
     },
-    
-    /**
-     * Fetch product details when editing an existing product
-     */
+    fetchProductTypes() {
+      this.productTypeLoader = true;
+      store.dispatch("fetchList", { url: "category-type" })
+        .then((res) => {
+          this.productTypes = res.data.results.map((productType) => ({
+            label: productType.name,
+            value: productType.id
+          }));
+          this.productTypeLoader = false;
+        })
+        .catch(() => {
+          this.productTypeLoader = false;
+        });
+    },
     fetchProduct() {
       const productId = this.$route.params.productId;
       store.dispatch("fetchSingleItem", { url: "product", id: productId })
