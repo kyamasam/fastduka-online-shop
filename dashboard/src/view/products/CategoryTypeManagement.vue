@@ -1,8 +1,8 @@
 <template>
   <div class="container py-8 px-4">
     <!-- Header with bulk actions -->
-    <div class="mb-6 flex justify-between items-center">
-      <h1 class="text-2xl font-bold text-gray-900">Category Types</h1>
+    <div class="mb-6 flex justify-end items-center">
+      <!-- <h1 class="text-2xl font-bold text-gray-900">Category Types</h1> -->
       <div class="flex gap-2">
         <el-button v-if="selectedCategoryTypes.length > 0"
                    type="danger"
@@ -27,7 +27,7 @@
     <!-- Category Types Table -->
     <BaseTable :columns="columns"
                fetchUrl="category-type"
-               title="Category Types"
+               title=""
                :enableSelection="true"
                @selection-change="selectedCategoryTypes = $event">
       <template v-slot:bodyCell="slotProps">
@@ -120,8 +120,8 @@
 <script setup>
 import BaseTable from "@/components/BaseTable.vue"
 import store from '@/vuex/store'
-import { Plus, Edit, Delete } from '@element-plus/icons-vue'
-import { ElMessageBox, ElNotification, ElMessage } from 'element-plus'
+import { Delete, Edit, Plus } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import { onMounted, reactive, ref } from 'vue'
 
 const submitting = ref(false)

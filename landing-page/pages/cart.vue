@@ -11,5 +11,10 @@
 </template>
 
 <script setup lang="ts">
-useSeoMeta({ title: "Cart Page" });
+// Use dynamic SEO with site settings
+useDynamicSeo({
+  title: "Shopping Cart",
+  description: "Review your cart and proceed to checkout for fresh meat delivery in Kenya.",
+  keywords: "shopping cart, meat order, checkout Kenya, online butchery cart",
+});
 </script>

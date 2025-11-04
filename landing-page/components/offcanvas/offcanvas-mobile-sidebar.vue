@@ -19,7 +19,7 @@
         >
           <div class="offcanvas__logo logo">
             <nuxt-link href="/">
-              <img src="/img/logo/logo-red.svg" alt="logo" />
+              <img class="w-12" :src="siteSettingsStore.logo" alt="logo" />
             </nuxt-link>
           </div>
         </div>
@@ -60,8 +60,10 @@
 
 <script setup lang="ts">
 import { useUtilityStore } from "@/pinia/useUtilityStore";
+import { useSiteSettingsStore } from "@/pinia/useSiteSettingsStore";
 const props = defineProps<{ productType: string }>();
 const utilsStore = useUtilityStore();
+const siteSettingsStore = useSiteSettingsStore();
 
 let isToggleActive = ref<string>("");
 // handle active

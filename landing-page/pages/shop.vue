@@ -11,5 +11,10 @@
 </template>
 
 <script setup lang="ts">
-useSeoMeta({ title: "Shop Fastduka" });
+// Use dynamic SEO with site settings
+useDynamicSeo({
+  title: "Shop",
+  description: "Browse our wide selection of fresh meat products. Order online for home delivery in Kenya.",
+  keywords: "shop meat online, butchery products, beef, chicken, goat meat, pork, Kenya",
+});
 </script>

@@ -111,32 +111,37 @@ const normalizeProduct = (product: IProduct) => {
 
 const generateFilterString = () => {
   let tempFilterString = "";
+  let isFirstParam = true;
 
   Object.keys(filterStore.filterObj).forEach((key, index) => {
-    const filter_prefix = "&";
+    const filter_prefix = isFirstParam ? "?" : "&";
 
     if (key === "category") {
       const categories_list = filterStore.filterObj.category.join(",");
       if (categories_list) {
         tempFilterString += `${filter_prefix}category_id__in=${categories_list}`;
+        isFirstParam = false;
       }
     }
 
     if (key === "priceValue") {
       tempFilterString += `${filter_prefix}selling_price__gte=${filterStore.filterObj.priceValue[0]}`;
       tempFilterString += `&selling_price__lte=${filterStore.filterObj.priceValue[1]}`;
+      isFirstParam = false;
     }
 
     if (key === "status") {
       Object.keys(filterStore.filterObj.status).forEach((statusKey: any) => {
         if (filterStore.filterObj.status[statusKey]) {
-          tempFilterString += `${filter_prefix}${statusKey}=true`;
+          tempFilterString += `${isFirstParam ? "?" : "&"}${statusKey}=true`;
+          isFirstParam = false;
         }
       });
     }
 
     if (key === "page") {
       tempFilterString += `${filter_prefix}page=${filterStore.filterObj?.page}`;
+      isFirstParam = false;
     }
   });
 
@@ -159,7 +164,7 @@ const fetchProducts = async () => {
       error: fetchError,
       execute,
     } = getDataUnauthed(
-      `/product?product_type=${product_type}${filterString.value}`
+      `/product${filterString.value}`
     );
 
     await execute();

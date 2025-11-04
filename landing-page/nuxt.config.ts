@@ -42,7 +42,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: "Fastduka Online - The Best Meat In Kenya",
+      title: "Loading...", // This will be replaced by dynamic SEO
       charset: "utf-8",
       viewport: "width=device-width, initial-scale=1",
     },

@@ -81,7 +81,7 @@ const columns = ref([
         <h1 class="text-2xl font-bold text-gray-900">
           {{ currentView === 'categories' ? 'Categories' : 'Category Types' }}
         </h1>
-        <div class="ml-4 inline-flex rounded-lg border border-gray-300 overflow-hidden">
+        <div class="ml-4  inline-flex rounded-lg border border-gray-300 overflow-hidden">
           <button :class="[
             'px-4 py-2 text-sm font-medium transition-colors',
             currentView === 'categories'

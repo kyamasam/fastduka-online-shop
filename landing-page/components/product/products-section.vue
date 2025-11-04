@@ -146,7 +146,7 @@ watch(activeTab, async () => {
 
 // Fetch categories first
 const { data: filtersData, error: filtersError } = await getDataUnauthed(
-  "/category?category_type=MEAT"
+  "/category"
 );
 
 if (filtersError.value) {

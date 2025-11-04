@@ -44,10 +44,10 @@ const setCheckBox = (value, index) => {
 };
 
 // Fetch categories
-let category_type = route.name === "shop" ? "MEAT" : "LIQUOR";
+// let category_type = route.name === "shop" ? "MEAT" : "LIQUOR";
 
 // Add null check and default values
-const response = await getDataUnauthed("/category?category_type=" + category_type);
+const response = await getDataUnauthed("/category");
 
 // Handle the case where response might be undefined or null
 const filtersData = response?.data || ref(null);

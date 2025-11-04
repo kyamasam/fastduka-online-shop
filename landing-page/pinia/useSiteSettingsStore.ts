@@ -168,18 +168,47 @@ export const useSiteSettingsStore = defineStore("siteSettings", () => {
     error.value = null;
 
     try {
-       const {
+      const {
         data,
         error: fetchError,
         execute,
+        pending,
       } = getDataUnauthed("/settings/");
-      await execute(); 
-      console.log("Site settings response:", data);
+
+      // Wait for the request to complete
+      await execute();
+
+      // Wait for pending to be false (ensures data is available)
+      while (pending.value) {
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+
+      if (fetchError.value) {
+        throw fetchError.value;
+      }
+
+      console.log("Site settings response:", data.value);
       settings.value = data.value as SiteSettings;
       return settings.value;
     } catch (err) {
       error.value = err;
       console.error("Error fetching site settings:", err);
+      // Use fallback settings during SSR if fetch fails
+      if (process.server) {
+        settings.value = {
+          title: "Fastduka",
+          description: "Online butchery in Kenya - Order fresh meat. Goat, Beef, pork, chicken",
+          site_logo: "/img/logo/logo-red.svg",
+          site_link: "https://fastduka.co.ke",
+          primary_color: "#2E8B57",
+          secondary_color: "#ffffff",
+          currency_symbol: "Ksh",
+          location: "Nairobi, Kenya",
+          contact_email: "",
+          contact_phone: "",
+        } as any;
+        return settings.value;
+      }
       throw err;
     } finally {
       loading.value = false;

@@ -35,16 +35,9 @@ definePageMeta({
   layout: false,
 });
 
-useSeoMeta({
-  title: "Lush",
-  ogTitle: "Fastduka",
-  keywords:
-    "Order Beef online, Fish online, Chicken online, Mutton online, Steak Nairobi, meat home delivery",
-  description:
-    "Online butchery in Kenya - Order fresh meat. Goat, Beef, pork, chicken",
-  ogDescription:
-    "Online butchery in Kenya - Order fresh meat. Goat, Beef, pork, chicken",
-  ogImage: "/public/images/logo-red.svg",
-  twitterCard: "summary_large_image",
+// Use dynamic SEO with site settings
+useDynamicSeo({
+  title: "Home",
+  keywords: "Order Beef online, Fish online, Chicken online, Mutton online, Steak Nairobi, meat home delivery",
 });
 </script>
