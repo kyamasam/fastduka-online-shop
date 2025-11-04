@@ -149,11 +149,9 @@
   </el-form>
 
   <!-- Category Form Popup -->
-  <CategoryForm 
-    :visible="showCategoryForm" 
-    @close="showCategoryForm = false"
-    @category-added="handleCategoryAdded"
-  />
+  <CategoryForm :visible="showCategoryForm"
+                @close="showCategoryForm = false"
+                @category-added="handleCategoryAdded" />
 </template>
 
 <script>
@@ -162,9 +160,10 @@ import BaseDialog from "@/components/BaseDialog.vue";
 import BaseLoader from "@/components/BaseLoader";
 import { baseUrl } from "@/utility/constants";
 import store from "@/vuex/store";
+import { Plus, Upload } from "@element-plus/icons-vue";
 import axios from "axios";
 import { ElNotification } from "element-plus";
-
+import CategoryForm from "./CategoryForm";
 export default {
   name: "ProductForm",
   components: {
@@ -242,14 +241,14 @@ export default {
           this.productLoader = false;
         });
     },
-    
+
     /**
      * Handle file removal from upload component
      */
     handleRemove() {
       this.fileList = [];
     },
-    
+
     /**
      * Track changes between original and current form state for PATCH requests
      */
@@ -279,7 +278,7 @@ export default {
 
       return changes;
     },
-    
+
     /**
      * Handle form submission (create or update product)
      */
@@ -294,7 +293,7 @@ export default {
         });
         return;
       }
-      
+
       const formData = new FormData();
 
       // Append each file to the formData if it meets the size condition
@@ -314,7 +313,7 @@ export default {
       }
 
       const isEditMode = this.$route.name === 'edit-product';
-      
+
       if (isEditMode) {
         // In edit mode, we might only want to send changed fields
         // Also, don't try to update primary_photo if not changed
@@ -337,7 +336,7 @@ export default {
         // Retrieve auth data from localStorage
         const authData = JSON.parse(localStorage.getItem("piczanguAuthData"));
         let resp;
-        
+
         if (isEditMode) {
           const productId = this.$route?.params?.productId;
           resp = await axios.patch(`${baseUrl}product/${productId}/`, formData, {
@@ -368,7 +367,7 @@ export default {
         }
 
         console.log("Success:", resp);
-        
+
         // Navigate back to product list
         router.push({ name: 'products' });
       } catch (err) {
@@ -382,7 +381,7 @@ export default {
         this.registerLoading = false;
       }
     },
-    
+
     /**
      * Handle newly added category from CategoryForm
      * @param {Object} newCategory - The newly created category
@@ -393,10 +392,10 @@ export default {
         label: newCategory.name,
         value: newCategory.id
       });
-      
+
       // Select the newly created category
       this.formState.category_id = newCategory.id;
-      
+
       // Show success notification
       notification["success"]({
         message: "Success",
@@ -421,7 +420,7 @@ export default {
       // Fetch product data if editing
       this.fetchProduct();
     }
-    
+
     // Note: Category form is NOT initialized here - it will only show when the plus icon is clicked
   }
 };
