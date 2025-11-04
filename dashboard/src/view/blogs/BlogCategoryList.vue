@@ -45,7 +45,7 @@ const deleteCategory = async (categoryId, categoryName) => {
     });
 
     ElMessage.success('Category deleted successfully');
-    window.location.reload();
+    await fetchCategories(); // Refresh the data
 
   } catch (error) {
     if (error !== 'cancel') {
@@ -72,7 +72,7 @@ const saveCategory = async () => {
       ElMessage.success('Category updated successfully');
     } else {
       // Create new category
-      await store.dispatch('createData', {
+      await store.dispatch('postData', {
         url: 'blog-categories',
         data: categoryForm.value
       });
@@ -80,7 +80,7 @@ const saveCategory = async () => {
     }
 
     cancelForm();
-    window.location.reload();
+    await fetchCategories(); // Refresh the data
 
   } catch (error) {
     ElMessage.error(editingCategory.value ? 'Failed to update category' : 'Failed to create category');
@@ -143,14 +143,20 @@ const formatDate = (dateString) => {
 const categoryList = ref([]);
 const loading = ref(false);
 
-onMounted(() => {
+const fetchCategories = async () => {
   loading.value = true;
-  store.dispatch("fetchList", { url: "blog-categories" }).then((res) => {
+  try {
+    const res = await store.dispatch("fetchList", { url: "blog-categories" });
     categoryList.value = res?.data?.results || res?.data || [];
+  } catch (error) {
+    console.error('Fetch categories error:', error);
+  } finally {
     loading.value = false;
-  }).catch(() => {
-    loading.value = false;
-  });
+  }
+};
+
+onMounted(() => {
+  fetchCategories();
 });
 
 const dataSource = computed(() => {
@@ -161,82 +167,76 @@ const dataSource = computed(() => {
 <template>
   <div class="blog-category-list">
     <!-- Create/Edit Form Modal -->
-    <el-dialog
-      v-model="showCreateForm"
-      :title="editingCategory ? 'Edit Category' : 'Create New Category'"
-      width="500px"
-      :before-close="cancelForm"
-    >
-      <el-form
-        ref="formRef"
-        :model="categoryForm"
-        label-width="100px"
-        @submit.prevent="saveCategory"
-      >
-        <el-form-item label="Name" required>
-          <el-input
-            v-model="categoryForm.name"
-            placeholder="Enter category name"
-            :maxlength="200"
-            show-word-limit
-          />
+    <el-dialog v-model="showCreateForm"
+               :title="editingCategory ? 'Edit Category' : 'Create New Category'"
+               width="500px"
+               :before-close="cancelForm">
+      <el-form ref="formRef"
+               :model="categoryForm"
+               label-width="100px"
+               @submit.prevent="saveCategory">
+        <el-form-item label="Name"
+                      required>
+          <el-input v-model="categoryForm.name"
+                    placeholder="Enter category name"
+                    :maxlength="200"
+                    show-word-limit />
         </el-form-item>
       </el-form>
 
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="cancelForm">Cancel</el-button>
-          <el-button type="primary" @click="saveCategory">
+          <el-button type="primary"
+                     @click="saveCategory">
             {{ editingCategory ? 'Update' : 'Create' }}
           </el-button>
         </span>
       </template>
     </el-dialog>
 
-    <BaseTable
-      ref="baseTableRef"
-      :columns="columns"
-      :data-source="dataSource"
-      :loading="loading"
-      :show-search="true"
-      :show-other-items="true"
-      title="Blog Categories"
-    >
+    <BaseTable ref="baseTableRef"
+               fetch-url="blog-categories"
+               :columns="columns"
+               :data-source="dataSource"
+               :loading="loading"
+               :show-search="true"
+               :show0ther-items="true"
+               title="Blog Categories">
       <template #bodyCell="{ column, text, record }">
         <template v-if="column.key === 'name'">
-          <span class="font-medium text-gray-900">{{ record.name }}</span>
+          <span class="font-medium text-gray-900">{{ text }}</span>
         </template>
 
         <template v-else-if="column.key === 'created_at'">
-          <span class="text-sm text-gray-600">{{ formatDate(record.created_at) }}</span>
+          <span class="text-sm text-gray-600">{{ formatDate(text) }}</span>
         </template>
 
         <template v-else-if="column.key === 'updated_at'">
-          <span class="text-sm text-gray-600">{{ formatDate(record.updated_at) }}</span>
+          <!-- sdsd {{ text }} -->
+          <span class="text-sm text-gray-600">{{ formatDate(text) }}</span>
         </template>
 
         <template v-else-if="column.key === 'actions'">
           <div class="flex gap-2">
-            <el-tooltip content="Edit Category" placement="top">
-              <el-button
-                type="warning"
-                size="small"
-                circle
-                @click="selectAction('edit', record.id)"
-                class="bg-yellow-500 hover:bg-yellow-600"
-              >
+            <el-tooltip content="Edit Category"
+                        placement="top">
+              <el-button type="warning"
+                         size="small"
+                         circle
+                         @click="selectAction('edit', record.id)"
+                         class="bg-yellow-500 hover:bg-yellow-600">
                 <Edit class="w-4 h-4" />
               </el-button>
             </el-tooltip>
 
-            <el-tooltip content="Delete Category" placement="top">
-              <el-button
-                type="danger"
-                size="small"
-                circle
-                @click="deleteCategory(record.id, record.name)"
-                class="bg-red-500 hover:bg-red-600"
-              >
+            <el-tooltip content="Delete Category"
+                        placement="top">
+              <el-button type="danger"
+                         size="small"
+                         circle
+                         @click="deleteCategory(record.id, record.name)"
+                         class="bg-red-500 hover:bg-red-600">
                 <Delete class="w-4 h-4" />
               </el-button>
             </el-tooltip>
@@ -245,12 +245,10 @@ const dataSource = computed(() => {
       </template>
 
       <template #otherItems>
-        <el-button
-          type="primary"
-          size="large"
-          @click="createNewCategory"
-          class="bg-green-600 hover:bg-green-700 border-none rounded-lg"
-        >
+        <el-button type="primary"
+                   size="large"
+                   @click="createNewCategory"
+                   class="bg-green-600 hover:bg-green-700 border-none rounded-lg">
           <template #icon>
             <Plus />
           </template>
@@ -258,11 +256,9 @@ const dataSource = computed(() => {
         </el-button>
 
         <router-link :to="{ name: 'blogs' }">
-          <el-button
-            type="info"
-            size="large"
-            class="bg-gray-600 hover:bg-gray-700 border-none rounded-lg"
-          >
+          <el-button type="info"
+                     size="large"
+                     class="bg-gray-600 hover:bg-gray-700 border-none rounded-lg">
             Back to Blogs
           </el-button>
         </router-link>

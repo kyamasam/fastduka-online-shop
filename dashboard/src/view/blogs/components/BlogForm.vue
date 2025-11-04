@@ -91,26 +91,27 @@
                   </el-button>
                 </div>
                 <div v-else class="upload-area">
-                  <el-upload
-                    :action="uploadUrl"
-                    :headers="uploadHeaders"
-                    :show-file-list="false"
-                    :on-success="handleImageSuccess"
-                    :on-error="handleImageError"
-                    :before-upload="beforeImageUpload"
+                  <input
+                    type="file"
+                    ref="fileInput"
+                    @change="handleFileSelect"
                     accept="image/*"
-                    drag
+                    style="display: none;"
+                  />
+                  <div
+                    class="upload-content"
+                    @click="$refs.fileInput.click()"
+                    @dragover.prevent
+                    @drop.prevent="handleFileDrop"
                   >
-                    <div class="upload-content">
-                      <i class="el-icon-upload text-3xl text-gray-400"></i>
-                      <div class="text-gray-600">
-                        Drop image here or <em>click to upload</em>
-                      </div>
-                      <div class="text-sm text-gray-500">
-                        Supports: JPG, PNG, GIF (max 5MB)
-                      </div>
+                    <i class="el-icon-upload text-3xl text-gray-400"></i>
+                    <div class="text-gray-600">
+                      Drop image here or <em>click to upload</em>
                     </div>
-                  </el-upload>
+                    <div class="text-sm text-gray-500">
+                      Supports: JPG, PNG, GIF (max 5MB)
+                    </div>
+                  </div>
                 </div>
               </div>
             </el-form-item>
@@ -233,26 +234,27 @@
                   </el-button>
                 </div>
                 <div v-else class="upload-area">
-                  <el-upload
-                    :action="uploadUrl"
-                    :headers="uploadHeaders"
-                    :show-file-list="false"
-                    :on-success="handleImageSuccess"
-                    :on-error="handleImageError"
-                    :before-upload="beforeImageUpload"
+                  <input
+                    type="file"
+                    ref="fileInput"
+                    @change="handleFileSelect"
                     accept="image/*"
-                    drag
+                    style="display: none;"
+                  />
+                  <div
+                    class="upload-content"
+                    @click="$refs.fileInput.click()"
+                    @dragover.prevent
+                    @drop.prevent="handleFileDrop"
                   >
-                    <div class="upload-content">
-                      <i class="el-icon-upload text-3xl text-gray-400"></i>
-                      <div class="text-gray-600">
-                        Drop image here or <em>click to upload</em>
-                      </div>
-                      <div class="text-sm text-gray-500">
-                        Supports: JPG, PNG, GIF (max 5MB)
-                      </div>
+                    <i class="el-icon-upload text-3xl text-gray-400"></i>
+                    <div class="text-gray-600">
+                      Drop image here or <em>click to upload</em>
                     </div>
-                  </el-upload>
+                    <div class="text-sm text-gray-500">
+                      Supports: JPG, PNG, GIF (max 5MB)
+                    </div>
+                  </div>
                 </div>
               </div>
             </el-form-item>
@@ -325,6 +327,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import store from '@/vuex/store'
 import RichTextEditor from '@/components/RichTextEditor.vue'
+import { baseUrl } from '@/utility/constants'
+import axios from 'axios'
 
 // Props and emits for modal support
 const props = defineProps({
@@ -367,18 +371,8 @@ const isEditing = computed(() => {
 })
 const blogId = computed(() => route.params.blogId)
 
-// Upload configuration
-const uploadUrl = computed(() => {
-  const baseUrl = store.getters.getApiUrl
-  return `${baseUrl}/upload/image/`
-})
-
-const uploadHeaders = computed(() => {
-  const token = store.getters.getToken
-  return {
-    'Authorization': `Bearer ${token}`
-  }
-})
+// Upload configuration - remove el-upload and handle manually
+const uploadedFile = ref(null)
 
 // Form validation rules
 const rules = {
@@ -436,10 +430,21 @@ const loadBlog = async () => {
     const blog = res?.data
 
     if (blog) {
+      // Parse content if it's a JSON string, otherwise use as is
+      let parsedContent = blog.content || ''
+      if (typeof blog.content === 'string' && blog.content.startsWith('{')) {
+        try {
+          parsedContent = JSON.parse(blog.content)
+        } catch (error) {
+          console.warn('Failed to parse blog content as JSON:', error)
+          parsedContent = blog.content
+        }
+      }
+
       Object.assign(form, {
         title: blog.title || '',
         slug: blog.slug || '',
-        content: blog.content || '',
+        content: parsedContent,
         category: blog.category?.id || null,
         cover_photo: blog.cover_photo || null,
         tags: blog.tags || []
@@ -460,27 +465,29 @@ const saveBlog = async () => {
 
     loading.value = true
 
-    const blogData = {
-      title: form.title,
-      slug: form.slug,
-      content: form.content,
-      category: form.category,
-      cover_photo: form.cover_photo,
-      tags: form.tags
+    // Create FormData for multipart upload
+    const formData = new FormData()
+    formData.append('title', form.title)
+    formData.append('content', JSON.stringify(form.content))
+    formData.append('category_id', form.category)
+
+    // Add image file if uploaded
+    if (uploadedFile.value) {
+      formData.append('cover_photo', uploadedFile.value)
+    }
+
+    // Get auth token
+    const authData = JSON.parse(localStorage.getItem('piczanguAuthData'))
+    const headers = {
+      'Content-Type': 'multipart/form-data',
+      'Authorization': `Bearer ${authData?.access}`
     }
 
     if (isEditing.value) {
-      await store.dispatch('updateData', {
-        url: 'blogs',
-        id: blogId.value,
-        data: blogData
-      })
+      await axios.patch(`${baseUrl}blogs/${blogId.value}/`, formData, { headers })
       ElMessage.success('Blog updated successfully')
     } else {
-      await store.dispatch('createData', {
-        url: 'blogs',
-        data: blogData
-      })
+      await axios.post(`${baseUrl}blogs/`, formData, { headers })
       ElMessage.success('Blog created successfully')
     }
 
@@ -512,17 +519,33 @@ const getImageUrl = (image) => {
   return typeof image === 'string' ? image : image.url || ''
 }
 
-const handleImageSuccess = (response) => {
-  form.cover_photo = response.url || response.file_url
-  ElMessage.success('Image uploaded successfully')
+const handleFileSelect = (event) => {
+  const file = event.target.files[0]
+  if (file && validateFile(file)) {
+    uploadedFile.value = file
+    // Create preview URL
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      form.cover_photo = e.target.result
+    }
+    reader.readAsDataURL(file)
+  }
 }
 
-const handleImageError = (error) => {
-  ElMessage.error('Failed to upload image')
-  console.error('Upload error:', error)
+const handleFileDrop = (event) => {
+  const file = event.dataTransfer.files[0]
+  if (file && validateFile(file)) {
+    uploadedFile.value = file
+    // Create preview URL
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      form.cover_photo = e.target.result
+    }
+    reader.readAsDataURL(file)
+  }
 }
 
-const beforeImageUpload = (file) => {
+const validateFile = (file) => {
   const isImage = file.type.startsWith('image/')
   const isLt5M = file.size / 1024 / 1024 < 5
 
@@ -539,6 +562,7 @@ const beforeImageUpload = (file) => {
 
 const removeCoverImage = () => {
   form.cover_photo = null
+  uploadedFile.value = null
 }
 
 // Tag handling
@@ -648,6 +672,14 @@ onMounted(() => {
 .upload-content {
   padding: 40px;
   text-align: center;
+  cursor: pointer;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  transition: border-color 0.3s;
+}
+
+.upload-content:hover {
+  border-color: #3b82f6;
 }
 
 .tags-section {

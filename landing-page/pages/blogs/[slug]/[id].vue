@@ -242,7 +242,7 @@ const {
     error,
     pending,
     execute
-} = await getData(
+} = await getDataUnauthed(
     "/blogs",
     {
         method: "GET",

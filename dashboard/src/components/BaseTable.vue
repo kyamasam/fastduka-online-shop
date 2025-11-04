@@ -1,62 +1,56 @@
 <template>
   <div class="px-2 pb-2">
     <div class="flex flex-col w-full h-full">
-      <a-table
-        :columns="columns"
-        :data-source="dataSource"
-        :loading="loading"
-        :row-key="(record) => record?.id"
-        :scroll="{ x: 1000 }"
-        :show-expand-column="showExpandedItems"
-        style="border-radius: 10px"
-      >
-        <template #bodyCell="{ column, text }" class="w-full">
-          <slot :column="column" :text="text" name="bodyCell"></slot>
+      <a-table :columns="columns"
+               :data-source="dataSource"
+               :loading="loading"
+               :row-key="(record) => record?.id"
+               :scroll="{ x: 1000 }"
+               :show-expand-column="showExpandedItems"
+               style="border-radius: 10px">
+        <template #bodyCell="{ column, text, record }"
+                  class="w-full">
+          <slot :column="column"
+                :text="text"
+                :record="record"
+                name="bodyCell"></slot>
         </template>
 
         <template #expandedRowRender="{ record }">
           <div style="width: 100%; background-color: white; padding: 6px">
-            <slot
-              :record="record"
-              name="expandedRowRender"
-              class="block w-full"
-            />
+            <slot :record="record"
+                  name="expandedRowRender"
+                  class="block w-full" />
           </div>
         </template>
 
         <template #title>
           <div
-            class="w-full py-4 flex flex-col md:justify-between md:flex-row flex-wrap gap-4 bg-white border-b rounded-t-lg border-b-gray-100"
-          >
+               class="w-full py-4 flex flex-col md:justify-between md:flex-row flex-wrap gap-4 bg-white border-b rounded-t-lg border-b-gray-100">
             <!--    <div class="font-medium text-lg">{{ title }}</div>-->
-            <a-input
-              v-if="showSearch"
-              class="text-lg h-12 rounded hidden md:block md:w-[300px] w-full"
-              placeholder="Search"
-              size="small"
-            ></a-input>
+            <a-input v-if="showSearch"
+                     class="text-lg h-12 rounded hidden md:block md:w-[300px] w-full"
+                     placeholder="Search"
+                     size="small"></a-input>
             <div v-else></div>
 
             <div class="flex flex-col md:flex-row gap-6">
-              <slot v-if="show0therItems" name="otherItems"></slot>
-              <router-link
-                v-if="createRouteName !== undefined"
-                :to="{ name: createRouteName }"
-              >
-                <el-button
-                  class="flex items-center justify-center rounded-none bg-red-500 hover:bg-red-400 border-none"
-                  size="large"
-                  type="primary"
-                >
+              <slot v-if="show0therItems"
+                    name="otherItems"></slot>
+              <router-link v-if="createRouteName !== undefined"
+                           :to="{ name: createRouteName }">
+                <el-button class="flex items-center justify-center rounded-none bg-red-500 hover:bg-red-400 border-none"
+                           size="large"
+                           type="primary">
                   <PlusOutlined class="h-fit pr-2" />
                   <span>Add New</span>
                 </el-button>
               </router-link>
 
-              <div
-                class="flex items-start gap-4 justify-between font-bold text-gray-800"
-              >
-                <a-button class="w-10" size="large" @click="toggleFilters">
+              <div class="flex items-start gap-4 justify-between font-bold text-gray-800">
+                <a-button class="w-10"
+                          size="large"
+                          @click="toggleFilters">
                   <template #icon>
                     <FilterOutlined v-if="!showFilters"></FilterOutlined>
 
@@ -64,7 +58,9 @@
                   </template>
                 </a-button>
 
-                <a-button class="w-10" size="large" @click="refresh">
+                <a-button class="w-10"
+                          size="large"
+                          @click="refresh">
                   <template #icon>
                     <ReloadOutlined></ReloadOutlined>
                   </template>
@@ -72,17 +68,13 @@
               </div>
             </div>
 
-            <a-input
-              v-if="showSearch"
-              class="text-lg h-12 rounded md:hidden"
-              placeholder="Search"
-              style="width: 300px"
-            ></a-input>
+            <a-input v-if="showSearch"
+                     class="text-lg h-12 rounded md:hidden"
+                     placeholder="Search"
+                     style="width: 300px"></a-input>
           </div>
-          <div
-            v-if="showFilters || show0therItems"
-            class="flex w-full py-4 gap-2 bg-white justify-start"
-          >
+          <div v-if="showFilters || show0therItems"
+               class="flex w-full py-4 gap-2 bg-white justify-start">
             <slot name="filters"> </slot>
           </div>
         </template>
