@@ -1,4 +1,6 @@
 import { defineConfig } from "vite"
+import pluginRewriteAll from "vite-plugin-rewrite-all";
+
 import vue from "@vitejs/plugin-vue"
 import Components from "unplugin-vue-components/vite"
 import {AntDesignVueResolver,ElementPlusResolver} from "unplugin-vue-components/resolvers"
@@ -27,30 +29,43 @@ export default defineConfig({
 
       // Add these lines to allow all .ts files to contain JSX
       "./src/**/*.ts",
-      "./node_modules/**/*.ts"
-    ]
+      "./node_modules/**/*.ts",
+    ],
   },
-  plugins: [vue(),
+  plugins: [
+    vue(),
     ElementPlus(),
     AutoImport({
-      resolvers: [AntDesignVueResolver(), ElementPlusResolver()]
+      resolvers: [AntDesignVueResolver(), ElementPlusResolver()],
     }),
     Components({
-      resolvers: [AntDesignVueResolver(),ElementPlusResolver()]
+      resolvers: [AntDesignVueResolver(), ElementPlusResolver()],
     }),
-      ],
+    pluginRewriteAll(),
+  ],
   resolve: {
-
     alias: [
-      { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
-      { find: '@assets', replacement: fileURLToPath(new URL('./src/assets', import.meta.url)) },
-      { find: '@static', replacement: fileURLToPath(new URL('./src/static', import.meta.url)) },
-      { find: '@router', replacement: fileURLToPath(new URL('./src/routes', import.meta.url)) },
+      {
+        find: "@",
+        replacement: fileURLToPath(new URL("./src", import.meta.url)),
+      },
+      {
+        find: "@assets",
+        replacement: fileURLToPath(new URL("./src/assets", import.meta.url)),
+      },
+      {
+        find: "@static",
+        replacement: fileURLToPath(new URL("./src/static", import.meta.url)),
+      },
+      {
+        find: "@router",
+        replacement: fileURLToPath(new URL("./src/routes", import.meta.url)),
+      },
 
       // "@": fileURLToPath(new URL("./src", import.meta.url)),
 
       // '@': path.resolve(__dirname, './src'),
     ],
     extensions: [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json", ".vue"],
-  }
-})
+  },
+});
