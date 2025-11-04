@@ -1,17 +1,20 @@
 from django.db import models
 from django.db.models import Sum
 
-from products.constants import LIQUOR, MEAT
 from users.models import User, UtilColumnsModel
 
-product_types = (
-    (LIQUOR, 'liquor'),
-    (MEAT, 'meat'),
-)
+
+class CategoryType(UtilColumnsModel):
+    name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
 
 class Category(UtilColumnsModel):
     name = models.CharField(max_length=255)
-    category_type = models.CharField(max_length=255, default=MEAT, choices=product_types )
+    category_type = models.ForeignKey(CategoryType, on_delete=models.CASCADE)
     parent = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, blank=True)
     photo = models.ImageField(null=True, blank=True)
     def __str__(self):
@@ -20,12 +23,12 @@ class Category(UtilColumnsModel):
 class Product (UtilColumnsModel):
 
     name = models.CharField(max_length=255)
-    product_type= models.CharField(max_length=255, default=MEAT, choices=product_types)
+    product_type = models.ForeignKey(CategoryType, on_delete=models.CASCADE)
     description = models.TextField(blank=True, null=True)
     seo_description = models.TextField(blank=True, null=True)
     additional_information = models.JSONField(blank=True, null=True,)  # [{ key:key, value: data}]
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    buying_price = models.FloatField()
+    buying_price = models.FloatField(default=0)
     selling_price = models.FloatField()
     sale_price = models.FloatField(null=True, blank=True, default=0)
     primary_photo = models.ImageField( null=True, blank=True)

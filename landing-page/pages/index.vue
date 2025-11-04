@@ -36,8 +36,8 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: "Fastduka: Order Meat In Kenya Order Beer in Kenya",
-  ogTitle: "Fastduka: Order Meat in Kenya and Order Liquor Kenya",
+  title: "Lush",
+  ogTitle: "Fastduka",
   keywords:
     "Order Beef online, Fish online, Chicken online, Mutton online, Steak Nairobi, meat home delivery",
   description:

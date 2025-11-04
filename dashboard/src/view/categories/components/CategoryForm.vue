@@ -20,14 +20,29 @@
     <!-- Category Type Field -->
     <el-form-item :rules="[{ required: true, message: 'Please select a category type!' }]"
                   label="Category Type"
-                  prop="category_type">
-      <el-select v-model="formState.category_type"
-                 class="w-full rounded-none"
-                 placeholder="Select Category Type"
-                 size="large">
-        <el-option label="MEAT" value="meat" />
-        <el-option label="LIQUOR" value="liquor" />
-      </el-select>
+                  prop="category_type_id">
+      <div class="flex gap-2">
+        <el-select v-model="formState.category_type_id"
+                   :loading="categoryTypesLoader"
+                   style="width: 305px;"
+                   class="flex-1 rounded-none w-12"
+                   placeholder="Select Category Type"
+                   size="large"
+                   @focus="fetchCategoryTypes">
+          <el-option v-for="categoryType in categoryTypes"
+                     :key="categoryType.value"
+                     :label="categoryType.label"
+                     :value="categoryType.value" />
+        </el-select>
+        <el-button type="primary"
+                   size="large"
+                   class="bg-green-500 hover:bg-green-600 border-green-500 px-3"
+                   @click="showCategoryTypeDialog = true">
+          <el-icon>
+            <Plus />
+          </el-icon>
+        </el-button>
+      </div>
     </el-form-item>
 
     <!-- Parent Category Field -->
@@ -92,35 +107,82 @@
       </el-button>
     </el-form-item>
   </el-form>
+
+  <!-- Category Type Creation Dialog -->
+  <el-dialog v-model="showCategoryTypeDialog"
+             title="Create Category Type"
+             width="500px">
+    <el-form ref="categoryTypeFormRef"
+             :model="categoryTypeForm"
+             :rules="categoryTypeRules"
+             label-position="top">
+      <el-form-item label="Name"
+                    prop="name">
+        <el-input v-model="categoryTypeForm.name"
+                  placeholder="Enter category type name" />
+      </el-form-item>
+      <el-form-item label="Description"
+                    prop="description">
+        <el-input v-model="categoryTypeForm.description"
+                  type="textarea"
+                  placeholder="Enter description" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="showCategoryTypeDialog = false">Cancel</el-button>
+        <el-button type="primary"
+                   @click="createCategoryType"
+                   :loading="creatingCategoryType">
+          Create
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script>
 import BaseLoader from "@/components/BaseLoader";
 import { baseUrl } from "@/utility/constants";
 import store from "@/vuex/store";
+import { Plus } from '@element-plus/icons-vue';
 import axios from "axios";
 import { ElNotification } from "element-plus";
 
 export default {
   name: "CategoryForm",
   components: {
-    BaseLoader
+    BaseLoader,
+    Plus
   },
   data() {
     return {
       formState: {
         name: '',
-        category_type: '',
+        category_type_id: '',
         parent: null
       },
       formStateCopy: {},
       registerLoading: false,
       parentCategories: [],
       parentCategoriesLoader: false,
+      categoryTypes: [],
+      categoryTypesLoader: false,
       categoryLoader: false,
       loadingPhotoUpload: false,
       fileList: [],
-      isEdit: false
+      isEdit: false,
+      showCategoryTypeDialog: false,
+      creatingCategoryType: false,
+      categoryTypeForm: {
+        name: '',
+        description: ''
+      },
+      categoryTypeRules: {
+        name: [
+          { required: true, message: 'Please input category type name', trigger: 'blur' }
+        ]
+      }
     };
   },
   methods: {
@@ -144,6 +206,67 @@ export default {
         });
     },
 
+    fetchCategoryTypes() {
+      this.categoryTypesLoader = true;
+      store.dispatch("fetchList", { url: "category-type" })
+        .then((res) => {
+          this.categoryTypes = res.data.results.map((categoryType) => ({
+            label: categoryType.name,
+            value: categoryType.id
+          }));
+          this.categoryTypesLoader = false;
+        })
+        .catch(() => {
+          this.categoryTypesLoader = false;
+        });
+    },
+
+    async createCategoryType() {
+      if (!this.$refs.categoryTypeFormRef) return;
+
+      await this.$refs.categoryTypeFormRef.validate(async (valid) => {
+        if (valid) {
+          this.creatingCategoryType = true;
+          try {
+            const authData = JSON.parse(localStorage.getItem("piczanguAuthData"));
+            const response = await axios.post(`${baseUrl}category-type/`, this.categoryTypeForm, {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + authData?.access,
+              },
+            });
+
+            ElNotification({
+              title: "Success",
+              message: "Category type created successfully",
+              type: "success",
+            });
+
+            // Add new category type to the list and select it
+            const newCategoryType = {
+              label: response.data.name,
+              value: response.data.id
+            };
+            this.categoryTypes.push(newCategoryType);
+            this.formState.category_type_id = response.data.id;
+
+            // Reset and close dialog
+            this.categoryTypeForm = { name: '', description: '' };
+            this.showCategoryTypeDialog = false;
+
+          } catch (error) {
+            ElNotification({
+              title: "Error",
+              message: "Failed to create category type",
+              type: "error",
+            });
+          } finally {
+            this.creatingCategoryType = false;
+          }
+        }
+      });
+    },
+
     fetchCategory() {
       if (!this.$route.params.categoryId) return;
 
@@ -153,7 +276,7 @@ export default {
         .then((res) => {
           this.formState = {
             name: res.data.name,
-            category_type: res.data.category_type,
+            category_type_id: res.data.category_type?.id || res.data.category_type_id,
             parent: res.data.parent?.id || null
           };
           this.formStateCopy = { ...this.formState };
@@ -244,6 +367,7 @@ export default {
   mounted() {
     this.fetchCategory();
     this.fetchParentCategories();
+    this.fetchCategoryTypes();
   }
 };
 </script>
@@ -260,5 +384,11 @@ export default {
 
 .avatar-uploader:hover {
   border-color: #409eff;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 </style>

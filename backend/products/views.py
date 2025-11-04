@@ -7,12 +7,19 @@ from rest_framework import viewsets, filters as rest_framework_filters
 from django_filters import rest_framework as filters
 from rest_framework import filters as rest_framework_filters, permissions
 from inventory.models import Inventory
-from products.models import Category, Product, ProductPhoto, ProductReview
+from products.models import Category, Product, ProductPhoto, ProductReview, CategoryType
 from products.serializers import CategorySerializer, ProductSerializer, ProductPhotoSerializer, \
-    ProductVariantSerializer, ProductVariantPhotoSerializer, ReviewSerializer
+    ProductVariantSerializer, ProductVariantPhotoSerializer, ReviewSerializer, CategoryTypeSerializer
 from users.permissions import AnonReadAdminCreate
 from rest_framework.response import Response
 from rest_framework.decorators import action
+
+
+class CategoryTypeViewSet(viewsets.ModelViewSet):
+    serializer_class = CategoryTypeSerializer
+    queryset = CategoryType.objects.all()
+    model = CategoryType
+    permission_classes = [AnonReadAdminCreate]
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

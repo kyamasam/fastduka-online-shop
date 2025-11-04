@@ -1,5 +1,5 @@
 <template>
-  <BaseDrawer title="New Category" close-route="categories">
+  <BaseDrawer title="Edit Category" close-route="categories">
     <CategoryForm />
   </BaseDrawer>
 </template>

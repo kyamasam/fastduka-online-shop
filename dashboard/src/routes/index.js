@@ -10,6 +10,7 @@ import ProductForm from "@/view/products/components/ProductForm.vue";
 import CategoryList from "@/view/categories/CategoryList.vue";
 import CategoryManagement from "@/view/categories/CategoryManagement.vue";
 import CreateCategoryView from "@/view/categories/CreateCategoryView.vue";
+import EditCategoryView from "@/view/categories/EditCategoryView.vue";
 import CategoryForm from "@/view/categories/components/CategoryForm.vue";
 import UserProfile from "@/view/profile/UserProfile.vue";
 import MiniRiderList from "@/view/riders/MiniRiderList.vue";
@@ -290,7 +291,7 @@ const routes = [
               {
                 path: "edit-category",
                 name: "edit-category",
-                component: CategoryForm,
+                component: EditCategoryView,
                 meta: {
                   showInSideBar: false,
                   verboseName: "Edit Category",
