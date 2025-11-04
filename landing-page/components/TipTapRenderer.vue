@@ -1,19 +1,53 @@
 <template>
-    <div class="tiptap-content">
-        <div v-if="typeof content === 'string'" v-html="content" />
-        <div v-else-if="content" class="space-y-4">
-            <div v-for="(node, index) in content.content" :key="index" class="tiptap-node">
-                <TipTapNode :node="node" />
-            </div>
-        </div>
-    </div>
+    <div class="tiptap-content" v-html="renderedContent" />
 </template>
 
 <script setup>
-defineProps({
+import { generateHTML } from '@tiptap/html'
+import StarterKit from '@tiptap/starter-kit'
+import { computed } from 'vue'
+
+const props = defineProps({
     content: {
         type: [String, Object],
         default: null
+    }
+})
+
+// TipTap extensions used in the editor
+const extensions = [
+    StarterKit,
+]
+
+const renderedContent = computed(() => {
+    if (!props.content) return ''
+
+    try {
+        let parsedContent = props.content
+
+        // If content is a string, try to parse it as JSON
+        if (typeof props.content === 'string') {
+            // If it's already HTML, return it as is
+            if (props.content.startsWith('<')) {
+                return props.content
+            }
+
+            // Try to parse as JSON
+            parsedContent = JSON.parse(props.content)
+        }
+
+        // Generate HTML using TipTap's official method
+        return generateHTML(parsedContent, extensions)
+
+    } catch (error) {
+        console.error('Error rendering TipTap content:', error)
+
+        // Fallback: if it's a string, return it as is (might be plain text)
+        if (typeof props.content === 'string') {
+            return `<p>${props.content}</p>`
+        }
+
+        return '<p>Error rendering content</p>'
     }
 })
 </script>

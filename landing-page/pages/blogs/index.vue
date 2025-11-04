@@ -239,16 +239,35 @@ const totalPages = computed(() => {
 const getExcerpt = (content) => {
     if (!content) return ''
 
-    let textContent = ''
-    if (typeof content === 'object') {
-        textContent = extractTextFromTiptap(content)
-    } else if (typeof content === 'string') {
-        textContent = content.replace(/<[^>]*>/g, '')
-    }
+    try {
+        let parsedContent = content
 
-    return textContent.length > 150
-        ? textContent.substring(0, 150) + '...'
-        : textContent
+        // If content is a string, try to parse it as JSON
+        if (typeof content === 'string') {
+            // If it's already HTML, extract text from it
+            if (content.startsWith('<')) {
+                return content.replace(/<[^>]*>/g, '').substring(0, 150) + '...'
+            }
+
+            // Try to parse as JSON
+            try {
+                parsedContent = JSON.parse(content)
+            } catch {
+                // If parsing fails, treat as plain text
+                return content.substring(0, 150) + (content.length > 150 ? '...' : '')
+            }
+        }
+
+        // Extract text from TipTap JSON
+        const textContent = extractTextFromTiptap(parsedContent)
+        return textContent.length > 150
+            ? textContent.substring(0, 150) + '...'
+            : textContent
+
+    } catch (error) {
+        console.error('Error getting excerpt:', error)
+        return 'Content not available'
+    }
 }
 
 const extractTextFromTiptap = (tiptapContent) => {
@@ -257,7 +276,7 @@ const extractTextFromTiptap = (tiptapContent) => {
     let text = ''
     const extractText = (node) => {
         if (node.text) {
-            text += node.text
+            text += node.text + ' '
         }
         if (node.content) {
             node.content.forEach(extractText)
@@ -265,7 +284,7 @@ const extractTextFromTiptap = (tiptapContent) => {
     }
 
     tiptapContent.content.forEach(extractText)
-    return text
+    return text.trim()
 }
 
 const formatDate = (dateString) => {
