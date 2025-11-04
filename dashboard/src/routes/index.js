@@ -712,13 +712,7 @@ const routes = [
 import("./authGuards");
 
 const router = createRouter({
-  history: createWebHistory(
-    import.meta.env.VITE_NODE_ENV === "production"
-      ? import.meta.env.VITE_VUE_APP_SUB_ROUTE
-        ? import.meta.env.VITE_VUE_APP_SUB_ROUTE
-        : import.meta.env.VITE_BASE_URL
-      : import.meta.env.VITE_BASE_URL
-  ),
+  history: createWebHistory("/"),
   linkExactActiveClass: "active",
   routes,
 });

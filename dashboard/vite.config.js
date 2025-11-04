@@ -1,5 +1,4 @@
 import { defineConfig } from "vite";
-import pluginRewriteAll from "vite-plugin-rewrite-all";
 
 import vue from "@vitejs/plugin-vue";
 import Components from "unplugin-vue-components/vite";
@@ -44,7 +43,6 @@ export default defineConfig({
     Components({
       resolvers: [AntDesignVueResolver(), ElementPlusResolver()],
     }),
-    pluginRewriteAll(),
   ],
   resolve: {
     alias: [
