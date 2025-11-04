@@ -13,7 +13,7 @@
         <div class="container">
           <div class="tp-mega-menu-wrapper p-relative">
             <div class="row align-items-center">
-              <div class="col-xl-2 col-lg-5 col-md-5 col-sm-4 col-6">
+              <div class="col-xl-2 col-lg-5 col-md-5 col-sm-4 col-6 flex ">
                 <div class="logo">
                   <nuxt-link href="/">
                     <img :style="logoStyle"
@@ -21,6 +21,9 @@
                          alt="logo" />
                   </nuxt-link>
                 </div>
+                <span class="ml-2 items-center flex text-lg font-semibold text-white">
+                  {{ siteSettingsStore?.settings.logo_text }}
+                </span>
               </div>
               <div class="col-xl-5 d-none d-xl-block">
                 <div class="main-menu menu-style-2">
