@@ -5,8 +5,8 @@
       >
         <h3>No Orders Found</h3>
         <nuxt-link href="/shop" className="tp-cart-checkout-btn mt-20"
-          >Continue Shopping</nuxt-link
-        >
+          >Continue Shopping
+          </nuxt-link>
       </div>
       <div v-else class="row">
         <div class="col-xl-9 col-lg-8">
@@ -43,9 +43,9 @@
                     {{
                       data?.payment_transaction_obj?.transaction_status || "N/A"
                     }}
-                    <p>
+                    <span>
                         {{ data?.payment_transaction_obj?.transaction_code }}
-                    </p>
+                    </span>
                     <!-- {{data?.id}} {{ data?.payment_transaction_obj?.id }} -->
                     <button  @click="refreshPayment(data?.id, data?.payment_transaction_obj?.id)" v-if="data?.payment_transaction_obj?.transaction_status !== 'processed' && data?.payment_transaction_obj?.id && data?.id" class="btn btn-primary"> Refresh Payment</button>
                   </p>

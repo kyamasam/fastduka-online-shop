@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils import timezone
+from colorfield.fields import ColorField
 class UtilColumnsModel(models.Model):
     """Abstract model for created_at & updated_at fields."""
 
@@ -23,8 +24,8 @@ class SiteSettings(UtilColumnsModel):
     contact_phone = models.CharField(max_length=20, null=True, blank=True)
     
     # Appearance
-    primary_color = models.CharField(max_length=7, help_text="Hex code (e.g., #FF5733)")
-    secondary_color = models.CharField(max_length=7, help_text="Hex code (e.g., #33C1FF)")
+    primary_color = ColorField(default='#FF5733')
+    secondary_color = ColorField(default='#33C1FF')
     site_icon = models.ImageField(upload_to='site_icons/', null=True, blank=True)
     site_logo = models.ImageField(upload_to='site_logos/', null=True, blank=True)
     

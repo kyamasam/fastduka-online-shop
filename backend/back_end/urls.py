@@ -11,6 +11,7 @@ from settings_app.urls import url_patterns as settings_app_url_patterns
 from products.urls import url_patterns as product_url_patterns
 from vendors.urls import url_patterns as vendor_url_patterns
 from delivery.urls import url_patterns as delivery_url_patterns
+from blogs.urls import url_patterns as blog_url_patterns
 
 urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
@@ -23,7 +24,8 @@ urlpatterns = [
                           *product_url_patterns,
                           *vendor_url_patterns,
                           *delivery_url_patterns,
-                          *settings_app_url_patterns
+                          *settings_app_url_patterns,
+                          *blog_url_patterns,
                           ])),
     path('admin/', admin.site.urls),
 ]

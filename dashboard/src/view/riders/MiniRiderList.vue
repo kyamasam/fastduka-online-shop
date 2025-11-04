@@ -73,7 +73,7 @@ const fetchUrl = () => {
       :columns="columns"
       :fetchUrl="fetchUrl()"
       :create-route-name="route?.name === 'mini-list-rider' ? 'mini-register-rider' : 'register-rider'"
-      title="Vendors">
+      title="Shops">
 
     <template #otherItems>
       <!--

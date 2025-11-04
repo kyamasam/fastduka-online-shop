@@ -53,6 +53,7 @@ declare module 'vue' {
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElInput: typeof import('element-plus/es')['ElInput']
     ElInputNumber: typeof import('element-plus/es')['ElInputNumber']
+    ElLoading: typeof import('element-plus/es')['ElLoading']
     ElOption: typeof import('element-plus/es')['ElOption']
     ElRadioButton: typeof import('element-plus/es')['ElRadioButton']
     ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']
@@ -84,5 +85,8 @@ declare module 'vue' {
     StartCamera: typeof import('./src/components/StartCamera.vue')['default']
     Support: typeof import('./src/components/utilities/auth-info/Support.vue')['default']
     TrueOrFalse: typeof import('./src/components/TrueOrFalse.vue')['default']
+  }
+  export interface ComponentCustomProperties {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
   }
 }
