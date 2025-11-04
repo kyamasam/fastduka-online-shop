@@ -162,57 +162,67 @@ const columns = ref([
 
       <template v-if="slotProps.column.key === 'actions'">
         <div class="flex gap-2">
-          <el-button class="bg-blue-500 border-none hover:bg-blue-600 focus:bg-blue-600 rounded-none"
-                     type="primary"
-                     size="default"
-                     @click="selectAction('edit-product', slotProps.text?.id)"
-                     title="Edit Product">
-            <el-icon>
-              <Edit />
-            </el-icon>
-          </el-button>
+          <el-tooltip content="Edit Product"
+                      placement="top">
+            <el-button class="bg-blue-500 border-none hover:bg-blue-600 focus:bg-blue-600 rounded-none"
+                       type="primary"
+                       size="small"
+                       @click="selectAction('edit-product', slotProps.text?.id)">
+              <el-icon>
+                <Edit />
+              </el-icon>
+            </el-button>
+          </el-tooltip>
 
-          <el-button class="bg-green-500 border-none hover:bg-green-600 focus:bg-green-600 rounded-none"
-                     type="primary"
-                     size="default"
-                     @click="manageProductImages(slotProps.text?.id)"
-                     title="Manage Images">
-            <el-icon>
-              <Picture />
-            </el-icon>
-          </el-button>
+          <el-tooltip content="Manage Images"
+                      placement="top">
+            <el-button class="bg-green-500 border-none hover:bg-green-600 focus:bg-green-600 rounded-none"
+                       type="primary"
+                       size="small"
+                       @click="manageProductImages(slotProps.text?.id)">
+              <el-icon>
+                <Picture />
+              </el-icon>
+            </el-button>
+          </el-tooltip>
 
-          <el-button class="bg-primary-400 border-none hover:bg-primary-500 focus:bg-primary-500 rounded-none"
-                     type="primary"
-                     size="default"
-                     @click="selectAction('add-inventory', slotProps.text?.id)"
-                     title="Add Inventory">
-            <el-icon>
-              <arrow-right />
-            </el-icon>
-          </el-button>
+          <el-tooltip content="Add Inventory"
+                      placement="top">
+            <el-button class="bg-primary-400 border-none hover:bg-primary-500 focus:bg-primary-500 rounded-none"
+                       type="primary"
+                       size="small"
+                       @click="selectAction('add-inventory', slotProps.text?.id)">
+              <el-icon>
+                <arrow-right />
+              </el-icon>
+            </el-button>
+          </el-tooltip>
 
-          <el-button :class="slotProps.text?.featured
-            ? 'bg-yellow-500 border-none hover:bg-yellow-600 focus:bg-yellow-600 rounded-none'
-            : 'bg-gray-500 border-none hover:bg-yellow-500 focus:bg-yellow-500 rounded-none'"
-                     type="primary"
-                     size="default"
-                     @click="toggleFeatured(slotProps.text?.id, slotProps.text?.name, slotProps.text?.featured)"
-                     :title="slotProps.text?.featured ? 'Unfeature Product' : 'Feature Product'">
-            <el-icon>
-              <Star />
-            </el-icon>
-          </el-button>
+          <el-tooltip :content="slotProps.text?.featured ? 'Unfeature Product' : 'Feature Product'"
+                      placement="top">
+            <el-button :class="slotProps.text?.featured
+              ? 'bg-yellow-500 border-none hover:bg-yellow-600 focus:bg-yellow-600 rounded-none'
+              : 'bg-gray-500 border-none hover:bg-yellow-500 focus:bg-yellow-500 rounded-none'"
+                       type="primary"
+                       size="small"
+                       @click="toggleFeatured(slotProps.text?.id, slotProps.text?.name, slotProps.text?.featured)">
+              <el-icon>
+                <Star />
+              </el-icon>
+            </el-button>
+          </el-tooltip>
 
-          <el-button class="bg-red-500 border-none hover:bg-red-600 focus:bg-red-600 rounded-none"
-                     type="danger"
-                     size="default"
-                     @click="deleteProduct(slotProps.text?.id, slotProps.text?.name)"
-                     title="Delete Product">
-            <el-icon>
-              <Delete />
-            </el-icon>
-          </el-button>
+          <el-tooltip content="Delete Product"
+                      placement="top">
+            <el-button class="bg-red-500 border-none hover:bg-red-600 focus:bg-red-600 rounded-none"
+                       type="danger"
+                       size="small"
+                       @click="deleteProduct(slotProps.text?.id, slotProps.text?.name)">
+              <el-icon>
+                <Delete />
+              </el-icon>
+            </el-button>
+          </el-tooltip>
         </div>
       </template>
     </template>
