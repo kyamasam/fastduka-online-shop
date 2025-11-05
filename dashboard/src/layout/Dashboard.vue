@@ -1,104 +1,77 @@
 <template>
   <div>
     <!-- Show main dashboard layout if onboarding is complete -->
-    <Div :darkMode="darkMode" class="min-h-screen w-full">
-      <Layout
-        class="layout h-[90%] w-full"
-        style="width: 100%; padding: 0; margin: 0; height: 150px"
-      >
-        <Header
-          :style="{
-            position: 'fixed',
-            width: '100%',
-            top: 0,
-            [!rtl ? 'left' : 'right']: 0,
-          }"
-          class="border-b border-1"
-          style="width: 100%; padding: 0; margin: 0; background-color: #cf000f"
-        >
+    <Div :darkMode="darkMode"
+         class="min-h-screen w-full">
+      <Layout class="layout h-[90%] w-full"
+              style="width: 100%; padding: 0; margin: 0; height: 150px">
+        <Header :style="{
+          position: 'fixed',
+          width: '100%',
+          top: 0,
+          [!rtl ? 'left' : 'right']: 0,
+        }"
+                class=""
+                style="width: 100%; padding: 0; margin: 0; background-color: #cf000f">
           <div class="w-full flex justify-between items-center bg-primary h-16">
             <div class="bg-primary px-4">
-              <div
-                class="navbar-brand align-center-v flex items-center flex-wrap gap-8 justify-center bg-transparent"
-              >
-                <div
-                  :class="topMenu && innerWidth > 991 ? ' top-menu' : ''"
-                  class="flex flex-row gap-2 items-center text-primary text-xl"
-                >
-                  <img
-                    v-if="settingsData?.site_logo"
-                    alt="logo"
-                    :style="logoStyle"
-                    :src="settingsData?.site_logo"
-                  />
+              <div class="navbar-brand align-center-v flex items-center flex-wrap gap-8 justify-center bg-transparent">
+                <div :class="topMenu && innerWidth > 991 ? ' top-menu' : ''"
+                     class="flex flex-row gap-2 items-center text-primary text-xl">
+                  <img v-if="settingsData?.site_logo"
+                       alt="logo"
+                       :style="logoStyle"
+                       :src="settingsData?.site_logo" />
                   <p v-else>{{ siteData?.title }}</p>
-                  <p v-if="settingsData?.logo_text" class="text-white font-medium ml-2">{{ settingsData?.logo_text }}</p>
+                  <p v-if="settingsData?.logo_text"
+                     class="text-white font-medium ml-2">{{ settingsData?.logo_text }}</p>
                 </div>
-                <div
-                  v-if="!topMenu || innerWidth <= 991"
-                  class="h-8 w-8 cursor-pointer text-white"
-                  @click="toggleCollapsed"
-                >
-                  <svg
-                    class="size-6"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M3.75 6.75h16.5M3.75 12H12m-8.25 5.25h16.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
+                <div v-if="!topMenu || innerWidth <= 991"
+                     class="h-8 w-8 cursor-pointer text-white"
+                     @click="toggleCollapsed">
+                  <svg class="size-6"
+                       fill="none"
+                       stroke="currentColor"
+                       stroke-width="1"
+                       viewBox="0 0 24 24"
+                       xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3.75 6.75h16.5M3.75 12H12m-8.25 5.25h16.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round" />
                   </svg>
                 </div>
-                <el-select
-                  placeholder="vendor"
-                  @focus="fetchVendors"
-                  v-model="vendorStore"
-                  style="width: 100px"
-                >
-                  <el-option
-                    v-for="vendor in vendorList"
-                    :key="vendor?.id"
-                    :value="vendor"
-                  >
+                <el-select placeholder="vendor"
+                           @focus="fetchVendors"
+                           v-model="vendorStore"
+                           style="width: 100px">
+                  <el-option v-for="vendor in vendorList"
+                             :key="vendor?.id"
+                             :value="vendor">
                     {{ vendor?.name }}
-                    <span
-                      class="text-green-500"
-                      v-if="vendor?.verification_status === 'APPROVED'"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        class="size-6"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"
-                        />
+                    <span class="text-green-500"
+                          v-if="vendor?.verification_status === 'APPROVED'">
+                      <svg xmlns="http://www.w3.org/2000/svg"
+                           fill="none"
+                           viewBox="0 0 24 24"
+                           stroke-width="1.5"
+                           stroke="currentColor"
+                           class="size-6">
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
                       </svg>
                     </span>
-                    <span class="text-primary-400" v-else>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        class="size-6"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
-                        />
+                    <span class="text-primary-400"
+                          v-else>
+                      <svg xmlns="http://www.w3.org/2000/svg"
+                           fill="none"
+                           viewBox="0 0 24 24"
+                           stroke-width="1.5"
+                           stroke="currentColor"
+                           class="size-6">
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
                       </svg>
                     </span>
                   </el-option>
@@ -123,13 +96,17 @@
 
         <div class="header-more">
           <a-row>
-            <a-col :md="0" :sm="24" :xs="24">
+            <a-col :md="0"
+                   :sm="24"
+                   :xs="24">
               <div class="small-screen-headerRight">
-                <SmallScreenSearch :darkMode="darkMode" :hide="searchHide">
+                <SmallScreenSearch :darkMode="darkMode"
+                                   :hide="searchHide">
                   <HeaderSearch />
                 </SmallScreenSearch>
 
-                <SmallScreenAuthInfo :darkMode="darkMode" :hide="hide">
+                <SmallScreenAuthInfo :darkMode="darkMode"
+                                     :hide="hide">
                   <AuthInfo :rtl="rtl" />
                 </SmallScreenAuthInfo>
               </div>
@@ -139,32 +116,26 @@
 
         <Layout class="h-full">
           <template v-if="!topMenu || innerWidth <= 991">
-            <Sider
-              :collapsed="collapsed"
-              :style="{
-                overflowY: 'auto',
-                position: 'fixed',
-                [!rtl ? 'left' : 'right']: 0,
-                zIndex: 998,
-              }"
-              :theme="!darkMode ? 'light' : 'dark'"
-              :width="280"
-              class="h-screen bg-white mt-2"
-            >
-              <perfect-scrollbar
-                :options="{
-                  wheelSpeed: 1,
-                  swipeEasing: true,
-                  suppressScrollX: true,
-                }"
-              >
-                <AsideItems
-                  :darkMode="darkMode"
-                  :events="onEventChange"
-                  :rtl="rtl"
-                  :toggleCollapsed="toggleCollapsedMobile"
-                  :topMenu="topMenu"
-                />
+            <Sider :collapsed="collapsed"
+                   :style="{
+                    overflowY: 'auto',
+                    position: 'fixed',
+                    [!rtl ? 'left' : 'right']: 0,
+                    zIndex: 998,
+                  }"
+                   :theme="!darkMode ? 'light' : 'dark'"
+                   :width="280"
+                   class="h-screen bg-white mt-2">
+              <perfect-scrollbar :options="{
+                wheelSpeed: 1,
+                swipeEasing: true,
+                suppressScrollX: true,
+              }">
+                <AsideItems :darkMode="darkMode"
+                            :events="onEventChange"
+                            :rtl="rtl"
+                            :toggleCollapsed="toggleCollapsedMobile"
+                            :topMenu="topMenu" />
               </perfect-scrollbar>
             </Sider>
           </template>
@@ -175,19 +146,15 @@
                 <template #default>
                   <div class="min-h-screen pb-32">
                     <!-- Show loader while checking onboarding status -->
-                    <div
-                      v-if="isLoading"
-                      class="flex justify-center items-center h-screen"
-                    >
+                    <div v-if="isLoading"
+                         class="flex justify-center items-center h-screen">
                       <base-loader />
                     </div>
 
                     <!-- Show onboarding component if needed -->
-                    <onboarding-flow
-                      :settingsData="settingsData"
-                      v-else-if="needsOnboarding"
-                      @complete="onboardingComplete"
-                    />
+                    <onboarding-flow :settingsData="settingsData"
+                                     v-else-if="needsOnboarding"
+                                     @complete="onboardingComplete" />
                     <router-view v-else></router-view>
                   </div>
                 </template>
@@ -198,27 +165,29 @@
                 </template>
               </Suspense>
 
-              <Footer
-                :style="{
-                  padding: '20px 30px 18px',
-                  color: 'rgba(0, 0, 0, 0.65)',
-                  fontSize: '14px',
-                  background: 'rgba(255, 255, 255, .90)',
-                  boxShadow: '0 -5px 10px rgba(146,153,184, 0.05)',
-                }"
-                class="admin-footer fixed bottom-0 w-full"
-              >
+              <Footer :style="{
+                padding: '20px 30px 18px',
+                color: 'rgba(0, 0, 0, 0.65)',
+                fontSize: '14px',
+                background: 'rgba(255, 255, 255, .90)',
+                boxShadow: '0 -5px 10px rgba(146,153,184, 0.05)',
+              }"
+                      class="admin-footer fixed bottom-0 w-full">
                 <a-row class="w-full">
-                  <a-col :md="12" :xs="24">
+                  <a-col :md="12"
+                         :xs="24">
                     <span class="admin-footer__copyright">
                       {{ new Date().getFullYear() }} ©
-                      <a class="" href="#" style="color: red">{{
-                        settingsData?.title
-                      }}</a>
+                      <a class=""
+                         href="#"
+                         style="color: red">{{
+                          settingsData?.title
+                        }}</a>
                     </span>
                   </a-col>
 
-                  <a-col :md="12" :xs="24">
+                  <a-col :md="12"
+                         :xs="24">
                     <div class="admin-footer__links">
                       <router-link to="#">Profile</router-link>
                       <router-link to="#">Team</router-link>
@@ -474,6 +443,7 @@ onMounted(() => {
 .ant-layout-sider-collapsed .ps {
   height: calc(100vh - 70px);
 }
+
 .el-select__wrapper {
   background: transparent !important;
   border-radius: 0 !important;
