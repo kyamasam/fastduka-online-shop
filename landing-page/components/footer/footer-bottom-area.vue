@@ -6,7 +6,7 @@
           <div class="col-md-6">
             <div class="tp-footer-copyright">
               <p>
-                © {{ new Date().getFullYear() }} All Rights Reserved Fastduka Online
+                © {{ new Date().getFullYear() }} All Rights Reserved <a href="https://fastduka.co.ke">Fastduka </a>
               </p>
             </div>
           </div>
