@@ -387,7 +387,7 @@ const debouncedUpdateProfile = _.debounce(async () => {
 
 const handleSubmit = async () => {
   // Validate step 2 fields
-  if (!formData.value.profile.address || !formData.value.profile.suite_number) {
+  if (!formData.value.profile.address || !formData.value?.profile?.suite_number) {
     toast.error("Please fill in all delivery information");
     return;
   }
