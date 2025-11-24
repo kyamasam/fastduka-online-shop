@@ -39,5 +39,8 @@
     "*.py": [
       "black"
     ]
+  },
+  "dependencies": {
+    "sitemap": "^9.0.0"
   }
 }
