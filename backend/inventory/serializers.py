@@ -1,20 +1,29 @@
 from rest_framework import serializers
 
+from products.models import Product
+from products.serializers import MiniProductSerializer, ProductSerializer
 from inventory.models import Inventory, InventoryHistory
+from inventory.constants import CUSTOMER_ORDER, STOCK_ADDITION, STOCK_DEDUCTION, ORDER_CANCELLED, IN_TRANSIT, EXPIRY
 from vendors.models import Vendor, VendorMember
 from vendors.serializers import VendorSerializer
 from vendors.constants import VENDOR_ROLE_ADMIN
 class InventorySerializer(serializers.ModelSerializer):
     vendor_id = serializers.PrimaryKeyRelatedField(queryset=Vendor.objects.all(), write_only=True)
     vendor =  VendorSerializer(read_only=True)
+    product_id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), write_only=True)
+    product = MiniProductSerializer(read_only=True)
     class Meta:
         model = Inventory
         fields = [
+            "id",
             "product",
+            "product_id",
             "product_variant",
             "quantity",
             "vendor_id",
-            "vendor"
+            "vendor",
+            "created_at",
+            "updated_at"
         ]
     def validate(self, attrs):
         vendor_id = attrs.get('vendor_id', None)
@@ -50,15 +59,19 @@ class InventorySerializer(serializers.ModelSerializer):
 
 
 class InventoryHistorySerializer(serializers.ModelSerializer):
-    inventory = InventorySerializer(read_only=True)
-    inventory_id = serializers.PrimaryKeyRelatedField(write_only=True, queryset=Inventory.objects.all())
+    inventory_id = serializers.PrimaryKeyRelatedField( queryset=Inventory.objects.all())
     class Meta:
         model = InventoryHistory
         fields = [
             "inventory",
             "inventory_id",
             "reference_id",
+            "reference_type",
+            "previous_value",
+            "new_value",
+            "quantity",
             "action_type",
+            "reason"
         ]
 
 
@@ -75,4 +88,48 @@ class InventoryHistorySerializer(serializers.ModelSerializer):
         instance.inventory = inventory
         instance.save()
         return instance
+
+
+class InventoryAdjustmentSerializer(serializers.Serializer):
+    """
+    Serializer for inventory adjustment requests.
+    """
+    product_id = serializers.IntegerField(required=True)
+    vendor_id = serializers.IntegerField(required=True)
+    quantity = serializers.FloatField(required=True, min_value=0.01)
+    action_type = serializers.ChoiceField(
+        required=True,
+        choices=[
+            (CUSTOMER_ORDER, "Customer Order"),
+            (STOCK_ADDITION, "Stock Addition"),
+            (STOCK_DEDUCTION, "Stock Deduction"),
+            (ORDER_CANCELLED, "Order Cancelled"),
+            (IN_TRANSIT, "In Transit"),
+            (EXPIRY, "Expiry")
+        ]
+    )
+    reason = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    inventory_id = serializers.IntegerField(required=False, allow_null=True)
+    product_variant_id = serializers.IntegerField(required=False, allow_null=True)
+    reference_id = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    reference_type = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
+    def validate_product_id(self, value):
+        """Validate that the product exists"""
+        if not Product.objects.filter(id=value).exists():
+            raise serializers.ValidationError(f"Product with id {value} does not exist")
+        return value
+
+    def validate_vendor_id(self, value):
+        """Validate that the vendor exists"""
+        if not Vendor.objects.filter(id=value).exists():
+            raise serializers.ValidationError(f"Vendor with id {value} does not exist")
+        return value
+
+    def validate_inventory_id(self, value):
+        """Validate that the inventory exists if provided"""
+        if value is not None:
+            if not Inventory.objects_all.filter(id=value).exists():
+                raise serializers.ValidationError(f"Inventory with id {value} does not exist")
+        return value
 

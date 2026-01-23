@@ -129,7 +129,8 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = [ "user", "user_id", "status", "delivery_location","vendor","vendor_obj",
                   "delivery_latitude","delivery_longitude","payment_transaction","delivery_distance","delivery_duration",
-                "orderitem_set", "created_at", "updated_at", "payment_transaction_obj", "id"]
+                "orderitem_set", "created_at", "updated_at", "payment_transaction_obj", "id",
+                "customer_signature", "rider_signature", "delivery_note", "delivery_completed_at"]
 
     @transaction.atomic
     def create(self, validated_data):
@@ -235,5 +236,9 @@ class AssignOrderToRiderSerializer(serializers.Serializer):
 
 
 class OrderDeliverySerializer(serializers.Serializer):
-    customer_signature = serializers.CharField(required=True)
-    rider_signature = serializers.CharField(required=True)
+    delivered_by_name = serializers.CharField(required=False, allow_blank=True)
+    status = serializers.CharField(required=False, allow_blank=True)
+    delivery_location = serializers.CharField(required=False, allow_blank=True)
+    customer_signature = serializers.CharField(required=False, allow_blank=True)
+    rider_signature = serializers.CharField(required=False, allow_blank=True)
+    delivery_note = serializers.CharField(required=False, allow_blank=True)

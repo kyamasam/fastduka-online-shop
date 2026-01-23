@@ -105,7 +105,7 @@ export default {
   data() {
     return {
       dataSource: [],
-      showFilters: false,
+      showFilters: true,
       loading: true,
     };
   },
@@ -188,10 +188,10 @@ export default {
     },
     $route: function (to, from) {
       console.log('changed');
-      
+
       this.queryData(this.fetchUrl);
     },
-    
+
   },
   mounted() {
     this.queryData(this.fetchUrl);

@@ -1,7 +1,7 @@
 <script setup>
+import BaseDrawer from "@/BaseDrawer.vue";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import BaseDrawer from "@/BaseDrawer.vue";
 
 /**
  * Variables
@@ -11,9 +11,9 @@ const router = useRouter();
 const drawerTitle = ref("Quick Actions");
 const activeRoute = ref("");
 const availableTabs = ref([
-  { name: "add-inventory", label: "Add Inventory" },
-  { name: "product-images", label: "Add Product Images" },
   { name: "edit-product", label: "Edit Product" },
+  { name: "add-inventory", label: "Manage Inventory" },
+  { name: "product-images", label: "Add Product Images" },
 ]);
 const activeName = ref("create-product");
 
@@ -25,7 +25,7 @@ const getCurrentRoute = () => {
 };
 
 const handleClick = (tabName) => {
-  router.push({name: tabName?.props?.name })
+  router.push({ name: tabName?.props?.name })
 };
 
 /**
@@ -37,19 +37,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <BaseDrawer close-route="products" :title="drawerTitle">
-    <el-tabs v-model="activeRoute" type="border-card" class="demo-tabs" @tab-click="handleClick">
-      <el-tab-pane
-          v-for="tab in availableTabs"
-          :key="tab.name"
-          :label="tab.label"
-          :name="tab.name"
-      >
-        <router-view/>
+  <BaseDrawer close-route="products"
+              :title="drawerTitle">
+    <el-tabs v-model="activeRoute"
+             type="border-card"
+             class="demo-tabs"
+             @tab-click="handleClick">
+      <el-tab-pane v-for="tab in availableTabs"
+                   :key="tab.name"
+                   :label="tab.label"
+                   :name="tab.name">
+        <router-view />
       </el-tab-pane>
     </el-tabs>
   </BaseDrawer>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

@@ -23,6 +23,7 @@ class Category(UtilColumnsModel):
 class Product (UtilColumnsModel):
 
     name = models.CharField(max_length=255)
+    sku = models.CharField(max_length=100, blank=True, null=True, unique=True, db_index=True)
     product_type = models.ForeignKey(CategoryType, on_delete=models.CASCADE)
     description = models.TextField(blank=True, null=True)
     seo_description = models.TextField(blank=True, null=True)

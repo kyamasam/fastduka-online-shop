@@ -4,7 +4,7 @@ from rest_framework import viewsets, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 from users.constants import USER_TYPE_BUSINESS_OWNER
 from vendors.constants import VENDOR_ROLE_ADMIN, VENDOR_STATUS_APPROVED
 from vendors.models import Vendor, VendorMember
@@ -34,6 +34,17 @@ class VendorViewSet(viewsets.ModelViewSet):
 
     # def detail(self, request, pk=None):
     #     pass
+    
+    @extend_schema(
+        summary="Get all vendors without pagination",
+        description="Retrieve a complete list of all vendors in the system without applying pagination limits. this returns an array of the below object",
+        responses=VendorSerializer()
+    )
+    @action(detail=False, url_path="vendors-unpaged", methods=['get'])
+    def vendors_unpaged(self, request):
+        vendors_lst = self.get_queryset()
+        return Response(VendorSerializer(vendors_lst, many=True).data)
+        
 
     @action(detail=True, methods=['post'], serializer_class=VendorApprovalSerializer, permission_classes=[IsAdminUser])
     def approve(self, request, pk=None):
