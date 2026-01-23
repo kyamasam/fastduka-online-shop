@@ -15,12 +15,15 @@ class InventorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Inventory
         fields = [
+            "id",
             "product",
             "product_id",
             "product_variant",
             "quantity",
             "vendor_id",
-            "vendor"
+            "vendor",
+            "created_at",
+            "updated_at"
         ]
     def validate(self, attrs):
         vendor_id = attrs.get('vendor_id', None)
@@ -56,15 +59,19 @@ class InventorySerializer(serializers.ModelSerializer):
 
 
 class InventoryHistorySerializer(serializers.ModelSerializer):
-    inventory = InventorySerializer(read_only=True)
-    inventory_id = serializers.PrimaryKeyRelatedField(write_only=True, queryset=Inventory.objects.all())
+    inventory_id = serializers.PrimaryKeyRelatedField( queryset=Inventory.objects.all())
     class Meta:
         model = InventoryHistory
         fields = [
             "inventory",
             "inventory_id",
             "reference_id",
+            "reference_type",
+            "previous_value",
+            "new_value",
+            "quantity",
             "action_type",
+            "reason"
         ]
 
 

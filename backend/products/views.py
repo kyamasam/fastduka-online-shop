@@ -78,6 +78,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     search_fields = [
         'name',
         'description',
+        'sku',
     ]
 
     def filter_queryset(self, queryset):
@@ -113,7 +114,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
             qs = qs.filter(category_id__in=[int(i) for i in category_id__in])
         if search is not None:
-            qs = qs.filter(Q(name__icontains=search ) or Q(description__icontains=search))
+            qs = qs.filter(Q(name__icontains=search) | Q(description__icontains=search) | Q(sku__icontains=search))
         return qs
 
 

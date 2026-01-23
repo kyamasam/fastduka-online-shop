@@ -17,6 +17,16 @@
                 style="border-radius:0" />
     </el-form-item>
 
+    <!-- SKU Field -->
+    <el-form-item label="SKU (Stock Keeping Unit)"
+                  prop="sku">
+      <el-input v-model="formState.sku"
+                class="rounded-none"
+                placeholder="e.g., PROD-001 (optional)"
+                size="large"
+                style="border-radius:0" />
+    </el-form-item>
+
     <!-- Description Field -->
     <el-form-item label="Description"
                   prop="description">
@@ -409,6 +419,7 @@ export default {
     if (!this.$route.params.productId) {
       this.formState = {
         name: '',
+        sku: '',
         description: '',
         selling_price: null,
         buying_price: null,

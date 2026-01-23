@@ -161,6 +161,11 @@ const columns = ref([
     key: "name",
   },
   {
+    title: "SKU",
+    dataIndex: "sku",
+    key: "sku",
+  },
+  {
     title: "Category",
     dataIndex: "category",
     key: "category",
@@ -197,7 +202,7 @@ onMounted(() => {
     <template #filters>
       <div class="flex gap-4 items-center flex-wrap mb-4">
         <el-input v-model="searchQuery"
-                  placeholder="Search products..."
+                  placeholder="Search by name, SKU..."
                   clearable
                   size="large"
                   class="w-64"
@@ -298,6 +303,13 @@ onMounted(() => {
           </el-tag>
         </div>
       </template>
+      <template v-if="slotProps.column.key === 'sku'">
+        <span v-if="slotProps.text" class="font-mono text-sm text-gray-600">
+          {{ slotProps.text }}
+        </span>
+        <span v-else class="text-gray-400 text-sm">-</span>
+      </template>
+
       <template v-if="slotProps.column.key === 'category'">
         <div class="flex items-center gap-2">
           {{ slotProps.text["name"] }}

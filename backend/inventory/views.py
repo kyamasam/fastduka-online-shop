@@ -5,7 +5,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum
 from django.core.exceptions import ValidationError as DjangoValidationError
-from inventory.models import Inventory
+from inventory.models import Inventory, InventoryHistory
 from inventory.serializers import InventorySerializer, InventoryHistorySerializer, InventoryAdjustmentSerializer
 from inventory.services import InventoryService
 from users import permissions
@@ -323,6 +323,8 @@ class InventoryViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class InventoryHistoryViewSet(viewsets.ModelViewSet):
-    queryset = Inventory.objects.all()
+    queryset = InventoryHistory.objects.all()
     serializer_class = InventoryHistorySerializer
     permission_classes = [permissions.AnonReadAdminCreate]
+    filterset_fields=['inventory_id']
+    pagination_class=None

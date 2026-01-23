@@ -75,7 +75,7 @@ class ProductSerializer(serializers.ModelSerializer):
     review_stats = serializers.SerializerMethodField()
     class Meta:
         model = Product
-        fields = ["id", "name","featured", "description","additional_information","seo_description", "primary_photo", "category", "category_id",
+        fields = ["id", "name", "sku", "featured", "description","additional_information","seo_description", "primary_photo", "category", "category_id",
                   "product_type", "product_type_id", "selling_price", "sale_price", "allowable_discount", "on_sale", "in_stock", "variants", "photos", "inventory","reviews",
                   "created_at", "updated_at", "buying_price", "review_stats"]
 
