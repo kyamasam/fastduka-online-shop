@@ -54,6 +54,11 @@ class ProductVariantSerializer(serializers.ModelSerializer):
         fields = ["id", "product", "value", "buying_price", "selling_price", "sale_price", "allowable_discount",
                   "created_at", "updated_at"]
 
+class MiniProductSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Product
+        fields = "__all__"
 
 class ProductSerializer(serializers.ModelSerializer):
     variants = serializers.SerializerMethodField(read_only=True)

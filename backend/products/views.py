@@ -13,7 +13,7 @@ from products.serializers import CategorySerializer, ProductSerializer, ProductP
 from users.permissions import AnonReadAdminCreate
 from rest_framework.response import Response
 from rest_framework.decorators import action
-
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 class CategoryTypeViewSet(viewsets.ModelViewSet):
     serializer_class = CategoryTypeSerializer
@@ -21,6 +21,16 @@ class CategoryTypeViewSet(viewsets.ModelViewSet):
     model = CategoryType
     permission_classes = [AnonReadAdminCreate]
 
+    @extend_schema(
+        summary="Get all category types without pagination",
+        description="Retrieve a complete list of all category types in the system without applying pagination limits. this returns an array of the below object",
+        responses=CategoryTypeSerializer()
+    )
+    @action(detail=False, methods=['get'], url_path="categories-types-unpaged")
+    def category_types_unpaged(self, request):
+        category_types = self.get_queryset()
+
+        return Response(CategoryTypeSerializer(category_types, many=True).data) 
 
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
@@ -29,6 +39,17 @@ class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [AnonReadAdminCreate]
 
     filterset_fields= { 'category_type':['exact']}
+    
+    @extend_schema(
+        summary="Get all categories without pagination",
+        description="Retrieve a complete list of all categories in the system without applying pagination limits. this returns an array of the below object",
+        responses=CategorySerializer()
+    )
+    @action(detail=False, methods=['get'], url_path="categories-unpaged")
+    def get_categories_unpaged(self, request):
+        categories = self.get_queryset()
+
+        return Response(CategorySerializer(categories, many=True).data)
 
 class ProductFilter(filters.FilterSet):
     in_stock = filters.BooleanFilter()
