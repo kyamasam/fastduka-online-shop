@@ -304,10 +304,12 @@ onMounted(() => {
         </div>
       </template>
       <template v-if="slotProps.column.key === 'sku'">
-        <span v-if="slotProps.text" class="font-mono text-sm text-gray-600">
+        <span v-if="slotProps.text"
+              class="font-mono text-sm text-gray-600">
           {{ slotProps.text }}
         </span>
-        <span v-else class="text-gray-400 text-sm">-</span>
+        <span v-else
+              class="text-gray-400 text-sm">-</span>
       </template>
 
       <template v-if="slotProps.column.key === 'category'">
@@ -381,7 +383,7 @@ onMounted(() => {
                        type="primary"
                        size="small"
                        @click="selectAction('add-inventory', slotProps.text?.id)">
-
+              <span>Inventory </span>
               <el-icon>
                 <Plus />
               </el-icon>

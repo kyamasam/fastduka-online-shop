@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-from vendors.constants import VENDOR_ROLE_ADMIN, VENDOR_ROLE_EDITOR
+from vendors.constants import VENDOR_ROLE_ADMIN, VENDOR_ROLE_EDITOR, VENDOR_ROLE_SHOP_KEEPER
 from vendors.models import Vendor, VendorMember
 
 class IsVendorAdmin(permissions.BasePermission):
@@ -30,4 +30,17 @@ class IsVendorEditor(permissions.BasePermission):
             vendor=vendor,
             user=request.user,
             role=VENDOR_ROLE_EDITOR
+        ).exists()
+        
+class IsVendorShopKeeper(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if isinstance(obj, Vendor):
+            vendor = obj
+        else:
+            vendor = obj.vendor
+            
+        return VendorMember.objects.filter(
+            vendor=vendor,
+            user=request.user,
+            role=VENDOR_ROLE_SHOP_KEEPER
         ).exists()

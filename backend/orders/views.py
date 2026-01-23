@@ -1,21 +1,26 @@
 import os
+import logging
 
 import requests
-from rest_framework import viewsets, serializers, filters
+from django.utils import timezone
+from rest_framework import viewsets, serializers, filters,status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from django.db.models import Q
-
 from orders.constants import ORDER_DELIVERED, ORDER_IN_TRANSIT, ORDER_PAID, ORDER_PLACED, ORDER_PROCESSING
+from inventory.services import InventoryService
+from inventory.constants import CUSTOMER_ORDER
+
+logger = logging.getLogger(__name__)
 from orders.models import CartItem, Cart, OrderItem, Order, Transaction, PURCHASE
 from orders.serializers import AssignOrderToRiderSerializer, CartItemSerializer, CartSerializer, OrderDeliverySerializer, OrderSerializer, OrderItemSerializer, \
     OrderStkSerializer, ConfirmPaymentSerializer, TransactionSerializer
 from users.constants import USER_TYPE_BUSINESS_MANAGER, USER_TYPE_BUSINESS_OWNER, USER_TYPE_CUSTOMER, USER_TYPE_PLATFORM_MANAGER, USER_TYPE_RIDER
 from users.permissions import HasToOwnCart
 from vendors.models import VendorMember
-from vendors.permissions import IsVendorAdmin, IsVendorEditor
+from vendors.permissions import IsVendorAdmin, IsVendorEditor, IsVendorShopKeeper
 from django_filters.rest_framework import DjangoFilterBackend
 
 class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
@@ -234,7 +239,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(OrderSerializer(order).data)
     
 
-    @action(detail=False, methods=["post"], url_path="assign-order-to-rider", permission_classes=[ IsVendorEditor, IsVendorAdmin],
+    @action(detail=False, methods=["post"], url_path="assign-order-to-rider", permission_classes=[ IsVendorEditor |IsVendorShopKeeper | IsVendorAdmin],
             serializer_class=AssignOrderToRiderSerializer,  )
     def assign_order_to_rider(self, request):
         serializer = AssignOrderToRiderSerializer(data=request.data)
@@ -247,19 +252,12 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.status = ORDER_IN_TRANSIT
         order.delivery_notes = delivery_notes
         order.save()
-        # todo: notify rider
+        # todo: notify rider/customer
         return Response(OrderSerializer(order).data)
     
-    @action(detail=True, methods=['post'], url_path='mark-delivered')
+    @action(detail=True, methods=['post'], url_path='mark-delivered', serializer_class=OrderDeliverySerializer, permission_classes=[ IsVendorEditor | IsVendorAdmin | IsVendorShopKeeper])
     def mark_delivered(self, request, pk=None):
         order = self.get_object()
-        
-        # Verify the rider is making the request
-        if not hasattr(request.user, 'rider') or order.rider != request.user.rider:
-            return Response(
-                {"error": "Only assigned riders can mark orders as delivered"}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
 
         # Validate signatures
         serializer = OrderDeliverySerializer(data=request.data)
@@ -267,15 +265,65 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         # Update order with signatures and mark as delivered
-        order.customer_signature = serializer.validated_data['customer_signature']
-        order.rider_signature = serializer.validated_data['rider_signature']
+        order.customer_signature = serializer.validated_data.get('customer_signature', '')
+        order.rider_signature = serializer.validated_data.get('rider_signature', '')
+        order.delivery_location = serializer.validated_data.get('delivery_location', order.delivery_location)
+        order.delivery_note = serializer.validated_data.get('delivery_note', '')
         order.delivery_completed_at = timezone.now()
         order.status = ORDER_DELIVERED
         order.save()
 
+        # Adjust inventory for each order item
+        inventory_service = InventoryService()
+        inventory_adjustments = []
+
+        # Build delivery info for the reason field
+        customer_name = f"{order.user.first_name} {order.user.last_name}".strip() if order.user else "Unknown Customer"
+        delivery_location = order.delivery_location or "Not specified"
+        rider_name = f"{order.rider.user.first_name} {order.rider.user.last_name}".strip() if order.rider and order.rider.user else "No rider assigned"
+
+        for order_item in order.orderitem_set.all():
+            try:
+                # Build a detailed reason with delivery information
+                reason = (
+                    f"Order #{order.id} delivered. "
+                    f"Customer: {customer_name}. "
+                    f"Delivery Location: {delivery_location}. "
+                    f"Rider: {rider_name}. "
+                    f"Product: {order_item.product.name}. "
+                    f"Qty: {order_item.quantity}."
+                )
+
+                result = inventory_service.adjust_inventory(
+                    product_id=order_item.product.id,
+                    vendor_id=order.vendor.id,
+                    quantity=order_item.quantity,
+                    action_type=CUSTOMER_ORDER,
+                    reason=reason,
+                    product_variant_id=order_item.product_variant.id if order_item.product_variant else None,
+                    reference_id=str(order.id),
+                    reference_type="order"
+                )
+                inventory_adjustments.append({
+                    "product_id": order_item.product.id,
+                    "product_name": order_item.product.name,
+                    "quantity_deducted": order_item.quantity,
+                    "success": result.get('success', False)
+                })
+            except Exception as e:
+                logger.error(f"Failed to adjust inventory for order item {order_item.id}: {str(e)}")
+                inventory_adjustments.append({
+                    "product_id": order_item.product.id,
+                    "product_name": order_item.product.name,
+                    "quantity_deducted": order_item.quantity,
+                    "success": False,
+                    "error": str(e)
+                })
+
         return Response({
             "message": "Order marked as delivered successfully",
-            "delivery_time": order.delivery_completed_at
+            "delivery_time": order.delivery_completed_at,
+            "inventory_adjustments": inventory_adjustments
         })
 def calculate_order_value(order: Order):
     total = 0

@@ -89,6 +89,7 @@ class Order(UtilColumnsModel):
 
     customer_signature = models.TextField(null=True, blank=True)
     rider_signature = models.TextField(null=True, blank=True)
+    delivery_note = models.TextField(null=True, blank=True)
     delivery_completed_at = models.DateTimeField(null=True, blank=True)
     cancelled_at = models.DateTimeField(null=True, blank=True)
     cancellation_reason = models.TextField(null=True, blank=True)
