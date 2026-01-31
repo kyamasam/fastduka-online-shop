@@ -2,12 +2,12 @@ from django.core.validators import MaxValueValidator
 from django.db import models
 
 from delivery.models import Rider
-from orders.constants import ORDER_CANCELLED, ORDER_PLACED, ORDER_PROCESSING, ORDER_IN_TRANSIT, ORDER_DELIVERED, ORDER_PAID, POS_WEB, WEB_SITE
+from orders.constants import CASH, MPESA, ORDER_CANCELLED, ORDER_PLACED, ORDER_PROCESSING, ORDER_IN_TRANSIT, ORDER_DELIVERED, ORDER_PAID, POS_WEB, WALLET, WEB_SITE
 from products.models import Product, ProductVariant
 from users.models import UtilColumnsModel, User
 from vendors.models import Vendor
 
-PAYMENT_METHOD_CHOICES = (("mpesa", "M-Pesa"), ("wallet", "Wallet"), ("cash", "Cash"))
+PAYMENT_METHOD_CHOICES = ((MPESA, "M-Pesa"), (WALLET, "Wallet"), (CASH, "Cash"))
 ORDER_CLIENT_CHOICES = [(WEB_SITE, "Site"), (POS_WEB, "POS Web")]
 PROCESSED ='processed'
 FAILED = 'failed'

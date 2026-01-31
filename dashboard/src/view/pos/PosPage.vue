@@ -47,6 +47,21 @@
                              :product="item"
                              @add-to-cart="addToCart" />
             </div>
+
+            <!-- Payment Details Display -->
+            <div v-if="lastPaymentTransaction" class="bg-white rounded-xl border border-gray-200 p-6 mt-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Last Payment Details</h3>
+                <div class="space-y-2 text-sm text-gray-700">
+                    <p><strong>Transaction ID:</strong> {{ lastPaymentTransaction.id }}</p>
+                    <p><strong>Amount:</strong> {{ lastPaymentTransaction.transaction_amount }} {{ lastPaymentTransaction.transaction_currency }}</p>
+                    <p><strong>Status:</strong> <span :class="{'text-red-600': lastPaymentTransaction.transaction_status === 'failed', 'text-green-600': lastPaymentTransaction.transaction_status === 'processed', 'text-yellow-600': lastPaymentTransaction.transaction_status === 'pending'}">{{ lastPaymentTransaction.transaction_status }}</span></p>
+                    <p v-if="lastPaymentTransaction.transaction_code"><strong>Code:</strong> {{ lastPaymentTransaction.transaction_code }}</p>
+                    <p><strong>Method:</strong> {{ lastPaymentTransaction.payment_method }}</p>
+                    <p v-if="lastPaymentTransaction.customer_account_number"><strong>Customer Account:</strong> {{ lastPaymentTransaction.customer_account_number }}</p>
+                    <p><strong>Time:</strong> {{ new Date(lastPaymentTransaction.created_at).toLocaleString() }}</p>
+                </div>
+                <button @click="lastPaymentTransaction = null" class="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Clear</button>
+            </div>
         </div>
 
         <!-- Cart Summary Component -->
@@ -113,6 +128,9 @@ const categories = computed(() => {
 // Tax calculation state
 const taxCalculation = ref(null)
 const isCalculatingTax = ref(false)
+
+// Last payment transaction details
+const lastPaymentTransaction = ref(null);
 
 // Helper function to round amounts to 2 decimal places
 const roundAmount = (amount) => {
@@ -315,6 +333,7 @@ const removeFromCart = (id) => {
 
 const clearCart = () => {
     cart.value = []
+    lastPaymentTransaction.value = null; // Clear payment details on new cart
 }
 
 // Checkout handlers
@@ -323,18 +342,32 @@ const handleCheckout = () => {
         ElMessage.warning('Cart is empty')
         return
     }
+    lastPaymentTransaction.value = null; // Clear previous payment details before new checkout
     showCheckoutModal.value = true
 }
 
 const handlePaymentSuccess = (order) => {
     ElMessage.success('Payment successful! Order placed.')
+    lastPaymentTransaction.value = order.payment_transaction_obj; // Store for display
     showCheckoutModal.value = false
     clearCart()
 }
 
-const handlePaymentFailed = (error) => {
-    ElMessage.error('Payment failed. Please try again.')
-    console.error('Payment error:', error)
+const handlePaymentFailed = (order) => { // Assuming order object is passed here
+    if (order && order.payment_transaction_obj) {
+        lastPaymentTransaction.value = order.payment_transaction_obj; // Store for display
+        if (order.payment_transaction_obj.transaction_status === 'failed') {
+            ElMessage.error('Payment failed. Please try again.')
+        } else {
+            // Payment might be pending, processed with issues, etc.
+            ElMessage.warning(`Payment status: ${order.payment_transaction_obj.transaction_status}. Please check details.`)
+        }
+    } else {
+        // Generic error if no order/transaction details are available
+        ElMessage.error('An unknown payment error occurred. Please try again.')
+    }
+    showCheckoutModal.value = false
+    // Do not clear cart on non-failed payment for user to review
 }
 
 // Watch cart for changes and recalculate tax

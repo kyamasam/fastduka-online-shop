@@ -2,7 +2,8 @@
     <div class="mpesa-payment">
         <!-- Phone Number Input -->
         <div class="mb-4">
-            <label class="block text-sm font-medium mb-2">M-Pesa Phone Number <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-medium mb-2">M-Pesa Phone Number <span
+                      class="text-red-500">*</span></label>
             <div class="flex gap-2">
                 <select v-model="phoneCode"
                         class="border rounded px-3 py-2 w-24">
@@ -69,10 +70,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted } from 'vue'
 import store from '@/vuex/store'
-import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { computed, onUnmounted, ref } from 'vue'
 
 const props = defineProps({
     cartItems: {
@@ -100,7 +101,7 @@ const loadingVerify = ref(false)
 
 // Polling state
 const POLLING_INTERVAL = 5000 // 5 seconds
-const MAX_POLLING_ATTEMPTS = 5
+const MAX_POLLING_ATTEMPTS = 6
 const INITIAL_DELAY = 3000
 let pollingInterval = null
 const pollingAttempts = ref(0)

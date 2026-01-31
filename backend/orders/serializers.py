@@ -315,7 +315,8 @@ class OrderSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         user = validated_data.pop("user_id", None)
 
-        instance.update(validated_data)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
 
         if user:
             instance.user = user

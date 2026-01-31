@@ -11,12 +11,12 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from django.db.models import Q
 from delivery.services.process_order_delivery import process_automatic_delivery
 from orders import constants
-from orders.constants import ORDER_DELIVERED, ORDER_IN_TRANSIT, ORDER_PAID, ORDER_PLACED, ORDER_PROCESSING,POS_WEB
+from orders.constants import CASH, ORDER_DELIVERED, ORDER_IN_TRANSIT, ORDER_PAID, ORDER_PLACED, ORDER_PROCESSING,POS_WEB
 from inventory.services import InventoryService
 from inventory.constants import CUSTOMER_ORDER
 
 logger = logging.getLogger(__name__)
-from orders.models import CartItem, Cart, OrderItem, Order, Transaction, PURCHASE
+from orders.models import PROCESSED, CartItem, Cart, OrderItem, Order, Transaction, PURCHASE
 from orders.serializers import (
     AssignOrderToRiderSerializer, CartItemSerializer, CartSerializer, OrderDeliverySerializer,
     OrderSerializer, OrderItemSerializer, OrderStkSerializer, ConfirmPaymentSerializer,
@@ -235,7 +235,7 @@ class CartItemViewSet(viewsets.ModelViewSet):
 
 
 class OrderViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated, HasToOwnCart]
+    permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializer
     filter_backends = [filters.SearchFilter,DjangoFilterBackend]
     search_fields = [ "delivery_location","rider_user__first_name", "rider_user__last_name", "payment_transaction__transaction_code", "payment_transaction__transaction_status"]
@@ -244,7 +244,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         "status",
         "payment_transaction__transaction_code",
         "payment_transaction__payment_method",
-        "rider_id"    ]
+        "rider_id"]
     
     def get_serializer_class(self):
         if self.action in ['list','retrieve']:
@@ -377,10 +377,18 @@ class OrderViewSet(viewsets.ModelViewSet):
         payment_transaction_serializer = ConfirmPaymentSerializer(data=request.data)
         if not payment_transaction_serializer.is_valid():
             raise serializers.ValidationError(payment_transaction_serializer.errors)
-        order = Order.objects.select_for_update().get(pk=payment_transaction_serializer.data['order_id'])
-        payment_transaction = Transaction.objects.get(
-            pk=payment_transaction_serializer.data['transaction_id'])
+        order:Order = Order.objects.select_for_update().get(pk=payment_transaction_serializer.data['order_id'])
+        payment_transaction:Transaction = order.payment_transaction
 
+        if order.payment_transaction.payment_method ==CASH:
+            order_total = calculate_order_value(order)
+            # confirm if the order is fully paid
+            if order_total <= payment_transaction.transaction_amount:
+                payment_transaction.transaction_status=PROCESSED
+                payment_transaction.save()
+                order.status=ORDER_PAID
+                order.save()
+            return Response(OrderSerializer(order).data)
         api_key = "Api-Key " + os.environ.get("FASTDUKA_API_KEY")
         header = {"Authorization": f"{api_key}", "Content-Type": "application/json", }
         response = requests.get(

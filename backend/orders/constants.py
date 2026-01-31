@@ -7,3 +7,7 @@ ORDER_PAID ="PAID"
 
 POS_WEB ="pos_web"
 WEB_SITE ="web_site"
+
+MPESA ="mpesa"
+WALLET ="wallet"
+CASH="cash"
