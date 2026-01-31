@@ -74,6 +74,53 @@
                        size="large" />
     </el-form-item>
 
+    <!-- Tax Configuration Section -->
+    <div class="col-span-2 border-t pt-4 mt-2">
+      <h3 class="text-md font-semibold mb-4 text-gray-700">Tax Configuration</h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Is Taxable Toggle -->
+        <el-form-item label="Is Product Taxable?"
+                      prop="is_taxable">
+          <el-switch v-model="formState.is_taxable"
+                     active-text="Yes"
+                     inactive-text="No"
+                     size="large" />
+        </el-form-item>
+
+        <!-- Tax Rate Field (shown only if is_taxable is true) -->
+        <el-form-item v-if="formState.is_taxable"
+                      :rules="[{ required: formState.is_taxable, message: 'Please select a tax rate' }]"
+                      label="Tax Rate"
+                      prop="tax_rate">
+          <el-select v-model="formState.tax_rate"
+                     :loading="taxRateLoader"
+                     class="w-full rounded-none"
+                     placeholder="Select Tax Rate"
+                     size="large"
+                     @focus="fetchTaxRates">
+            <el-option v-for="rate in taxRates"
+                       :key="rate.value"
+                       :label="rate.label"
+                       :value="rate.value" />
+          </el-select>
+        </el-form-item>
+
+        <!-- Price Includes Tax Toggle (shown only if is_taxable is true) -->
+        <el-form-item v-if="formState.is_taxable"
+                      label="Price Includes Tax?"
+                      prop="price_includes_tax">
+          <el-switch v-model="formState.price_includes_tax"
+                     active-text="Yes"
+                     inactive-text="No"
+                     size="large" />
+          <div class="text-xs text-gray-500 mt-1">
+            If enabled, the selling price already includes tax. If disabled, tax will be added on top.
+          </div>
+        </el-form-item>
+      </div>
+    </div>
+
     <!-- Product Type Field -->
     <div class="z-50">
       <el-form-item :rules="[{ required: true, message: 'Please select a product type', trigger: 'blur' }]"
@@ -195,6 +242,8 @@ export default {
       categoryLoader: false,
       productTypes: [],
       productTypeLoader: false,
+      taxRates: [],
+      taxRateLoader: false,
       productLoader: false,
       counter: 0,
       loadingProfilePhotoUpload: false,
@@ -238,6 +287,25 @@ export default {
         })
         .catch(() => {
           this.productTypeLoader = false;
+        });
+    },
+    fetchTaxRates() {
+      // Don't fetch if already loaded
+      if (this.taxRates.length > 0) {
+        return;
+      }
+
+      this.taxRateLoader = true;
+      store.dispatch("fetchList", { url: "product/tax-rates" })
+        .then((res) => {
+          this.taxRates = res.data.map((rate) => ({
+            label: rate.label,
+            value: rate.value
+          }));
+          this.taxRateLoader = false;
+        })
+        .catch(() => {
+          this.taxRateLoader = false;
         });
     },
     fetchProduct() {
@@ -425,13 +493,19 @@ export default {
         buying_price: null,
         sale_price: null,
         allowable_discount: null,
-        category_id: null
+        category_id: null,
+        is_taxable: true,  // Default to taxable
+        price_includes_tax: true,  // Default to price includes tax
+        tax_rate: '0.1600'  // Default to 16% (stored as 0.16)
       };
       this.productLoader = false;
     } else {
       // Fetch product data if editing
       this.fetchProduct();
     }
+
+    // Fetch tax rates on mount
+    this.fetchTaxRates();
 
     // Note: Category form is NOT initialized here - it will only show when the plus icon is clicked
   }

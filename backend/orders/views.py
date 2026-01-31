@@ -15,8 +15,13 @@ from inventory.constants import CUSTOMER_ORDER
 
 logger = logging.getLogger(__name__)
 from orders.models import CartItem, Cart, OrderItem, Order, Transaction, PURCHASE
-from orders.serializers import AssignOrderToRiderSerializer, CartItemSerializer, CartSerializer, OrderDeliverySerializer, OrderSerializer, OrderItemSerializer, \
-    OrderStkSerializer, ConfirmPaymentSerializer, TransactionSerializer
+from orders.serializers import (
+    AssignOrderToRiderSerializer, CartItemSerializer, CartSerializer, OrderDeliverySerializer,
+    OrderSerializer, OrderItemSerializer, OrderStkSerializer, ConfirmPaymentSerializer,
+    TransactionSerializer, POSTransactionSerializer, CalculateTaxRequestSerializer,
+    CalculateTaxResponseSerializer
+)
+from orders.tax_utils import calculate_order_tax
 from users.constants import USER_TYPE_BUSINESS_MANAGER, USER_TYPE_BUSINESS_OWNER, USER_TYPE_CUSTOMER, USER_TYPE_PLATFORM_MANAGER, USER_TYPE_RIDER
 from users.permissions import HasToOwnCart
 from vendors.models import VendorMember
@@ -63,6 +68,66 @@ class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
         
         # Default case - return empty queryset
         return Transaction.objects.none()
+
+
+class POSTransactionViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for creating POS transactions.
+    Allows authenticated users to create transactions for POS cash payments.
+    """
+    serializer_class = POSTransactionSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['post', 'get', 'head', 'options']  # Only allow creation and retrieval
+
+    def get_queryset(self):
+        """
+        Return transactions created by the current user for POS orders.
+        """
+        user = self.request.user
+
+        # For platform managers, return all POS transactions
+        if user.user_type == USER_TYPE_PLATFORM_MANAGER:
+            return Transaction.objects.filter(
+                order__order_client='pos_web'
+            ).select_related('user')
+
+        # For business managers and owners, return POS transactions from their vendors
+        if user.user_type in [USER_TYPE_BUSINESS_MANAGER, USER_TYPE_BUSINESS_OWNER]:
+            vendor_memberships = VendorMember.objects.filter(user=user).values_list('vendor', flat=True)
+            order_ids = Order.objects.filter(
+                vendor__in=vendor_memberships,
+                order_client='pos_web'
+            ).values_list('id', flat=True)
+            return Transaction.objects.filter(
+                order__id__in=order_ids
+            ).select_related('user')
+
+        # For other users, return only their own POS transactions
+        return Transaction.objects.filter(
+            user=user,
+            order__order_client='pos_web'
+        ).select_related('user')
+
+    def create(self, request, *args, **kwargs):
+        """
+        Create a new POS transaction.
+        Validates that payment_method is 'cash' for POS transactions.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Ensure this is a cash transaction for POS
+        payment_method = serializer.validated_data.get('payment_method')
+        if payment_method != 'cash':
+            raise serializers.ValidationError(
+                "POS transaction endpoint only supports cash payments. Use order/create-stk for M-Pesa."
+            )
+
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
 class CartViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, HasToOwnCart]
     serializer_class = CartSerializer
@@ -72,11 +137,99 @@ class CartViewSet(viewsets.ModelViewSet):
         qs = Cart.objects.filter(user=user)
         return qs
 
+    def get_serializer_context(self):
+        """
+        Add context to serializer to conditionally include tax calculations.
+        """
+        context = super().get_serializer_context()
+        # Check if we should include tax breakdown
+        include_tax = self.request.query_params.get('include_tax', 'false').lower() == 'true'
+        context['include_tax'] = include_tax
+        return context
+
+    @action(detail=False, methods=['get'], url_path='with-tax', permission_classes=[IsAuthenticated])
+    def get_cart_with_tax(self, request):
+        """
+        Retrieve the user's cart with complete tax breakdown.
+
+        This endpoint should be called:
+        - After adding an item to cart
+        - After updating item quantity
+        - After removing an item
+        - When loading the cart summary page
+
+        Returns cart with tax_total, total_before_tax, total_after_tax breakdown.
+        """
+        user = request.user
+
+        # Get or create cart for user
+        cart, created = Cart.objects.get_or_create(user=user)
+
+        # Serialize with tax calculations
+        serializer = CartSerializer(cart, context={'request': request, 'include_tax': True})
+
+        return Response(serializer.data)
+
 
 class CartItemViewSet(viewsets.ModelViewSet):
     queryset = CartItem.objects.all()
     serializer_class = CartItemSerializer
     permission_classes = [HasToOwnCart]
+
+    def create(self, request, *args, **kwargs):
+        """
+        Create a new cart item and return the cart with tax breakdown.
+        """
+        response = super().create(request, *args, **kwargs)
+
+        # Get the cart from the created item
+        cart_item = CartItem.objects.get(pk=response.data['id'])
+        cart = cart_item.cart
+
+        # Return cart with tax breakdown
+        cart_serializer = CartSerializer(cart, context={'request': request, 'include_tax': True})
+
+        return Response({
+            'cart_item': response.data,
+            'cart': cart_serializer.data
+        }, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        """
+        Update a cart item and return the cart with tax breakdown.
+        """
+        response = super().update(request, *args, **kwargs)
+
+        # Get the cart from the updated item
+        cart_item = CartItem.objects.get(pk=response.data['id'])
+        cart = cart_item.cart
+
+        # Return cart with tax breakdown
+        cart_serializer = CartSerializer(cart, context={'request': request, 'include_tax': True})
+
+        return Response({
+            'cart_item': response.data,
+            'cart': cart_serializer.data
+        })
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Delete a cart item and return the cart with tax breakdown.
+        """
+        # Get the cart before deleting the item
+        cart_item = self.get_object()
+        cart = cart_item.cart
+
+        # Delete the item
+        self.perform_destroy(cart_item)
+
+        # Return updated cart with tax breakdown
+        cart_serializer = CartSerializer(cart, context={'request': request, 'include_tax': True})
+
+        return Response({
+            'message': 'Cart item deleted successfully',
+            'cart': cart_serializer.data
+        }, status=status.HTTP_200_OK)
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -90,6 +243,21 @@ class OrderViewSet(viewsets.ModelViewSet):
         "payment_transaction__transaction_code",
         "payment_transaction__payment_method",
         "rider_id"    ]
+    
+    def get_serializer_class(self):
+        if self.action in ['list','retrieve']:
+            return OrderSerializer
+        if self.action =="create_stk":
+            return OrderStkSerializer
+        if self.action == "confirm_payment":
+            return ConfirmPaymentSerializer
+        if self.action =="assign_order_to_rider":
+            return AssignOrderToRiderSerializer
+        if self.action == "mark_delivered":
+            return OrderDeliverySerializer
+        if self.action == "calculate_tax":
+            return CalculateTaxRequestSerializer
+        return super().get_serializer_class()
 
     @extend_schema(
         parameters=[
@@ -168,14 +336,14 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["post"], url_path="create-stk", permission_classes=[IsAuthenticated],
             serializer_class=OrderStkSerializer, )
     def create_stk(self, request):
-        #todo: improve so that amount does not come from  FE
+        
         serializer = OrderStkSerializer(data=request.data)
         if not serializer.is_valid():
             raise serializers.ValidationError(serializer.errors)
         order = Order.objects.get(pk=serializer.data['order_id'])
         if serializer.is_valid():
             # create Transaction
-            transaction_amount = serializer.data['amount']
+            transaction_amount = order.total_after_tax or serializer.data['amount']
             json_data = {"customer_account_number": serializer.data['phone_number'], "amount": transaction_amount,
                          "receiving_account_number": os.environ.get("FASTDUKA_PAYBILL"),
                          "receiving_organization_id": os.environ.get("FASTDUKA_ORGID"), "payment_method_name": "mpesa",
@@ -325,6 +493,49 @@ class OrderViewSet(viewsets.ModelViewSet):
             "delivery_time": order.delivery_completed_at,
             "inventory_adjustments": inventory_adjustments
         })
+
+    @extend_schema(request=CalculateTaxRequestSerializer, responses=CalculateTaxResponseSerializer)
+
+    @action(detail=False, methods=['post'], url_path='calculate-tax',
+            serializer_class=CalculateTaxRequestSerializer,
+            
+            permission_classes=[IsAuthenticated])
+    def calculate_tax(self, request):
+        """
+        Calculate tax for order items before creating an order.
+
+        Request body:
+        {
+            "items": [
+                {
+                    "product_id": 1,
+                    "quantity": 2,
+                    "purchase_price": "150.00"
+                }
+            ]
+        }
+
+        Returns tax calculations for all items and order totals.
+        """
+        serializer = CalculateTaxRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            raise serializers.ValidationError(serializer.errors)
+
+        # Prepare items for tax calculation
+        items_for_calculation = []
+        for item in serializer.validated_data['items']:
+            items_for_calculation.append({
+                'product': item['product_id'],
+                'quantity': item['quantity'],
+                'purchase_price': item['purchase_price']
+            })
+
+        # Calculate taxes
+        tax_result = calculate_order_tax(items_for_calculation)
+
+        # Return formatted response
+        response_serializer = CalculateTaxResponseSerializer(tax_result)
+        return Response(response_serializer.data)
 def calculate_order_value(order: Order):
     total = 0
     for order_item in list(order.orderitem_set.all()):

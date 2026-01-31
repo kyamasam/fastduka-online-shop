@@ -7,9 +7,11 @@ from products.models import Product, ProductVariant
 from users.models import UtilColumnsModel, User
 from vendors.models import Vendor
 
-PAYMENT_METHOD_CHOICES = (("mpesa", "M-Pesa"), ("wallet", "Wallet"))
+PAYMENT_METHOD_CHOICES = (("mpesa", "M-Pesa"), ("wallet", "Wallet"), ("cash", "Cash"))
+ORDER_CLIENT_CHOICES = [("site", "Site"), ("pos_web", "POS Web")]
 PROCESSED ='processed'
 FAILED = 'failed'
+
 TRANSACTION_STATUS_CHOICES = [(ORDER_PROCESSING, "Processing"), (PROCESSED, "Processed"), (FAILED, "Failed"), ]
 SUPPORTED_CURRENCY_CHOICES =[('KES', 'Kenya Shillings')]
 WITHDRAWAL = 'withdrawal'
@@ -86,6 +88,7 @@ class Order(UtilColumnsModel):
     delivery_notes = models.TextField(blank=True, null=True)
     # add vendor
     vendor = models.ForeignKey(Vendor, null=True, blank=True, on_delete=models.SET_NULL)
+    order_client = models.CharField(max_length=20, choices=ORDER_CLIENT_CHOICES, default="site", help_text="Client application that created this order")
 
     customer_signature = models.TextField(null=True, blank=True)
     rider_signature = models.TextField(null=True, blank=True)
@@ -93,6 +96,9 @@ class Order(UtilColumnsModel):
     delivery_completed_at = models.DateTimeField(null=True, blank=True)
     cancelled_at = models.DateTimeField(null=True, blank=True)
     cancellation_reason = models.TextField(null=True, blank=True)
+    tax_total = models.DecimalField(null=True, blank=True,max_digits=12, decimal_places=2)
+    total_before_tax = models.DecimalField(max_digits=12, decimal_places=2,null=True, blank=True)
+    total_after_tax = models.DecimalField(max_digits=12, decimal_places=2,null=True, blank=True)
     
 
     class Meta:
@@ -107,6 +113,10 @@ class OrderItem(UtilColumnsModel):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     product_variant = models.ForeignKey(ProductVariant, on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.IntegerField(default=1)
-    purchase_price = models.FloatField()
+    purchase_price = models.DecimalField(max_digits=12, decimal_places=2)
+    tax_percent = models.FloatField(null=True, blank=True)
+    tax_amount = models.DecimalField(max_digits=12, decimal_places=2,null=True, blank=True)
+    total_before_tax = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    total_after_tax = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
 

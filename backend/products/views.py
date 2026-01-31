@@ -1,5 +1,4 @@
 from copy import deepcopy
-
 from django.db.models import Case, When, Subquery, OuterRef, BooleanField, Sum, Q
 from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
@@ -7,14 +6,20 @@ from rest_framework import viewsets, filters as rest_framework_filters
 from django_filters import rest_framework as filters
 from rest_framework import filters as rest_framework_filters, permissions
 from inventory.models import Inventory
-from products.models import Category, Product, ProductPhoto, ProductReview, CategoryType
+from products.models import Category, Product, ProductPhoto, ProductReview, CategoryType, TaxRate
 from products.serializers import CategorySerializer, ProductSerializer, ProductPhotoSerializer, \
-    ProductVariantSerializer, ProductVariantPhotoSerializer, ReviewSerializer, CategoryTypeSerializer
+    ProductVariantSerializer, ProductVariantPhotoSerializer, ReviewSerializer, CategoryTypeSerializer, TaxRateSerializer
 from users.permissions import AnonReadAdminCreate
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 
+class TaxViewSet(viewsets.ModelViewSet):
+    model = TaxRate
+    serializer_class=TaxRateSerializer
+    permission_classes=[AnonReadAdminCreate]
+    
+    
 class CategoryTypeViewSet(viewsets.ModelViewSet):
     serializer_class = CategoryTypeSerializer
     queryset = CategoryType.objects.all()
@@ -67,22 +72,29 @@ class ProductFilter(filters.FilterSet):
 
 
 
+
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     model = Product
     queryset = Product.objects.all()
     permission_classes = [AnonReadAdminCreate]
 
-    filter_backends =[DjangoFilterBackend, rest_framework_filters.SearchFilter]
+    filter_backends = [
+        DjangoFilterBackend, 
+        rest_framework_filters.SearchFilter,
+        rest_framework_filters.OrderingFilter  
+    ]
     filterset_class = ProductFilter
     search_fields = [
         'name',
         'description',
         'sku',
     ]
+    ordering_fields = ['created_at', 'name', 'price']  # Fields that can be sorted
+    ordering = ['-created_at']  # Default ordering (newest first)
 
     def filter_queryset(self, queryset):
-        q_params = ( self.request.query_params.dict())
+        q_params = self.request.query_params.dict()
         in_stock = q_params.pop('in_stock', None)
         category_id__in = q_params.pop('category_id__in', None)
         on_sale = q_params.pop('on_sale', None)
@@ -91,34 +103,35 @@ class ProductViewSet(viewsets.ModelViewSet):
         q_params.pop('offset', None)
         q_params.pop('page', None)
         search = q_params.pop('search', None)
+        q_params.pop('ordering', None)  # Remove ordering param so it doesn't interfere
 
-
-        qs= super().get_queryset().filter(**q_params)
-
+        qs = super().get_queryset().filter(**q_params)
 
         if in_stock is not None:
             qs = qs.annotate(inventory_total=Sum('inventory__quantity'))
-            if in_stock.lower() == 'true' or in_stock==1:
-                qs= qs.filter(inventory_total__gt=0)
+            if in_stock.lower() == 'true' or in_stock == 1:
+                qs = qs.filter(inventory_total__gt=0)
             else:
-                qs= qs.filter(Q(inventory_total=None)or Q(inventory_total__lt=1))
+                qs = qs.filter(Q(inventory_total__isnull=True) | Q(inventory_total__lt=1))
 
         if on_sale is not None:
-            if on_sale.lower()=='true' or on_sale==1:
+            if on_sale.lower() == 'true' or on_sale == 1:
                 qs = qs.filter(sale_price__gt=0)
             else:
                 qs = qs.filter(sale_price__lt=1)
 
         if category_id__in is not None:
-            category_id__in = (category_id__in).split(',')
-
+            category_id__in = category_id__in.split(',')
             qs = qs.filter(category_id__in=[int(i) for i in category_id__in])
+            
         if search is not None:
-            qs = qs.filter(Q(name__icontains=search) | Q(description__icontains=search) | Q(sku__icontains=search))
+            qs = qs.filter(
+                Q(name__icontains=search) |
+                Q(description__icontains=search) |
+                Q(sku__icontains=search)
+            )
+
         return qs
-
-
-
 
 
 class ProductPhotoViewSet(viewsets.ModelViewSet):
