@@ -56,7 +56,7 @@ const fetchInventoryBatches = async () => {
 
   inventoryLoading.value = true;
   try {
-    const url = `inventory/unpaged?product=${route?.params.productId}&vendor_id=${selectedVendor.value}`;
+    const url = `inventory/unpaged-batches?product=${route?.params.productId}&vendor_id=${selectedVendor.value}`;
     const response = await store.dispatch("fetchList", {
       url: url,
     });
@@ -367,6 +367,7 @@ onMounted(() => {
               <th class="px-4 py-3">Change</th>
               <th class="px-4 py-3">New</th>
               <th class="px-4 py-3">Reason</th>
+              <th class="px-4 py-3">Time</th>
             </tr>
           </thead>
           <tbody>
@@ -396,6 +397,10 @@ onMounted(() => {
               </td>
               <td class="px-4 py-3 text-gray-500">
                 {{ record.reason || '-' }}
+              </td>
+              <td class="px-4 py-3 text-gray-500">
+                {{ new Date(record.created_at).toLocaleDateString() || '-' }}
+                {{ new Date(record.created_at).toLocaleTimeString() || '-' }}
               </td>
             </tr>
           </tbody>

@@ -1,6 +1,6 @@
 import os
 import logging
-
+import math
 import requests
 from django.utils import timezone
 from rest_framework import viewsets, serializers, filters,status
@@ -9,7 +9,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from django.db.models import Q
-from orders.constants import ORDER_DELIVERED, ORDER_IN_TRANSIT, ORDER_PAID, ORDER_PLACED, ORDER_PROCESSING
+from delivery.services.process_order_delivery import process_automatic_delivery
+from orders import constants
+from orders.constants import ORDER_DELIVERED, ORDER_IN_TRANSIT, ORDER_PAID, ORDER_PLACED, ORDER_PROCESSING,POS_WEB
 from inventory.services import InventoryService
 from inventory.constants import CUSTOMER_ORDER
 
@@ -343,7 +345,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = Order.objects.get(pk=serializer.data['order_id'])
         if serializer.is_valid():
             # create Transaction
-            transaction_amount = order.total_after_tax or serializer.data['amount']
+            transaction_amount = float(math.ceil(order.total_after_tax or serializer.data['amount']))
             json_data = {"customer_account_number": serializer.data['phone_number'], "amount": transaction_amount,
                          "receiving_account_number": os.environ.get("FASTDUKA_PAYBILL"),
                          "receiving_organization_id": os.environ.get("FASTDUKA_ORGID"), "payment_method_name": "mpesa",
@@ -375,7 +377,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         payment_transaction_serializer = ConfirmPaymentSerializer(data=request.data)
         if not payment_transaction_serializer.is_valid():
             raise serializers.ValidationError(payment_transaction_serializer.errors)
-        order = Order.objects.get(pk=payment_transaction_serializer.data['order_id'])
+        order = Order.objects.select_for_update().get(pk=payment_transaction_serializer.data['order_id'])
         payment_transaction = Transaction.objects.get(
             pk=payment_transaction_serializer.data['transaction_id'])
 
@@ -398,12 +400,11 @@ class OrderViewSet(viewsets.ModelViewSet):
             payment_transaction.save()
 
             order_total = calculate_order_value(order)
+            # confirm if the order is fully paid
             if order_total <= payment_transaction.transaction_amount and payment_transaction.transaction_status=='processed':
                 order.status=ORDER_PAID
                 order.save()
-
-
-        # confirm if the order is fully paid
+            
         return Response(OrderSerializer(order).data)
     
 
@@ -426,6 +427,9 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], url_path='mark-delivered', serializer_class=OrderDeliverySerializer, permission_classes=[ IsVendorEditor | IsVendorAdmin | IsVendorShopKeeper])
     def mark_delivered(self, request, pk=None):
         order = self.get_object()
+
+        if order.status == ORDER_DELIVERED:
+            return Response({"message": "Order is already delivered."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Validate signatures
         serializer = OrderDeliverySerializer(data=request.data)
@@ -537,9 +541,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         response_serializer = CalculateTaxResponseSerializer(tax_result)
         return Response(response_serializer.data)
 def calculate_order_value(order: Order):
-    total = 0
-    for order_item in list(order.orderitem_set.all()):
-        total += order_item.quantity * order_item.purchase_price
+    total = order.total_after_tax
+    if total is None:
+        for order_item in list(order.orderitem_set.all()):
+            total += order_item.quantity * order_item.purchase_price
     return total
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()

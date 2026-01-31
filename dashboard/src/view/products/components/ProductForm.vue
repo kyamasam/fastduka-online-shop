@@ -215,13 +215,13 @@
 import BaseDrawer from "@/BaseDrawer.vue";
 import BaseDialog from "@/components/BaseDialog.vue";
 import BaseLoader from "@/components/BaseLoader";
+import router from "@/routes";
 import { baseUrl } from "@/utility/constants";
 import store from "@/vuex/store";
 import { Plus, Upload } from "@element-plus/icons-vue";
 import axios from "axios";
 import { ElNotification } from "element-plus";
 import CategoryForm from "./CategoryForm";
-import router from "@/routes";
 export default {
   name: "ProductForm",
   components: {
@@ -296,11 +296,12 @@ export default {
       }
 
       this.taxRateLoader = true;
-      store.dispatch("fetchList", { url: "product/tax-rates" })
+      store.dispatch("fetchList", { url: "tax-rate/unpaged/" })
         .then((res) => {
+          console.log("res", res)
           this.taxRates = res.data.map((rate) => ({
-            label: rate.label,
-            value: rate.value
+            label: rate?.name + " " + rate?.display_rate,
+            value: rate?.rate
           }));
           this.taxRateLoader = false;
         })

@@ -2,13 +2,13 @@ from django.core.validators import MaxValueValidator
 from django.db import models
 
 from delivery.models import Rider
-from orders.constants import ORDER_CANCELLED, ORDER_PLACED, ORDER_PROCESSING, ORDER_IN_TRANSIT, ORDER_DELIVERED, ORDER_PAID
+from orders.constants import ORDER_CANCELLED, ORDER_PLACED, ORDER_PROCESSING, ORDER_IN_TRANSIT, ORDER_DELIVERED, ORDER_PAID, POS_WEB, WEB_SITE
 from products.models import Product, ProductVariant
 from users.models import UtilColumnsModel, User
 from vendors.models import Vendor
 
 PAYMENT_METHOD_CHOICES = (("mpesa", "M-Pesa"), ("wallet", "Wallet"), ("cash", "Cash"))
-ORDER_CLIENT_CHOICES = [("site", "Site"), ("pos_web", "POS Web")]
+ORDER_CLIENT_CHOICES = [(WEB_SITE, "Site"), (POS_WEB, "POS Web")]
 PROCESSED ='processed'
 FAILED = 'failed'
 
@@ -88,7 +88,7 @@ class Order(UtilColumnsModel):
     delivery_notes = models.TextField(blank=True, null=True)
     # add vendor
     vendor = models.ForeignKey(Vendor, null=True, blank=True, on_delete=models.SET_NULL)
-    order_client = models.CharField(max_length=20, choices=ORDER_CLIENT_CHOICES, default="site", help_text="Client application that created this order")
+    order_client = models.CharField(max_length=20, choices=ORDER_CLIENT_CHOICES, default=WEB_SITE, help_text="Client application that created this order")
 
     customer_signature = models.TextField(null=True, blank=True)
     rider_signature = models.TextField(null=True, blank=True)

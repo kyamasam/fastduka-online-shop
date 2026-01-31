@@ -16,8 +16,25 @@ from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 class TaxViewSet(viewsets.ModelViewSet):
     model = TaxRate
+    queryset= TaxRate.objects.all()
     serializer_class=TaxRateSerializer
     permission_classes=[AnonReadAdminCreate]
+    
+    @action(url_path="unpaged", detail=False, methods=["get"], permission_classes=[AnonReadAdminCreate])
+    def tax_rates_unpaged(self, request):
+        # Fetch the data
+        queryset = TaxRate.objects.all()
+        if queryset.count() <1:
+            TaxRate.objects.create(
+                name="VAT",
+                rate="0.16",
+                description="VAT",
+                is_default=True,
+                is_active=True
+            )
+            queryset = TaxRate.objects.all()
+        serializer = TaxRateSerializer(queryset, many=True) 
+        return Response(serializer.data)
     
     
 class CategoryTypeViewSet(viewsets.ModelViewSet):

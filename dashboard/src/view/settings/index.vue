@@ -1,3 +1,4 @@
+
 <template>
     <div class="flex min-h-screen bg-gray-50 px-4 py-4">
         <!-- Sidebar Navigation -->
@@ -62,197 +63,26 @@
                            @update:settings="updateSettings" />
 
             <!-- Delivery Settings Section -->
-            <section v-if="activeSection === 'delivery'"
-                     class="space-y-5">
-                <div class="bg-white rounded-xl border border-gray-200 p-6">
-                    <h2 class="text-base font-semibold text-gray-900 mb-5">Delivery Configuration</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="default_delivery_radius"
-                                   class="block text-sm font-semibold text-gray-900 mb-2">Default Delivery Radius
-                                (km)</label>
-                            <input id="default_delivery_radius"
-                                   v-model="settings.default_delivery_radius"
-                                   type="number"
-                                   step="0.1"
-                                   min="0.1"
-                                   class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="estimated_delivery_time_min"
-                                       class="block text-sm font-semibold text-gray-900 mb-2">Min Delivery Time
-                                    (minutes)</label>
-                                <input id="estimated_delivery_time_min"
-                                       v-model="settings.estimated_delivery_time_min"
-                                       type="number"
-                                       class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
-                            </div>
-                            <div>
-                                <label for="estimated_delivery_time_max"
-                                       class="block text-sm font-semibold text-gray-900 mb-2">Max Delivery Time
-                                    (minutes)</label>
-                                <input id="estimated_delivery_time_max"
-                                       v-model="settings.estimated_delivery_time_max"
-                                       type="number"
-                                       class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <input id="match_vendor"
-                                   v-model="settings.match_user_to_closest_vendor"
-                                   type="checkbox"
-                                   class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-600" />
-                            <label for="match_vendor"
-                                   class="text-sm font-medium text-gray-900 cursor-pointer">
-                                Match users to closest vendor automatically
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <DeliverySettings v-if="activeSection === 'delivery'"
+                              :settings="settings"
+                              @update:settings="updateSettings" />
 
             <!-- Location Settings Section -->
-            <section v-if="activeSection === 'location'"
-                     class="space-y-5">
-                <div class="bg-white rounded-xl border border-gray-200 p-6">
-                    <h2 class="text-base font-semibold text-gray-900 mb-5">Location Information</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="location"
-                                   class="block text-sm font-semibold text-gray-900 mb-2">Location</label>
-                            <input id="location"
-                                   v-model="settings.location"
-                                   type="text"
-                                   placeholder="e.g., Nairobi, Kenya"
-                                   class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
-                        </div>
-                        <div>
-                            <label for="location_link"
-                                   class="block text-sm font-semibold text-gray-900 mb-2">Location Link (Google
-                                Maps)</label>
-                            <input id="location_link"
-                                   v-model="settings.location_link"
-                                   type="url"
-                                   placeholder="https://maps.google.com/..."
-                                   class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
-                        </div>
-                        <div>
-                            <label for="google_maps_api_key"
-                                   class="block text-sm font-semibold text-gray-900 mb-2">Google Maps API Key</label>
-                            <input id="google_maps_api_key"
-                                   v-model="settings.google_maps_api_key"
-                                   type="password"
-                                   class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
-                        </div>
-                        <div>
-                            <label for="google_analytics_id"
-                                   class="block text-sm font-semibold text-gray-900 mb-2">Google Analytics ID
-                                (Optional)</label>
-                            <input id="google_analytics_id"
-                                   v-model="settings.google_analytics_id"
-                                   type="text"
-                                   placeholder="G-XXXXXXXXXX"
-                                   class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <LocationSettings v-if="activeSection === 'location'"
+                              :settings="settings"
+                              @update:settings="updateSettings" />
 
             <!-- Email Settings Section -->
-            <section v-if="activeSection === 'email'"
-                     class="space-y-5">
-                <div class="bg-white rounded-xl border border-gray-200 p-6">
-                    <h2 class="text-base font-semibold text-gray-900 mb-5">SMTP Configuration</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="smtp_host"
-                                   class="block text-sm font-semibold text-gray-900 mb-2">SMTP Host</label>
-                            <input id="smtp_host"
-                                   v-model="settings.smtp_host"
-                                   type="text"
-                                   placeholder="smtp.gmail.com"
-                                   class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
-                        </div>
-                        <div>
-                            <label for="smtp_port"
-                                   class="block text-sm font-semibold text-gray-900 mb-2">SMTP Port</label>
-                            <input id="smtp_port"
-                                   v-model="settings.smtp_port"
-                                   type="number"
-                                   placeholder="587"
-                                   class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
-                        </div>
-                        <div>
-                            <label for="smtp_user"
-                                   class="block text-sm font-semibold text-gray-900 mb-2">SMTP Username</label>
-                            <input id="smtp_user"
-                                   v-model="settings.smtp_user"
-                                   type="text"
-                                   class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
-                        </div>
-                        <div>
-                            <label for="smtp_password"
-                                   class="block text-sm font-semibold text-gray-900 mb-2">SMTP Password</label>
-                            <input id="smtp_password"
-                                   v-model="settings.smtp_password"
-                                   type="password"
-                                   class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
-                        </div>
-                        <div>
-                            <label for="default_from_email"
-                                   class="block text-sm font-semibold text-gray-900 mb-2">Default From Email</label>
-                            <input id="default_from_email"
-                                   v-model="settings.default_from_email"
-                                   type="email"
-                                   class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <EmailSettings v-if="activeSection === 'email'"
+                           :settings="settings"
+                           @update:settings="updateSettings" />
+
+            <TaxSettings v-if="activeSection === 'taxes'" />
 
             <!-- System Settings Section -->
-            <section v-if="activeSection === 'system'"
-                     class="space-y-5">
-                <div class="bg-white rounded-xl border border-gray-200 p-6">
-                    <h2 class="text-base font-semibold text-gray-900 mb-5">System Configuration</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <div class="flex items-center gap-3">
-                                <input id="maintenance_mode"
-                                       v-model="settings.maintenance_mode"
-                                       type="checkbox"
-                                       class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-600" />
-                                <label for="maintenance_mode"
-                                       class="text-sm font-medium text-gray-900 cursor-pointer">
-                                    Enable Maintenance Mode
-                                </label>
-                            </div>
-                            <p class="mt-1.5 ml-7 text-xs text-gray-600">When enabled, the site will show a maintenance
-                                page to visitors</p>
-                        </div>
-                        <div>
-                            <label for="items_per_page"
-                                   class="block text-sm font-semibold text-gray-900 mb-2">Items Per Page</label>
-                            <input id="items_per_page"
-                                   v-model="settings.items_per_page"
-                                   type="number"
-                                   min="1"
-                                   class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <input id="enable_reviews"
-                                   v-model="settings.enable_reviews"
-                                   type="checkbox"
-                                   class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-600" />
-                            <label for="enable_reviews"
-                                   class="text-sm font-medium text-gray-900 cursor-pointer">
-                                Enable Product Reviews
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <SystemSettings v-if="activeSection === 'system'"
+                            :settings="settings"
+                            @update:settings="updateSettings" />
 
             <!-- Hero Sliders Section -->
             <section v-if="activeSection === 'sliders'"
@@ -261,35 +91,14 @@
             </section>
 
             <!-- Terms and Policies Section -->
-            <section v-if="activeSection === 'policies'"
-                     class="space-y-5">
-                <div class="bg-white rounded-xl border border-gray-200 p-6">
-                    <h2 class="text-base font-semibold text-gray-900 mb-5">Legal Information</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="terms_and_conditions"
-                                   class="block text-sm font-semibold text-gray-900 mb-2">Terms and Conditions</label>
-                            <textarea id="terms_and_conditions"
-                                      v-model="settings.terms_and_conditions"
-                                      rows="8"
-                                      placeholder="Enter your terms and conditions..."
-                                      class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent resize-y"></textarea>
-                        </div>
-                        <div>
-                            <label for="privacy_policy"
-                                   class="block text-sm font-semibold text-gray-900 mb-2">Privacy Policy</label>
-                            <textarea id="privacy_policy"
-                                      v-model="settings.privacy_policy"
-                                      rows="8"
-                                      placeholder="Enter your privacy policy..."
-                                      class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent resize-y"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <PoliciesSettings v-if="activeSection === 'policies'"
+                              :settings="settings"
+                              @update:settings="updateSettings" />
 
             <!-- Save Button -->
-            <div class="mt-8 pt-5 border-t border-gray-200">
+            <div 
+                v-if="activeSection !== 'taxes' && activeSection !== 'sliders'"
+                class="mt-8 pt-5 border-t border-gray-200">
                 <button @click="saveSettings"
                         class="px-6 py-3 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 active:bg-green-800 transition-colors">
                     Save Changes
@@ -306,6 +115,12 @@ import PaymentSettings from './components/PaymentSettings.vue'
 import SiteInfo from './components/SiteInfo.vue'
 import SocialMedia from './components/SocialMedia.vue'
 import SliderManagement from './components/SliderManagement.vue'
+import DeliverySettings from './components/DeliverySettings.vue'
+import LocationSettings from './components/LocationSettings.vue'
+import EmailSettings from './components/EmailSettings.vue'
+import SystemSettings from './components/SystemSettings.vue'
+import PoliciesSettings from './components/PoliciesSettings.vue'
+import TaxSettings from './components/TaxSettings.vue'
 
 export default {
     name: 'SettingsPage',
@@ -321,6 +136,7 @@ export default {
                 { id: 'delivery', label: 'Delivery Settings', icon: 'truck-icon' },
                 { id: 'location', label: 'Location Settings', icon: 'map-pin-icon' },
                 { id: 'email', label: 'Email Settings', icon: 'mail-icon' },
+                { id: 'taxes', label: 'Taxes', icon: 'scale-icon' },
                 { id: 'sliders', label: 'Hero Sliders', icon: 'image-icon' },
                 { id: 'system', label: 'System Settings', icon: 'settings-icon' },
                 { id: 'policies', label: 'Terms and Policies', icon: 'file-text-icon' }
@@ -445,6 +261,19 @@ export default {
         PaymentSettings,
         OrderSettings,
         SliderManagement,
+        DeliverySettings,
+        LocationSettings,
+        EmailSettings,
+        SystemSettings,
+        PoliciesSettings,
+        TaxSettings,
+        'scale-icon': {
+            template: `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52c2.62 1.666 4.5 4.62 4.5 8.03a9.753 9.753 0 01-4.132 8.01m-4.5-8.03C11.25 7.5 9.375 4.5 9.375 4.5s-1.875 3-4.125 7.5m-4.125 0c.99-.203 1.99-.377 3-.52m0 0c-2.62 1.666-4.5 4.62-4.5 8.03a9.753 9.753 0 004.132 8.01M6.75 4.97a48.416 48.416 0 015.25-.47m0 0c-2.291 0-4.545.16-6.75.47M12 4.5c1.135 0 2.236.056 3.33.166" />
+            </svg>
+            `
+        },
         'info-icon': {
             template: `
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -476,7 +305,7 @@ export default {
         'shopping-cart-icon': {
             template: `
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 6.0114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
         </svg>
       `
         },
@@ -519,7 +348,7 @@ export default {
         },
         'image-icon': {
             template: `
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/.svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
           <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
         </svg>
