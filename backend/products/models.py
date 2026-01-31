@@ -1,7 +1,43 @@
 from django.db import models
 from django.db.models import Sum
-
+from decimal import Decimal
 from users.models import User, UtilColumnsModel
+
+
+class TaxRate(UtilColumnsModel):
+    """
+    Model to store tax rates that can be applied to products.
+    Rates are stored as decimals (0.16 for 16%).
+    """
+    name = models.CharField(max_length=100, unique=True, help_text="e.g., 'Standard VAT', 'Reduced Rate'")
+    rate = models.DecimalField(
+        max_digits=5,
+        decimal_places=4,
+        help_text="Tax rate as decimal (0.16 for 16%)"
+    )
+    description = models.TextField(blank=True, null=True, help_text="Optional description of this tax rate")
+    is_default = models.BooleanField(default=False, help_text="Is this the default tax rate?")
+    is_active = models.BooleanField(default=True, help_text="Is this tax rate active?")
+
+    class Meta:
+        ordering = ['-is_default', 'rate']
+        verbose_name = "Tax Rate"
+        verbose_name_plural = "Tax Rates"
+
+    def __str__(self):
+        percentage = float(self.rate) * 100
+        return f"{self.name} ({percentage}%)"
+
+    def save(self, *args, **kwargs):
+        # Ensure only one default tax rate
+        if self.is_default:
+            TaxRate.objects.filter(is_default=True).update(is_default=False)
+        super().save(*args, **kwargs)
+
+    @property
+    def display_rate(self):
+        """Return rate as percentage string (e.g., '16%')"""
+        return f"{float(self.rate) * 100}%"
 
 
 class CategoryType(UtilColumnsModel):
@@ -31,6 +67,9 @@ class Product (UtilColumnsModel):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     buying_price = models.FloatField(default=0)
     selling_price = models.FloatField()
+    is_taxable=models.BooleanField(default=True)
+    price_includes_tax = models.BooleanField(default=True)
+    tax_rate = models.DecimalField(max_digits=5, decimal_places=4, default=Decimal(0.16))
     sale_price = models.FloatField(null=True, blank=True, default=0)
     primary_photo = models.ImageField( null=True, blank=True)
     allowable_discount = models.FloatField(null=True, blank=True)

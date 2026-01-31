@@ -71,7 +71,8 @@ class InventoryHistorySerializer(serializers.ModelSerializer):
             "new_value",
             "quantity",
             "action_type",
-            "reason"
+            "reason",
+            "created_at"
         ]
 
 

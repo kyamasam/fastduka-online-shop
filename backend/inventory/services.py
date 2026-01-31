@@ -1,3 +1,4 @@
+from django.utils import timezone
 from typing import Optional, List, Dict, Any
 from django.db import transaction
 from django.core.exceptions import ValidationError
@@ -105,6 +106,7 @@ class InventoryService:
                 raise ValidationError("Inventory record does not match product/vendor")
 
             previous_value = inventory.quantity
+            inventory.updated_at= timezone.now()
             inventory.quantity += quantity
             inventory.save()
         else:
@@ -303,7 +305,7 @@ class InventoryService:
             # If quantity reaches 0, mark as expired
             if inventory.quantity == 0:
                 inventory.is_expired = True
-
+            inventory.updated_at= timezone.now()
             inventory.save()
 
             # Create history record
@@ -355,6 +357,7 @@ class InventoryService:
                     reduction_amount = min(inventory.quantity, remaining_to_reduce)
 
                     inventory.quantity -= reduction_amount
+                    inventory.updated_at= timezone.now()
                     inventory.save()
 
                     # Create history record
@@ -484,6 +487,7 @@ class InventoryService:
                     reduction_amount = min(inventory.quantity, remaining_to_reduce)
 
                     inventory.quantity -= reduction_amount
+                    inventory.updated_at= timezone.now()
                     inventory.save()
 
                     # Create history record

@@ -2,11 +2,26 @@ from django.db.models import Sum
 from rest_framework import serializers
 
 from inventory.models import Inventory
-from products.models import Category, Product, ProductPhoto, ProductVariant, ProductVariantPhoto, ProductReview, CategoryType
+from products.models import Category, Product, ProductPhoto, ProductVariant, ProductVariantPhoto, ProductReview, CategoryType, TaxRate
 from users.models import User
 from django.db import transaction
 from django.core.validators import EmailValidator
 from django.core.exceptions import ValidationError
+
+
+class TaxRateSerializer(serializers.ModelSerializer):
+    display_rate = serializers.ReadOnlyField()
+
+    class Meta:
+        model = TaxRate
+        fields = ["id", "name", "rate", "display_rate", "description", "is_default", "is_active", "created_at", "updated_at"]
+        read_only_fields = ["created_at", "updated_at", "display_rate"]
+
+    def validate_rate(self, value):
+        """Ensure rate is between 0 and 1 (0% to 100%)"""
+        if value < 0 or value > 1:
+            raise serializers.ValidationError("Tax rate must be between 0 and 1 (representing 0% to 100%)")
+        return value
 
 
 class CategoryTypeSerializer(serializers.ModelSerializer):
@@ -77,7 +92,9 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ["id", "name", "sku", "featured", "description","additional_information","seo_description", "primary_photo", "category", "category_id",
                   "product_type", "product_type_id", "selling_price", "sale_price", "allowable_discount", "on_sale", "in_stock", "variants", "photos", "inventory","reviews",
-                  "created_at", "updated_at", "buying_price", "review_stats"]
+                  "created_at", "updated_at", "buying_price", "review_stats",
+                  "is_taxable", "price_includes_tax", "tax_rate",
+                  ]
 
     def get_in_stock(self, obj):
         return obj.in_stock

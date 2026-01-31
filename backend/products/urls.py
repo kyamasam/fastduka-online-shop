@@ -3,10 +3,11 @@ from os.path import basename
 from rest_framework.routers import DefaultRouter
 
 from products.views import CategoryViewSet, CategoryTypeViewSet, ProductVariantPhotoViewSet, ProductPhotoViewSet, ProductVariantViewSet, \
-    ProductViewSet, ReviewViewSet
+    ProductViewSet, ReviewViewSet, TaxViewSet
 
 core_router = DefaultRouter()
 
+core_router.register(r"tax-rate", TaxViewSet, basename="tax-rate")
 core_router.register(r"category-type", CategoryTypeViewSet, basename="category-type")
 core_router.register(r"category",CategoryViewSet, basename="category")
 core_router.register(r"product",ProductViewSet, basename="product")

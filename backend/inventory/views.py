@@ -20,7 +20,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
     serializer_class = InventorySerializer
     permission_classes = [permissions.AnonReadAdminCreate, IsVendorAdmin]
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ['vendor_id']
+    filterset_fields = ['vendor_id','product']
     search_fields = ['product__name', 'product__description']
 
     def get_queryset(self):
@@ -253,6 +253,69 @@ class InventoryViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='vendor_id',
+            type=int,
+            location=OpenApiParameter.QUERY,
+            description='Filter by vendor ID',
+            required=False
+        ),
+        OpenApiParameter(
+            name='category_id',
+            type={'type': 'array', 'items': {'type': 'integer'}},
+            location=OpenApiParameter.QUERY,
+            description='Filter by category ID(s). Multiple values may be separated by commas.',
+            required=False
+        ),
+        OpenApiParameter(
+            name='featured',
+            type=bool,
+            location=OpenApiParameter.QUERY,
+            description='Filter by featured products',
+            required=False
+        ),
+        OpenApiParameter(
+            name='in_stock',
+            type=bool,
+            location=OpenApiParameter.QUERY,
+            description='Filter by stock availability',
+            required=False
+        ),
+        OpenApiParameter(
+            name='on_sale',
+            type=bool,
+            location=OpenApiParameter.QUERY,
+            description='Filter by products on sale',
+            required=False
+        ),
+        OpenApiParameter(
+            name='search',
+            type=str,
+            location=OpenApiParameter.QUERY,
+            description='Search by product name or description',
+            required=False
+        ),
+    ],
+    responses={200: InventorySerializer(many=True)},
+    description='List all inventory batches without pagination.  '
+    )
+        
+    @action(detail=False, methods=['get'], url_path='unpaged-batches')
+    def unpaged_batches(self, request):
+        """
+        List all inventory items without pagination.
+        Groups inventory by product, product_variant, and vendor to show aggregated quantities.
+        Supports all the same filters as the paginated list endpoint.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+    
+
+        # Serialize and return all results without pagination
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
         request=InventoryAdjustmentSerializer,
         responses={200: InventorySerializer(many=True)},
         description='Adjust inventory by adding or reducing stock based on action type. '
@@ -328,3 +391,4 @@ class InventoryHistoryViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AnonReadAdminCreate]
     filterset_fields=['inventory_id']
     pagination_class=None
+    ordering=['-created_at']

@@ -30,6 +30,17 @@
       </router-link>
     </a-menu-item>
 
+    <a-menu-item key="pos"
+                 @click="toggleCollapsed">
+      <template #icon>
+        <price-tag class="h-8 w-8" />
+
+      </template>
+      <router-link to="/dashboard/pos">
+        {{ 'POS' }}
+      </router-link>
+    </a-menu-item>
+
     <a-menu-item key="categories"
                  @click="toggleCollapsed">
       <template #icon>
