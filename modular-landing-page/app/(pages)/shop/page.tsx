@@ -1,5 +1,5 @@
-import { getTheme } from '@/app/lib/get-theme';
-import { getThemePageComponent } from '@/app/lib/theme-loader';
+import { getTheme } from '@/lib/get-theme';
+import { getThemePageComponent } from '@/lib/theme-loader';
 
 // Default shop page - used when theme doesn't have an override
 function DefaultShopPage() {

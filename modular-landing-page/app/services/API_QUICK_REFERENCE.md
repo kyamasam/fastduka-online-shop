@@ -5,7 +5,7 @@ Quick examples for common API operations.
 ## Setup
 
 ```typescript
-import apiService from '@/app/services/api.service';
+import apiService from '@/services/api.service';
 
 // Set base URL (optional, can use env variable)
 apiService.setBaseURL('https://api.example.com');
@@ -72,7 +72,7 @@ await apiService.download('/files/123', 'document.pdf');
 ## Error Handling
 
 ```typescript
-import { ApiError } from '@/app/services/api.service';
+import { ApiError } from '@/services/api.service';
 
 try {
   const response = await apiService.get('/users');
@@ -173,7 +173,7 @@ export const useStore = create<State>((set) => ({
 'use client';
 
 import { useEffect } from 'react';
-import { useStore } from '@/app/store/your.store';
+import { useStore } from '@/store/your.store';
 
 export default function Component() {
   const { items, loading, error, fetchItems, createItem, deleteItem } = useStore();

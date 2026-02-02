@@ -72,7 +72,7 @@ export const useProductStore = create<ProductState>((set) => ({
 'use client';
 
 import { useEffect } from 'react';
-import { useProductStore } from '@/app/store/product.store';
+import { useProductStore } from '@/store/product.store';
 
 export default function ProductsPage() {
   const { products, loading, error, fetchProducts } = useProductStore();

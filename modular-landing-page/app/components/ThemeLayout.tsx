@@ -1,5 +1,5 @@
-import { getTheme } from '@/app/lib/get-theme';
-import { loadMainThemeComponent, loadThemeLayout } from '@/app/lib/theme-loader';
+import { getTheme } from '@/lib/get-theme';
+import { loadMainThemeComponent, loadThemeLayout } from '@/lib/theme-loader';
 
 interface ThemeLayoutProps {
   children: React.ReactNode;

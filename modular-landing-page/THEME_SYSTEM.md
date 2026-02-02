@@ -168,8 +168,8 @@ Make your page an async Server Component:
 
 ```typescript
 // app/(pages)/shop/page.tsx
-import { getTheme } from '@/app/lib/get-theme';
-import { getThemePageComponent } from '@/app/lib/theme-loader';
+import { getTheme } from '@/lib/get-theme';
+import { getThemePageComponent } from '@/lib/theme-loader';
 
 // Default page content
 function DefaultShopPage() {

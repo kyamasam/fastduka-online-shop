@@ -89,7 +89,11 @@ class ApiService {
    * Build URL with query parameters
    */
   private buildURL(endpoint: string, params?: Record<string, string | number | boolean>): string {
-    const url = new URL(endpoint, this.baseURL);
+    // Remove leading slash from endpoint if baseURL already ends with one
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+    const baseURL = this.baseURL.endsWith('/') ? this.baseURL : this.baseURL + '/';
+
+    const url = new URL(cleanEndpoint, baseURL);
 
     if (params) {
       Object.entries(params).forEach(([key, value]) => {

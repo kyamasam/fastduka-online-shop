@@ -25,7 +25,7 @@ The API service can be configured using environment variables or programmaticall
 NEXT_PUBLIC_API_URL=https://api.example.com
 
 // Or configure programmatically
-import apiService from '@/app/services/api.service';
+import apiService from '@/services/api.service';
 
 apiService.setBaseURL('https://api.example.com');
 ```
@@ -209,7 +209,7 @@ await apiService.download('/export', 'report.csv', {
 ## Error Handling
 
 ```typescript
-import { ApiError } from '@/app/services/api.service';
+import { ApiError } from '@/services/api.service';
 
 try {
   const response = await apiService.get('/users');
@@ -282,7 +282,7 @@ export const useUserStore = create<UserState>((set) => ({
 'use client';
 
 import { useEffect } from 'react';
-import { useUserStore } from '@/app/store/user.store';
+import { useUserStore } from '@/store/user.store';
 
 export default function UsersPage() {
   const { users, loading, error, fetchUsers } = useUserStore();

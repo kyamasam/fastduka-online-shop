@@ -11,9 +11,9 @@ export default function DefaultLayout({ children }: ConstructionLayoutProps) {
   return (
     <div >
       {/* Theme-specific announcement banner */}
-      <div className="bg-red-500 text-white text-center py-2 text-sm font-bold">
+      {/* <div className="bg-red-500 text-white text-center py-2 text-sm font-bold">
         Default theme
-      </div>
+      </div> */}
 
       {/* Use construction theme Header */}
       <Header />

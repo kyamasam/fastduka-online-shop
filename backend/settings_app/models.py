@@ -108,8 +108,8 @@ class SiteSettings(UtilColumnsModel):
         if not self.pk and SiteSettings.objects.exists():
             return SiteSettings.objects.first()
         # Set default menu structure if empty
-        if not self.menu_structure:
-            self.menu_structure = DEFAULT_MENU_STRUCTURE
+        if not self.top_menu_structure:
+            self.top_menu_structure = DEFAULT_MENU_STRUCTURE
         return super().save(*args, **kwargs)
 
 
