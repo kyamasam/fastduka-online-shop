@@ -43,12 +43,12 @@ class SiteSettings(UtilColumnsModel):
     # Navigation Menu
     # JSON structure for dynamic menu. See constants.py for structure documentation.
     # Each item: {name, icon (Lucide), link, is_external, order, children[]}
-    menu_structure = models.JSONField(
+    top_menu_structure = models.JSONField(
         default=list,
         blank=True,
         help_text="Navigation menu structure. See settings_app/constants.py for format."
     )
-
+    
     # Payment Settings
     currency_code = models.CharField(max_length=3, default="KES")
     currency_symbol = models.CharField(max_length=5, default="Ksh")

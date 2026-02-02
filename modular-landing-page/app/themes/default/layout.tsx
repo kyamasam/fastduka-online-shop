@@ -9,7 +9,7 @@ interface ConstructionLayoutProps {
 
 export default function DefaultLayout({ children }: ConstructionLayoutProps) {
   return (
-    <div className="construction-theme">
+    <div >
       {/* Theme-specific announcement banner */}
       <div className="bg-red-500 text-white text-center py-2 text-sm font-bold">
         Default theme
@@ -23,7 +23,7 @@ export default function DefaultLayout({ children }: ConstructionLayoutProps) {
         {children}
       </main>
 
-      {/* Construction theme custom footer */}
+      {/* default theme custom footer */}
       <footer className="bg-gray-900 text-white py-8">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
