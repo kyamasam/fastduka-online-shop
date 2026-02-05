@@ -49,6 +49,9 @@ class SiteSettings(UtilColumnsModel):
         help_text="Navigation menu structure. See settings_app/constants.py for format."
     )
     
+    top_menu_bg = ColorField(default='#fff')
+    top_menu_text_color = ColorField(default='#000')
+    
     # Payment Settings
     currency_code = models.CharField(max_length=3, default="KES")
     currency_symbol = models.CharField(max_length=5, default="Ksh")

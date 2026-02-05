@@ -35,6 +35,32 @@
                                class="flex-1 px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
                     </div>
                 </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">Menu Background</label>
+                    <div class="flex gap-2">
+                        <input v-model="localSettings.top_menu_bg"
+                               @input="updateSettings"
+                               type="color"
+                               class="w-12 h-10 border border-gray-300 rounded-lg cursor-pointer" />
+                        <input v-model="localSettings.top_menu_bg"
+                               @input="updateSettings"
+                               type="text"
+                               class="flex-1 px-3 py-2.5 text-sm border border-gray-300 rounded-lg" />
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">Menu Text Color</label>
+                    <div class="flex gap-2">
+                        <input v-model="localSettings.top_menu_text_color"
+                               @input="updateSettings"
+                               type="color"
+                               class="w-12 h-10 border border-gray-300 rounded-lg cursor-pointer" />
+                        <input v-model="localSettings.top_menu_text_color"
+                               @input="updateSettings"
+                               type="text"
+                               class="flex-1 px-3 py-2.5 text-sm border border-gray-300 rounded-lg" />
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -50,9 +76,22 @@
                            @change="handleFileUpload($event, 'site_logo')"
                            class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
                     <p class="mt-1.5 text-xs text-gray-600">Recommended size: 200x60px</p>
-                    <div v-if="localSettings.site_logo" class="mt-2">
-                        <img :src="getImageUrl(localSettings.site_logo)" alt="Site Logo" class="h-16 object-contain" />
+                    <div v-if="localSettings.site_logo"
+                         class="mt-2">
+                        <img :src="getImageUrl(localSettings.site_logo)"
+                             alt="Site Logo"
+                             class="h-16 object-contain" />
                     </div>
+                </div>
+                <div>
+                    <label for="logo_text"
+                           class="block text-sm font-semibold text-gray-900 mb-2">Logo Text</label>
+                    <input id="logo_text"
+                           v-model="localSettings.logo_text"
+                           @input="updateSettings"
+                           type="text"
+                           placeholder="Brand Name"
+                           class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
                 </div>
                 <div>
                     <label for="site_icon"
@@ -63,8 +102,11 @@
                            @change="handleFileUpload($event, 'site_icon')"
                            class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
                     <p class="mt-1.5 text-xs text-gray-600">Recommended size: 32x32px or 64x64px</p>
-                    <div v-if="localSettings.site_icon" class="mt-2">
-                        <img :src="getImageUrl(localSettings.site_icon)" alt="Site Icon" class="h-8 w-8 object-contain" />
+                    <div v-if="localSettings.site_icon"
+                         class="mt-2">
+                        <img :src="getImageUrl(localSettings.site_icon)"
+                             alt="Site Icon"
+                             class="h-8 w-8 object-contain" />
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -79,7 +121,8 @@
                                class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                                :class="{ 'border-red-500': logoSizeErrors.desktop }" />
                         <p class="mt-1.5 text-xs text-gray-600">Format: width,height in pixels (e.g., 64,64)</p>
-                        <p v-if="logoSizeErrors.desktop" class="mt-1 text-xs text-red-600">{{ logoSizeErrors.desktop }}</p>
+                        <p v-if="logoSizeErrors.desktop"
+                           class="mt-1 text-xs text-red-600">{{ logoSizeErrors.desktop }}</p>
                     </div>
                     <div>
                         <label for="logo_size_mobile"
@@ -92,7 +135,8 @@
                                class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                                :class="{ 'border-red-500': logoSizeErrors.mobile }" />
                         <p class="mt-1.5 text-xs text-gray-600">Format: width,height in pixels (e.g., 48,48)</p>
-                        <p v-if="logoSizeErrors.mobile" class="mt-1 text-xs text-red-600">{{ logoSizeErrors.mobile }}</p>
+                        <p v-if="logoSizeErrors.mobile"
+                           class="mt-1 text-xs text-red-600">{{ logoSizeErrors.mobile }}</p>
                     </div>
                 </div>
             </div>

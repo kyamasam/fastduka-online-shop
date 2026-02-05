@@ -5,7 +5,7 @@ import { Category } from '@/types/category';
 import { useEffect, useState } from 'react';
 
 interface CategoryFilterProps {
-  onCategoryChange: (categoryId: number | null) => void;
+  onCategoryChange: (category: { id: number; name: string } | null) => void;
   selectedCategoryId: number | null;
 }
 
@@ -60,7 +60,7 @@ export function CategoryFilter({ onCategoryChange, selectedCategoryId }: Categor
         <div key={category.id} className="flex items-center gap-3">
           <span className="text-gray-300">•</span>
           <button
-            onClick={() => onCategoryChange(category.id)}
+            onClick={() => onCategoryChange({ id: category.id, name: category.name })}
             className={`px-4 py-2 text-sm font-medium transition-colors duration-200 ${selectedCategoryId === category.id
               ? 'text-[#8B4513] font-semibold'
               : 'text-gray-500 hover:text-gray-700'

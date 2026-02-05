@@ -88,6 +88,7 @@ declare module 'vue' {
     Popup: typeof import('./src/components/popup/Popup.vue')['default']
     ProductCard: typeof import('./src/components/pos/ProductCard.vue')['default']
     ProductCardSkeleton: typeof import('./src/components/pos/ProductCardSkeleton.vue')['default']
+    ProductDetailsModal: typeof import('./src/components/pos/ProductDetailsModal.vue')['default']
     ProductGrid: typeof import('./src/components/pos/ProductGrid.vue')['default']
     PurchaserRedirect: typeof import('./src/components/purchaserRedirect.vue')['default']
     ReviewCard: typeof import('./src/components/cards/reviewCard.vue')['default']

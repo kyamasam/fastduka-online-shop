@@ -47,6 +47,8 @@ export interface SiteSettings {
 
   // Menu & Navigation
   top_menu_structure: MenuItem[];
+  top_menu_bg: string;
+  top_menu_text_color: string;
 
   // Currency & Payment
   currency_code: string;

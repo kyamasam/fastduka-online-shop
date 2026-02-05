@@ -1,10 +1,9 @@
 'use client';
 
-import apiService from '@/services/api.service';
 import { useThemeColors } from '@/store/settings.store';
-import { Product, ProductsResponse } from '@/types/product';
+import { Product } from '@/types/product';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 // Import Swiper styles
@@ -19,36 +18,28 @@ interface TopSellingProductsClientProps {
   subTitle?: String
 }
 
-export function ProductsListClient({ products: initialProducts, title = "Top Selling Products", subTitle = "Top selling products in our store" }: TopSellingProductsClientProps) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
+export function ProductsListClient({ products, title = "Top Selling Products", subTitle = "Top selling products in our store" }: TopSellingProductsClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { primary } = useThemeColors();
 
-  // Fetch products when category changes
-  useEffect(() => {
-    async function fetchProductsByCategory() {
-      if (selectedCategoryId === null) {
-        setProducts(initialProducts);
-        return;
-      }
+  const selectedCategoryId = searchParams.get('category') ? Number(searchParams.get('category')) : null;
 
-      setLoading(true);
-      try {
-        const response = await apiService.get<ProductsResponse>('/product/', {
-          params: { category_id: selectedCategoryId },
-          requiresAuth: false,
-        });
-        setProducts(response.data.results || []);
-      } catch (error) {
-        console.error('Error fetching products by category:', error);
-      } finally {
-        setLoading(false);
-      }
+  const handleCategoryChange = (category: { id: number; name: string } | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (category) {
+      params.set('category', category.id.toString());
+      // Create a slug for the category name
+      const slug = category.name.toLowerCase().replace(/\s+/g, '-');
+      params.set('category_name', slug);
+    } else {
+      params.delete('category');
+      params.delete('category_name');
     }
-
-    fetchProductsByCategory();
-  }, [selectedCategoryId, initialProducts]);
+    // We are using `push` to navigate. We are also creating a new URLSearchParams object 
+    // to construct the new URL with the category parameter. This will reload the page with the new products
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
 
   // Handler functions for product actions
   const handleAddToCart = (product: Product) => {
@@ -85,19 +76,15 @@ export function ProductsListClient({ products: initialProducts, title = "Top Sel
         </div>
         {/* Category Filter */}
         <CategoryFilter
-          onCategoryChange={setSelectedCategoryId}
+          onCategoryChange={handleCategoryChange}
           selectedCategoryId={selectedCategoryId}
         />
 
-        {loading ? (
-          <div className="flex justify-center items-center py-2">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B4513]"></div>
-          </div>
-        ) : !products || products.length === 0 ? (
+        {!products || products.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
             <p className="text-gray-500 text-lg mb-6">No Products Match Your Criteria</p>
             <button
-              onClick={() => setSelectedCategoryId(null)}
+              onClick={() => handleCategoryChange(null)}
               className="px-6 py-3 border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white transition-colors duration-200 flex items-center gap-2"
             >
               Go to Shop

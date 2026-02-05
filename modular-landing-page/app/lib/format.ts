@@ -5,9 +5,14 @@
  * @param locale - The locale for formatting (default: en-KE)
  * @returns Formatted currency string
  */
+
+import { getSettings } from "./get-settings";
+
+const settings = await getSettings()
+
 export function formatCurrency(
   amount: number,
-  currency: string = 'KES',
+  currency: string = settings?.currency_code || 'KES',
   locale: string = 'en-KE'
 ): string {
   return new Intl.NumberFormat(locale, {
