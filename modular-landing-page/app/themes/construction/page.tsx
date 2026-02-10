@@ -1,5 +1,7 @@
 // Construction theme custom index page
 
+import FeaturedProducts from "@/components/default-products/featured/FeaturedProducts";
+
 export default function ConstructionIndexPage() {
   return (
     <div className="min-h-screen">
@@ -18,6 +20,8 @@ export default function ConstructionIndexPage() {
           </button>
         </div>
       </div>
+      {/* Image #2 - Featured Products Section */}
+      <FeaturedProducts />
 
       {/* Featured Categories */}
       <div className="container mx-auto px-4 py-16">
