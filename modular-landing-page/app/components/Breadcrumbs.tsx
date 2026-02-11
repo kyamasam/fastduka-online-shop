@@ -8,7 +8,7 @@ function Breadcrumbs({ child_page_label }: BreadcrumbProps) {
     return (
         <>
             {/* Breadcrumb */}
-            < div className="max-w-7xl mx-auto px-4 py-4" >
+            < div className="py-4" >
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Link href="/" className="flex items-center hover:text-gray-900">
                         <Home size={16} className="mr-1" />

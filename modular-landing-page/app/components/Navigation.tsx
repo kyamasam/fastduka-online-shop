@@ -1,5 +1,6 @@
 'use client';
 
+import { useThemeColors } from '@/store/settings.store';
 import { MenuItem } from '@/types/settings';
 import * as Icons from 'lucide-react';
 import { ChevronDown, Heart, Menu as MenuIcon, Search, ShoppingCart, User, X } from 'lucide-react';
@@ -29,18 +30,24 @@ interface NavigationProps {
 }
 
 export default function Navigation({ menuItems, logo, logoText, primaryColor, menuBgColor, menuTextColor }: NavigationProps) {
+  const { topMenuBgColor, topMenuTextColor } = useThemeColors();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   const sortedMenuItems = [...menuItems].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  const finalMenuBgColor = menuBgColor ?? topMenuBgColor;
+  const finalMenuTextColor = menuTextColor ?? topMenuTextColor;
 
   const toggleDropdown = (menuName: string) => {
     setActiveDropdown(activeDropdown === menuName ? null : menuName);
   };
 
   return (
-    <nav style={{ backgroundColor: menuBgColor || '#ffffff', color: menuTextColor || '#000000' }} className="shadow-md sticky top-0 z-50">
+    <nav style={{ backgroundColor: finalMenuBgColor || '#ffffff', color: finalMenuTextColor || '#000000' }} className="shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4">
+
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2" style={{ color: menuTextColor || '#000000' }}>

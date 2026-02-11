@@ -69,9 +69,10 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                     key={index}
                     onClick={() => setSelectedImage(image)}
                     className={`aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 transition-all ${selectedImage === image
-                      ? 'border-gray-900'
+                      ? ''
                       : 'border-transparent hover:border-gray-300'
                       }`}
+                    style={selectedImage === image ? { borderColor: primary } : undefined}
                   >
                     <img
                       src={image}
@@ -99,7 +100,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             <p className="text-sm text-gray-600">{product.category.name}</p>
 
             {/* Product Name */}
-            <h1 className="text-4xl font-bold text-red-600">
+            <h1 className="text-4xl font-bold" style={{ color: primary }}>
               {product.name}
             </h1>
 
@@ -136,7 +137,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
             {/* Quantity Label */}
             <div>
-              <label className="block text-red-600 font-medium mb-3">
+              <label className="block font-medium mb-3" style={{ color: primary }}>
                 Quantity
               </label>
 
@@ -168,7 +169,23 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 {/* Add to Cart Button */}
                 <button
                   disabled={!product.in_stock}
-                  className="flex-1 py-3 px-6 rounded-lg border-2 border-gray-900 text-gray-900 font-medium hover:bg-gray-900 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-3 px-6 rounded-lg border-2 font-medium hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    borderColor: primary,
+                    color: primary,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (product.in_stock) {
+                      e.currentTarget.style.backgroundColor = primary;
+                      e.currentTarget.style.color = 'white';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (product.in_stock) {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = primary;
+                    }
+                  }}
                 >
                   {product.in_stock ? 'Add To Cart' : 'Out of Stock'}
                 </button>
@@ -248,7 +265,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               <div className="mt-8">
                 <h4 className="text-lg font-semibold mb-4">Rating & Review</h4>
                 {product.reviews.length === 0 ? (
-                  <p className="text-red-500 font-semibold">No Reviews Found</p>
+                  <p className="font-semibold" style={{ color: primary }}>No Reviews Found</p>
                 ) : (
                   <div className="space-y-4">
                     {product.reviews.map((review: any) => (

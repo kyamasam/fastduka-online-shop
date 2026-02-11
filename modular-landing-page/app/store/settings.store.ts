@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import apiService, { ApiError } from '../services/api.service';
-import { SiteSettings, SettingsState } from '../types/settings';
+import { SettingsState, SiteSettings } from '../types/settings';
 
 /**
  * Global Settings Store
@@ -88,10 +88,16 @@ export function useCurrency() {
 export function useThemeColors() {
   const primaryColor = useSetting('primary_color');
   const secondaryColor = useSetting('secondary_color');
+  const topMenuBg = useSetting('top_menu_bg');
+  const topMenuTextColor = useSetting('top_menu_text_color');
+  
 
   return {
     primary: primaryColor || '#2E8B57',
     secondary: secondaryColor || '#ffffff',
+    topMenuBgColor: topMenuBg||"#d1298b",
+    topMenuTextColor: topMenuTextColor||"#ffffff" 
+    
   };
 }
 
