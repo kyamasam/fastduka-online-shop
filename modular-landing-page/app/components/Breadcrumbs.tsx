@@ -3,10 +3,13 @@ import Link from "next/link"
 
 interface BreadcrumbProps {
     child_page_label: string
+    title?: string
+    child_page_label2?: string
 }
-function Breadcrumbs({ child_page_label }: BreadcrumbProps) {
+function Breadcrumbs({ title = "", child_page_label, child_page_label2 }: BreadcrumbProps) {
     return (
-        <>
+        <div className="py-4">
+            {title !== "" && <h1 style={{}} className="text-3xl font-bold">{title}</h1>}
             {/* Breadcrumb */}
             < div className="py-4" >
                 <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -16,9 +19,15 @@ function Breadcrumbs({ child_page_label }: BreadcrumbProps) {
                     </Link>
                     <span>•</span>
                     <span>{child_page_label}</span>
+                    {child_page_label2 !== null &&
+                        <>
+                            <span>•</span>
+                            <span>{child_page_label2}</span>
+                        </>
+                    }
                 </div>
             </div >
-        </>
+        </div>
     )
 }
 
