@@ -1,10 +1,10 @@
 'use client';
 
-import { Category } from '@/types/product';
-import { ShopFilters } from './ShopFilters';
-import { useState, useEffect } from 'react';
-import { X, SlidersHorizontal } from 'lucide-react';
 import { useThemeColors } from '@/store/settings.store';
+import { Category } from '@/types/product';
+import { SlidersHorizontal, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ShopFilters } from './ShopFilters';
 
 interface ShopFiltersWrapperProps {
   categories: Category[];
