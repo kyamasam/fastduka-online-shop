@@ -68,6 +68,7 @@ export interface Product {
   is_taxable: boolean;
   price_includes_tax: boolean;
   tax_rate: string;
+  slug: string;
 }
 
 export interface ProductsResponse {
@@ -81,4 +82,24 @@ export interface FeaturedProductsParams {
   featured?: number;
   limit?: number;
   offset?: number;
+}
+
+export interface ShopQueryParams {
+  category_id?: string;
+  featured?: boolean;
+  in_stock?: boolean;
+  on_sale?: boolean;
+  ordering?: string;
+  page?: number;
+  product_type?: number;
+  search?: string;
+  selling_price__gte?: number;
+  selling_price__lte?: number;
+  selling_price_max?: number;
+  selling_price_min?: number;
+}
+
+export interface PriceRange {
+  min: number;
+  max: number;
 }

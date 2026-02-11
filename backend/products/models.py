@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import Sum
 from decimal import Decimal
+from django.utils.text import slugify
 from users.models import User, UtilColumnsModel
 
 
@@ -59,6 +60,7 @@ class Category(UtilColumnsModel):
 class Product (UtilColumnsModel):
 
     name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=300, unique=True, blank=True, db_index=True)
     sku = models.CharField(max_length=100, blank=True, null=True, unique=True, db_index=True)
     product_type = models.ForeignKey(CategoryType, on_delete=models.CASCADE)
     description = models.TextField(blank=True, null=True)
@@ -86,6 +88,25 @@ class Product (UtilColumnsModel):
 
     def __str__(self):
         return f"{self.name} @ {self.selling_price}"
+
+    def generate_unique_slug(self):
+        """Generate a unique slug for the product"""
+        base_slug = slugify(self.name)
+        slug = base_slug
+        counter = 1
+
+        # Check if slug already exists and append a number if it does
+        while Product.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+
+        return slug
+
+    def save(self, *args, **kwargs):
+        # Auto-generate slug if not provided
+        if not self.slug:
+            self.slug = self.generate_unique_slug()
+        super().save(*args, **kwargs)
 
 
 
