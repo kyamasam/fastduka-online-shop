@@ -76,4 +76,8 @@ const fetchProducts = async () => {
     pending.value = false;
   }
 };
+
+onMounted(() => {
+  fetchProducts()
+})
 </script>

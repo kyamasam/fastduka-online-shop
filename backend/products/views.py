@@ -6,9 +6,9 @@ from rest_framework import viewsets, filters as rest_framework_filters
 from django_filters import rest_framework as filters
 from rest_framework import filters as rest_framework_filters, permissions
 from inventory.models import Inventory
-from products.models import Category, Product, ProductPhoto, ProductReview, CategoryType, TaxRate
+from products.models import Category, Product, ProductPhoto, ProductReview, CategoryType, TaxRate, Brand, Collection
 from products.serializers import CategorySerializer, ProductSerializer, ProductPhotoSerializer, \
-    ProductVariantSerializer, ProductVariantPhotoSerializer, ReviewSerializer, CategoryTypeSerializer, TaxRateSerializer
+    ProductVariantSerializer, ProductVariantPhotoSerializer, ReviewSerializer, CategoryTypeSerializer, TaxRateSerializer, BrandSerializer, CollectionSerializer
 from users.permissions import AnonReadAdminCreate
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -73,10 +73,52 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
         return Response(CategorySerializer(categories, many=True).data)
 
+
+class BrandViewSet(viewsets.ModelViewSet):
+    serializer_class = BrandSerializer
+    queryset = Brand.objects.all()
+    model = Brand
+    permission_classes = [AnonReadAdminCreate]
+    search_fields = ['name', 'description']
+
+    @extend_schema(
+        summary="Get all brands without pagination",
+        description="Retrieve a complete list of all brands in the system without applying pagination limits.",
+        responses=BrandSerializer()
+    )
+    @action(detail=False, methods=['get'], url_path="brands-unpaged")
+    def get_brands_unpaged(self, request):
+        brands = self.get_queryset()
+        return Response(BrandSerializer(brands, many=True).data)
+
+
+class CollectionViewSet(viewsets.ModelViewSet):
+    serializer_class = CollectionSerializer
+    queryset = Collection.objects.all()
+    model = Collection
+    permission_classes = [AnonReadAdminCreate]
+    search_fields = ['name', 'description']
+
+    @extend_schema(
+        summary="Get all collections without pagination",
+        description="Retrieve a complete list of all collections in the system without applying pagination limits.",
+        responses=CollectionSerializer()
+    )
+    @action(detail=False, methods=['get'], url_path="collections-unpaged")
+    def get_collections_unpaged(self, request):
+        collections = self.get_queryset()
+        return Response(CollectionSerializer(collections, many=True).data)
+
+
 class ProductFilter(filters.FilterSet):
     in_stock = filters.BooleanFilter()
     on_sale = filters.BooleanFilter()
     category_id = filters.BaseInFilter(field_name='category_id', lookup_expr='in')
+    category_slug = filters.BaseInFilter(field_name='category__slug', lookup_expr='in')
+    brand_id = filters.BaseInFilter(field_name='brands__id', lookup_expr='in')
+    brand_slug = filters.BaseInFilter(field_name='brands__slug', lookup_expr='in')
+    collection_id = filters.BaseInFilter(field_name='collections__id', lookup_expr='in')
+    collection_slug = filters.BaseInFilter(field_name='collections__slug', lookup_expr='in')
     selling_price = filters.RangeFilter()
 
     class Meta:
@@ -114,6 +156,11 @@ class ProductViewSet(viewsets.ModelViewSet):
         q_params = self.request.query_params.dict()
         in_stock = q_params.pop('in_stock', None)
         category_id__in = q_params.pop('category_id__in', None)
+        category_slug = q_params.pop('category_slug', None)
+        brand_id__in = q_params.pop('brand_id__in', None)
+        brand_slug = q_params.pop('brand_slug', None)
+        collection_id__in = q_params.pop('collection_id__in', None)
+        collection_slug = q_params.pop('collection_slug', None)
         on_sale = q_params.pop('on_sale', None)
         # Remove pagination-related query parameters
         q_params.pop('limit', None)
@@ -140,7 +187,27 @@ class ProductViewSet(viewsets.ModelViewSet):
         if category_id__in is not None:
             category_id__in = category_id__in.split(',')
             qs = qs.filter(category_id__in=[int(i) for i in category_id__in])
-            
+
+        if category_slug is not None:
+            category_slugs = category_slug.split(',')
+            qs = qs.filter(category__slug__in=category_slugs)
+
+        if brand_id__in is not None:
+            brand_ids = brand_id__in.split(',')
+            qs = qs.filter(brands__id__in=[int(i) for i in brand_ids]).distinct()
+
+        if brand_slug is not None:
+            brand_slugs = brand_slug.split(',')
+            qs = qs.filter(brands__slug__in=brand_slugs).distinct()
+
+        if collection_id__in is not None:
+            collection_ids = collection_id__in.split(',')
+            qs = qs.filter(collections__id__in=[int(i) for i in collection_ids]).distinct()
+
+        if collection_slug is not None:
+            collection_slugs = collection_slug.split(',')
+            qs = qs.filter(collections__slug__in=collection_slugs).distinct()
+
         if search is not None:
             qs = qs.filter(
                 Q(name__icontains=search) |

@@ -1,5 +1,7 @@
 'use client';
 
+import { CartDrawer } from '@/components/cart/drawer/CartDrawer';
+import { useCartStore, useCartTotal } from '@/store/cart.store';
 import { useThemeColors } from '@/store/settings.store';
 import { MenuItem } from '@/types/settings';
 import * as Icons from 'lucide-react';
@@ -31,9 +33,12 @@ interface NavigationProps {
 
 export default function Navigation({ menuItems, logo, logoText, primaryColor, menuBgColor, menuTextColor }: NavigationProps) {
   const { topMenuBgColor, topMenuTextColor } = useThemeColors();
+  // const { getTotalItems } = useCartTotal();
+  const { getTotalItems } = useCartStore()
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
 
   const sortedMenuItems = [...menuItems].sort((a, b) => (a.order || 0) - (b.order || 0));
 
@@ -95,10 +100,14 @@ export default function Navigation({ menuItems, logo, logoText, primaryColor, me
                 0
               </span>
             </button>
-            <button className="relative p-2 hover:opacity-80 rounded-full">
+            <button
+              onClick={() => setCartDrawerOpen(true)}
+              className="relative p-2 hover:opacity-80 rounded-full"
+            >
               <ShoppingCart className="w-6 h-6" style={{ color: menuTextColor || '#000000' }} />
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                0
+                {/* {cartItemCount} */}
+                {getTotalItems()}
               </span>
             </button>
             <button className="p-2 hover:opacity-80 rounded-full">
@@ -147,14 +156,23 @@ export default function Navigation({ menuItems, logo, logoText, primaryColor, me
                 <Heart className="w-5 h-5" />
                 <span>Wishlist (0)</span>
               </button>
-              <button className="relative flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg flex-1 justify-center">
+              <button
+                onClick={() => {
+                  setCartDrawerOpen(true);
+                  setMobileMenuOpen(false);
+                }}
+                className="relative flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg flex-1 justify-center"
+              >
                 <ShoppingCart className="w-5 h-5" />
-                <span>Cart (0)</span>
+                <span>Cart ({getTotalItems()})</span>
               </button>
             </div>
           </div>
         )}
       </div>
+
+      {/* Cart Drawer */}
+      <CartDrawer isOpen={cartDrawerOpen} onClose={() => setCartDrawerOpen(false)} />
     </nav>
   );
 }

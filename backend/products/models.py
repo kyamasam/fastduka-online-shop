@@ -51,11 +51,89 @@ class CategoryType(UtilColumnsModel):
 
 class Category(UtilColumnsModel):
     name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=300, unique=True, blank=True, null=True, db_index=True)
     category_type = models.ForeignKey(CategoryType, on_delete=models.SET_NULL, null=True, blank=True)
     parent = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, blank=True)
     photo = models.ImageField(null=True, blank=True)
+
     def __str__(self):
         return self.name
+
+    def generate_unique_slug(self):
+        """Generate a unique slug for the category"""
+        base_slug = slugify(self.name)
+        slug = base_slug
+        counter = 1
+
+        # Check if slug already exists and append a number if it does
+        while Category.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+
+        return slug
+
+    def save(self, *args, **kwargs):
+        # Auto-generate slug if not provided
+        if not self.slug:
+            self.slug = self.generate_unique_slug()
+        super().save(*args, **kwargs)
+
+
+class Brand(UtilColumnsModel):
+    name = models.CharField(max_length=255, unique=True)
+    slug = models.SlugField(max_length=300, unique=True, blank=True, db_index=True)
+    description = models.TextField(blank=True, null=True)
+    logo = models.ImageField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+    def generate_unique_slug(self):
+        """Generate a unique slug for the brand"""
+        base_slug = slugify(self.name)
+        slug = base_slug
+        counter = 1
+
+        while Brand.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+
+        return slug
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = self.generate_unique_slug()
+        super().save(*args, **kwargs)
+
+
+class Collection(UtilColumnsModel):
+    name = models.CharField(max_length=255, unique=True)
+    slug = models.SlugField(max_length=300, unique=True, blank=True, db_index=True)
+    description = models.TextField(blank=True, null=True)
+    photo = models.ImageField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+    def generate_unique_slug(self):
+        """Generate a unique slug for the collection"""
+        base_slug = slugify(self.name)
+        slug = base_slug
+        counter = 1
+
+        while Collection.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+
+        return slug
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = self.generate_unique_slug()
+        super().save(*args, **kwargs)
+
 # Create your models here.
 class Product (UtilColumnsModel):
 
@@ -67,6 +145,8 @@ class Product (UtilColumnsModel):
     seo_description = models.TextField(blank=True, null=True)
     additional_information = models.JSONField(blank=True, null=True,)  # [{ key:key, value: data}]
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    brands = models.ManyToManyField(Brand, blank=True, related_name='products')
+    collections = models.ManyToManyField(Collection, blank=True, related_name='products')
     buying_price = models.FloatField(default=0)
     selling_price = models.FloatField()
     is_taxable=models.BooleanField(default=True)

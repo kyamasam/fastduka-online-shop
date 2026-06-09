@@ -63,7 +63,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         return <ProductDetailClient product={product} />;
     } catch (error) {
-        console.log("error****", error)
         notFound();
     }
 }

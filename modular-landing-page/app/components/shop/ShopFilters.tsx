@@ -122,10 +122,10 @@ export function ShopFilters({ categories, priceRange }: ShopFiltersProps) {
     });
   };
 
-  const handleCategoryToggle = (id: string) => {
-    const current = searchParams.get('category_id')?.split(',').filter(Boolean) || [];
-    const next = current.includes(id) ? current.filter(c => c !== id) : [...current, id];
-    updateFilters({ category_id: next.length ? next.join(',') : null });
+  const handleCategoryToggle = (slug: string) => {
+    const current = searchParams.get('category_slug')?.split(',').filter(Boolean) || [];
+    const next = current.includes(slug) ? current.filter(c => c !== slug) : [...current, slug];
+    updateFilters({ category_slug: next.length ? next.join(',') : null });
   };
 
   const toggleSection = (section: string) => {
@@ -268,8 +268,8 @@ export function ShopFilters({ categories, priceRange }: ShopFiltersProps) {
             <div key={category.id} className="mb-1">
               <CustomCheckbox
                 label={category.name}
-                checked={searchParams.get('category_id')?.split(',').includes(String(category.id))}
-                onChange={() => handleCategoryToggle(String(category.id))}
+                checked={searchParams.get('category_slug')?.split(',').includes(category.slug)}
+                onChange={() => handleCategoryToggle(category.slug)}
                 color={primary}
                 className="py-1.5"
               />
@@ -280,8 +280,8 @@ export function ShopFilters({ categories, priceRange }: ShopFiltersProps) {
                     <CustomCheckbox
                       key={child.id}
                       label={child.name}
-                      checked={searchParams.get('category_id')?.split(',').includes(String(child.id))}
-                      onChange={() => handleCategoryToggle(String(child.id))}
+                      checked={searchParams.get('category_slug')?.split(',').includes(child.slug)}
+                      onChange={() => handleCategoryToggle(child.slug)}
                       color={primary}
                       className="py-1 opacity-80"
                     />

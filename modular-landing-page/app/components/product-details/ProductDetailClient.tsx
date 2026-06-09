@@ -3,9 +3,10 @@
 import ReviewForm from '@/components/reviews/ReviewForm';
 import { formatPrice } from '@/lib/format';
 import { useCurrency, useThemeColors } from '@/store/settings.store';
+import { useCartStore } from '@/store/cart.store';
 import { Product } from '@/types/product';
 import { Star } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Breadcrumbs from '../Breadcrumbs';
 
 interface ProductDetailClientProps {
@@ -13,10 +14,23 @@ interface ProductDetailClientProps {
 }
 
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
-  const [quantity, setQuantity] = useState(1);
+  const getItemCount = useCartStore((state) => state.getItemCount);
+  const cartQuantity = getItemCount(product.id);
+
+  const [quantity, setQuantity] = useState(cartQuantity || 1);
   const [selectedImage, setSelectedImage] = useState(product.primary_photo);
+  const [isAdded, setIsAdded] = useState(false);
   const { symbol } = useCurrency();
   const { primary } = useThemeColors();
+  const addItem = useCartStore((state) => state.addItem);
+
+  // Update quantity when cart changes
+  useEffect(() => {
+    const currentCartQuantity = getItemCount(product.id);
+    if (currentCartQuantity > 0) {
+      setQuantity(currentCartQuantity);
+    }
+  }, [cartQuantity, product.id, getItemCount]);
 
   const handleQuantityChange = (type: 'increase' | 'decrease') => {
     if (type === 'increase' && quantity < product.inventory) {
@@ -24,6 +38,12 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     } else if (type === 'decrease' && quantity > 1) {
       setQuantity(quantity - 1);
     }
+  };
+
+  const handleAddToCart = () => {
+    addItem(product, quantity);
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
   };
 
   const renderStars = (rating: number, size: number = 20) => {
@@ -56,7 +76,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
         {/* Breadcrumb */}
 
-        <Breadcrumbs title={product?.name} child_page_label={product.category.name} child_page_label2={product.name} />
+        <Breadcrumbs title={product?.name} menu={[{ label: product.category.name, link: `shop?category_slug=${product.category.slug}` }, { label: product?.name, link: `product/${product?.id}/${product?.slug}` }]} />
 
         {/* Main Product Section */}
         <div className=" mx-auto ">
@@ -170,6 +190,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
                   {/* Add to Cart Button */}
                   <button
+                    onClick={handleAddToCart}
                     disabled={!product.in_stock}
                     className="flex-1 py-3 px-6 rounded-lg border-2 font-medium hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
@@ -189,7 +210,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                       }
                     }}
                   >
-                    {product.in_stock ? 'Add To Cart' : 'Out of Stock'}
+                    {!product.in_stock ? 'Out of Stock' : isAdded ? 'Added to Cart!' : 'Add To Cart'}
                   </button>
                 </div>
               </div>

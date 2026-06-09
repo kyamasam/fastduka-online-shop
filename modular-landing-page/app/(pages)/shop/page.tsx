@@ -82,8 +82,7 @@ async function DefaultShopPage({ searchParams }: ShopPageProps) {
         <div className='flex justify-center'>
             <div className='container flex-col items-start justify-start'>
                 <div className=" mx-auto px-4 py-4">
-                    <h1 style={{}} className="text-3xl font-bold">Shop</h1>
-                    <Breadcrumbs child_page_label="Shop" />
+                    <Breadcrumbs title='Shop' menu={[{ 'label': 'shop', link: 'shop' }]} />
 
                     <div className="flex flex-col lg:flex-row gap-8">
                         {/* Filters Sidebar with Mobile Support */}

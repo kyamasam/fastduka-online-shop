@@ -2,6 +2,7 @@
 
 import { formatPrice } from '@/lib/format';
 import { useCurrency, useThemeColors } from '@/store/settings.store';
+import { useCartStore, useIsInCart } from '@/store/cart.store';
 import { Product } from '@/types/product';
 import {
     Eye,
@@ -29,9 +30,17 @@ export function ProductCard({
 }: ProductCardProps) {
     const { symbol } = useCurrency();
     const { primary } = useThemeColors();
+    const addItem = useCartStore((state) => state.addItem);
+    const isInCart = useIsInCart(product.id);
 
     // 1. Manage Modal State
     const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+    // Handle adding to cart
+    const handleAddToCart = (productToAdd: Product = product, quantity: number = 1) => {
+        addItem(productToAdd, quantity);
+        onAddToCart?.(productToAdd, quantity);
+    };
 
     // Helper function to render stars
     const renderStars = (rating: number, totalReviews: number) => {
@@ -101,13 +110,16 @@ export function ProductCard({
                         <button
                             onClick={(e) => {
                                 e.preventDefault();
-                                onAddToCart?.(product);
+                                handleAddToCart(product, 1);
                             }}
                             className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition-colors cursor-pointer"
                             aria-label="Add to cart"
                             disabled={!product.in_stock}
                         >
-                            <ShoppingCart size={20} className="text-gray-700" />
+                            <ShoppingCart
+                                size={20}
+                                className={isInCart ? "text-gray-900 fill-gray-900" : "text-gray-700"}
+                            />
                         </button>
 
                         {/* 2. Update Eye Button to open Modal */}
@@ -175,7 +187,7 @@ export function ProductCard({
                 product={product}
                 isOpen={isQuickViewOpen}
                 onClose={() => setIsQuickViewOpen(false)}
-                onAddToCart={onAddToCart}
+                onAddToCart={handleAddToCart}
             />
         </>
     );
