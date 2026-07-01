@@ -178,6 +178,7 @@ export default {
                 free_delivery_threshold: null,
 
                 // Delivery Settings
+                delivery_location_type: 'map',
                 default_delivery_radius: 10.0,
                 estimated_delivery_time_min: 30,
                 estimated_delivery_time_max: 60,

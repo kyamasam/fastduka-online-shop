@@ -159,10 +159,27 @@
             <div class="col-md-12">
               <div class="tp-checkout-input">
                 <label>Delivery Location <span>*</span></label>
-                <LocationSearch :default_latitude="formData?.profile?.latitude"
+                <LocationSearch v-if="deliveryLocationType === 'map'"
+                                :default_latitude="formData?.profile?.latitude"
                                 :default_longitude="formData?.profile?.longitude"
                                 :location_address="formData?.profile?.address"
                                 @location-selected="handleLocationSelected" />
+                <div v-else class="row">
+                  <div class="col-md-6">
+                    <select v-model="selectedCityId" @change="handleCityChange" class="w-100 border p-3">
+                      <option :value="null" disabled>Select city</option>
+                      <option v-for="city in deliveryCities" :key="city.id" :value="city.id">{{ city.name }}</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <select v-model="selectedLocationId" @change="handlePredefinedLocation" class="w-100 border p-3" :disabled="!selectedCity">
+                      <option :value="null" disabled>Select location</option>
+                      <option v-for="location in selectedCity?.locations || []" :key="location.id" :value="location.id">
+                        {{ location.name }} — {{ siteSettingsStore.currencySymbol }} {{ location.delivery_fee }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="col-md-12">
@@ -229,9 +246,49 @@
 
 <script setup>
 import { useUserStore } from "@/pinia/useUserDataStore";
+import { useSiteSettingsStore } from "@/pinia/useSiteSettingsStore";
 import _ from "lodash";
 import { toast } from "vue3-toastify";
 const store = useUserStore();
+const siteSettingsStore = useSiteSettingsStore();
+const deliverySelection = useDeliverySelection();
+const deliveryCities = ref([]);
+const selectedCityId = ref(deliverySelection.value.cityId);
+const selectedLocationId = ref(deliverySelection.value.locationId);
+const deliveryLocationType = computed(() => siteSettingsStore.settings?.delivery_location_type || 'map');
+const selectedCity = computed(() => deliveryCities.value.find((city) => city.id === selectedCityId.value));
+
+const loadDeliveryCities = async () => {
+  if (deliveryLocationType.value !== 'predefined') return;
+  const { data, error, execute } = getDataUnauthed('/delivery-cities/');
+  await execute();
+  if (!error.value) deliveryCities.value = data.value?.results || data.value || [];
+};
+
+const handleCityChange = () => {
+  selectedLocationId.value = null;
+  deliverySelection.value = { cityId: selectedCityId.value, locationId: null, cityName: selectedCity.value?.name || '', locationName: '', deliveryFee: 0, latitude: null, longitude: null };
+};
+
+const handlePredefinedLocation = () => {
+  const location = selectedCity.value?.locations?.find((item) => item.id === selectedLocationId.value);
+  if (!location) return;
+  const latitude = location.latitude ?? selectedCity.value.latitude ?? null;
+  const longitude = location.longitude ?? selectedCity.value.longitude ?? null;
+  deliverySelection.value = {
+    cityId: selectedCity.value.id,
+    locationId: location.id,
+    cityName: selectedCity.value.name,
+    locationName: location.name,
+    deliveryFee: Number(location.delivery_fee),
+    latitude,
+    longitude,
+  };
+  formData.value.profile.address = `${location.name}, ${selectedCity.value.name}`;
+  formData.value.profile.latitude = latitude;
+  formData.value.profile.longitude = longitude;
+  hasUserTyped.value = true;
+};
 
 const currentStep = ref(1);
 const isLoginMode = ref(false);
@@ -324,6 +381,7 @@ const handleLocationSelected = (location) => {
   formData.value.profile.latitude = location?.lat;
   formData.value.profile.longitude = location?.lng;
   hasUserTyped.value = true;
+  deliverySelection.value = { cityId: null, locationId: null, cityName: '', locationName: location?.address || '', deliveryFee: Number(siteSettingsStore.settings?.default_delivery_fee || 0), latitude: location?.lat, longitude: location?.lng };
 };
 
 const logout = () => {
@@ -486,6 +544,8 @@ watch(
 const currentUserData = useCookie("userData");
 
 onMounted(async () => {
+  await siteSettingsStore.fetchSettings();
+  await loadDeliveryCities();
   if (currentUserData.value) {
     Object.assign(formData.value, currentUserData.value);
   } else {

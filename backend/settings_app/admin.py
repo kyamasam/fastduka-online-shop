@@ -5,11 +5,13 @@ from .models import SiteSettings, HeroSlider
 class SiteSettingsAdmin(admin.ModelAdmin):
     list_display = (
         'title', 
+        'delivery_location_type',
         'mpesa_paybill_number', 
         'maintenance_mode', 
         'match_user_to_closest_vendor'
     )
     search_fields = ('title', 'description')
+    list_filter = ('delivery_location_type', 'maintenance_mode')
 
 
 @admin.register(HeroSlider)

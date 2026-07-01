@@ -3,6 +3,7 @@ from django.db import transaction
 from rest_framework import serializers
 
 from delivery.models import Rider
+from delivery.models import DeliveryLocation
 from orders.constants import ORDER_DELIVERED, ORDER_IN_TRANSIT, ORDER_PAID
 from orders.models import Cart, CartItem, Order, OrderItem, Transaction
 from orders.tax_utils import calculate_order_tax, validate_purchase_price
@@ -13,6 +14,7 @@ from users.serializers import UserSerializer
 from vendors.models import Vendor
 from vendors.serializers import VendorSerializer
 from vendors.utils.find_nearest import find_nearest_vendor
+from settings_app.models import SiteSettings
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -189,6 +191,10 @@ class OrderSerializer(serializers.ModelSerializer):
     payment_transaction_obj = serializers.SerializerMethodField()
     delivery_latitude = serializers.FloatField(required=False, allow_null=True)
     delivery_longitude = serializers.FloatField(required=False, allow_null=True)
+    delivery_location = serializers.CharField(required=False, allow_blank=True)
+    predefined_delivery_location = serializers.PrimaryKeyRelatedField(
+        queryset=DeliveryLocation.objects.all(), required=False, allow_null=True
+    )
     vendor_obj = serializers.SerializerMethodField()
 
     def get_vendor_obj(self, obj):
@@ -203,7 +209,10 @@ class OrderSerializer(serializers.ModelSerializer):
                   "delivery_latitude","delivery_longitude","payment_transaction","delivery_distance","delivery_duration",
                 "orderitem_set", "created_at", "updated_at", "payment_transaction_obj", "id",
                 "customer_signature", "rider_signature", "delivery_note", "delivery_completed_at", "order_client",
-                "tax_total", "total_before_tax", "total_after_tax"]
+                "tax_total", "total_before_tax", "total_after_tax", "delivery_location_type",
+                "predefined_delivery_location", "delivery_fee", "grand_total"]
+
+        read_only_fields = ["delivery_location_type", "delivery_fee", "grand_total"]
 
     @transaction.atomic
     def create(self, validated_data):
@@ -213,7 +222,9 @@ class OrderSerializer(serializers.ModelSerializer):
         delivery_location = validated_data.pop("delivery_location", None)
         delivery_latitude = validated_data.pop("delivery_latitude", None)
         delivery_longitude = validated_data.pop("delivery_longitude", None)
+        predefined_location = validated_data.pop("predefined_delivery_location", None)
         order_client = validated_data.get("order_client", "site")
+        site_settings = SiteSettings.objects.first()
 
         if user is None:
             request = self.context.get("request")
@@ -239,23 +250,63 @@ class OrderSerializer(serializers.ModelSerializer):
 
             delivery_distance = None
             delivery_duration = None
+            delivery_location_type = 'pickup'
+            delivery_fee = Decimal('0.00')
         else:
-            # Site orders: require delivery location and nearest vendor calculation
-            if not delivery_latitude or not delivery_longitude:
-                # Fail silently and select Nairobi default
-                delivery_latitude = -1.286389
-                delivery_longitude = 36.817223
+            delivery_location_type = getattr(site_settings, 'delivery_location_type', 'map')
+            delivery_fee = Decimal(str(getattr(site_settings, 'default_delivery_fee', 0)))
 
-            try:
-                vendor_distance_data = find_nearest_vendor(delivery_latitude, delivery_longitude)
-            except KeyError:
-                raise serializers.ValidationError("Please Indicate a more specific location for us to find you")
-            except Exception as e:
-                raise serializers.ValidationError(str(e))
+            if delivery_location_type == 'predefined':
+                if predefined_location is None:
+                    raise serializers.ValidationError({
+                        'predefined_delivery_location': 'Please select a delivery location.'
+                    })
+                if not predefined_location.is_active or not predefined_location.city.is_active:
+                    raise serializers.ValidationError({
+                        'predefined_delivery_location': 'This delivery location is not available.'
+                    })
 
-            vendor_obj = Vendor.objects.filter(pk=vendor_distance_data.get('id')).first()
-            delivery_distance = vendor_distance_data.get('distance', None)
-            delivery_duration = vendor_distance_data.get('duration', None)
+                delivery_location = str(predefined_location)
+                delivery_fee = predefined_location.delivery_fee
+                delivery_latitude = (
+                    predefined_location.latitude
+                    if predefined_location.latitude is not None
+                    else predefined_location.city.latitude
+                )
+                delivery_longitude = (
+                    predefined_location.longitude
+                    if predefined_location.longitude is not None
+                    else predefined_location.city.longitude
+                )
+            elif delivery_latitude is None or delivery_longitude is None:
+                raise serializers.ValidationError({
+                    'delivery_location': 'Please select your delivery location on the map.'
+                })
+
+            if delivery_latitude is not None and delivery_longitude is not None:
+                try:
+                    vendor_distance_data = find_nearest_vendor(
+                        delivery_latitude, delivery_longitude
+                    )
+                except KeyError:
+                    raise serializers.ValidationError(
+                        'This location is outside our delivery area.'
+                    )
+                except Exception as e:
+                    raise serializers.ValidationError(str(e))
+
+                vendor_obj = Vendor.objects.filter(
+                    pk=vendor_distance_data.get('id')
+                ).first()
+                delivery_distance = vendor_distance_data.get('distance')
+                delivery_duration = vendor_distance_data.get('duration')
+            else:
+                vendor_obj = Vendor.objects.filter(is_default=True).first() or Vendor.objects.first()
+                delivery_distance = None
+                delivery_duration = None
+
+            if vendor_obj is None:
+                raise serializers.ValidationError('No vendor is available for this order.')
 
         # Create order
         order = Order.objects.create(
@@ -264,6 +315,9 @@ class OrderSerializer(serializers.ModelSerializer):
             delivery_location=delivery_location,
             delivery_latitude=delivery_latitude,
             delivery_longitude=delivery_longitude,
+            delivery_location_type=delivery_location_type,
+            predefined_delivery_location=predefined_location,
+            delivery_fee=delivery_fee,
             **validated_data
         )
         order.vendor = vendor_obj
@@ -311,6 +365,10 @@ class OrderSerializer(serializers.ModelSerializer):
         order.tax_total = tax_result['tax_total']
         order.total_before_tax = tax_result['total_before_tax']
         order.total_after_tax = tax_result['total_after_tax']
+        threshold = getattr(site_settings, 'free_delivery_threshold', None)
+        if threshold is not None and order.total_after_tax >= threshold:
+            order.delivery_fee = Decimal('0.00')
+        order.grand_total = order.total_after_tax + order.delivery_fee
         order.save()
 
         return order

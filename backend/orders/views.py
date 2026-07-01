@@ -391,7 +391,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                 }
 
         # create Transaction
-        transaction_amount = float(math.ceil(order.total_after_tax or serializer.data['amount']))
+        transaction_amount = float(math.ceil(order.grand_total or order.total_after_tax or serializer.data['amount']))
         json_data = {"customer_account_number": serializer.data['phone_number'], "amount": transaction_amount,
                      "receiving_account_number": os.environ.get("FASTDUKA_PAYBILL"),
                      "receiving_organization_id": os.environ.get("FASTDUKA_ORGID"), "payment_method_name": "mpesa",
@@ -598,11 +598,14 @@ class OrderViewSet(viewsets.ModelViewSet):
         response_serializer = CalculateTaxResponseSerializer(tax_result)
         return Response(response_serializer.data)
 def calculate_order_value(order: Order):
-    total = order.total_after_tax
-    if total is None:
-        for order_item in list(order.orderitem_set.all()):
-            total += order_item.quantity * order_item.purchase_price
-    return total
+    if order.grand_total is not None:
+        return order.grand_total
+    if order.total_after_tax is not None:
+        return order.total_after_tax + order.delivery_fee
+    return sum(
+        order_item.quantity * order_item.purchase_price
+        for order_item in order.orderitem_set.all()
+    ) + order.delivery_fee
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer

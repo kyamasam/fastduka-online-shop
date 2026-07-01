@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from decimal import Decimal
 
 from delivery.constants import RIDER_PENDING, RIDER_STATUS_CHOICES
 from users.models import User, UtilColumnsModel
@@ -30,7 +31,7 @@ class DeliveryLocation(UtilColumnsModel):
     delivery_fee = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(0)],
+        validators=[MinValueValidator(Decimal('0.00'))],
     )
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)

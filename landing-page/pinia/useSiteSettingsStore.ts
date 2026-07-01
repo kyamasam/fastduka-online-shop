@@ -137,6 +137,7 @@ export interface SiteSettings {
   default_tax_rate: string;
   minimum_order_amount: string;
   default_delivery_fee: string;
+  delivery_location_type: "map" | "predefined";
   free_delivery_threshold: string | null;
   default_delivery_radius: string;
   estimated_delivery_time_min: number;

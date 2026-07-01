@@ -24,6 +24,11 @@
           <span>{{ formatCurrency(cartStore.totalPriceQuantity.total) }}</span>
         </li>
 
+        <li class="tp-order-info-list-subtotal">
+          <span>Delivery<span v-if="deliverySelection.locationName"> ({{ deliverySelection.locationName }})</span></span>
+          <span>{{ formatCurrency(effectiveDeliveryFee) }}</span>
+        </li>
+
         <!--shipping -->
         <!-- <li class="tp-order-info-list-shipping">
           <span>Shipping</span>
@@ -54,7 +59,7 @@
         <!-- total -->
         <li class="tp-order-info-list-total">
           <span>Total</span>
-          <span>{{ formatCurrency(cartStore.totalPriceQuantity.total) }}</span>
+          <span>{{ formatCurrency(checkoutTotal) }}</span>
         </li>
       </ul>
     </div>
@@ -181,11 +186,31 @@ import { toast } from "vue3-toastify";
 
 import { useCartStore } from "@/pinia/useCartStore";
 import { useUserStore } from "@/pinia/useUserDataStore";
+import { useSiteSettingsStore } from "@/pinia/useSiteSettingsStore";
 import type { IProduct } from "@/types/product-type";
 let shipCost = ref<number>(0);
 let payment_method_name = ref<string>("mpesa_payment_express");
 let userStore = useUserStore();
 const cartStore = useCartStore();
+const siteSettingsStore = useSiteSettingsStore();
+const deliverySelectionCookie = useDeliverySelection();
+const deliverySelection = computed(() => deliverySelectionCookie.value);
+const effectiveDeliveryFee = computed(() => {
+  if (cartStore.activeOrder?.id) return Number(cartStore.activeOrder.delivery_fee || 0);
+  const subtotal = cartStore.totalPriceQuantity.total;
+  const threshold = Number(siteSettingsStore.settings?.free_delivery_threshold || 0);
+  if (threshold > 0 && subtotal >= threshold) return 0;
+  if (siteSettingsStore.settings?.delivery_location_type === 'predefined') {
+    return Number(deliverySelection.value.deliveryFee || 0);
+  }
+  return Number(siteSettingsStore.settings?.default_delivery_fee || 0);
+});
+const checkoutTotal = computed(() => {
+  if (cartStore.activeOrder?.grand_total) return Number(cartStore.activeOrder.grand_total);
+  return cartStore.totalPriceQuantity.total + effectiveDeliveryFee.value;
+});
+
+onMounted(() => siteSettingsStore.fetchSettings());
 const currentUserData = useCookie("userData");
 
 const phone_code = ref(currentUserData?.value?.phone_code);
@@ -223,6 +248,10 @@ const isPolling = ref(false);
 const showManualVerifyButton = ref(false);
 
 const checkAllRequiredFields = () => {
+  if (siteSettingsStore.settings?.delivery_location_type === 'predefined' && !deliverySelection.value.locationId) {
+    toast.warning("Select a city and delivery location before placing your order");
+    return false;
+  }
   console.log("deli", currentUserData?.value?.profile?.address);
   if (!currentUserData?.value?.profile?.address) {
     toast.warning(
@@ -252,6 +281,7 @@ const createOrder = async () => {
           delivery_location: currentUserData?.value?.profile?.address,
           delivery_latitude: currentUserData?.value?.profile?.latitude,
           delivery_longitude: currentUserData?.value?.profile?.longitude,
+          predefined_delivery_location: deliverySelection.value.locationId || null,
           orderitem_set: orderItems,
         },
       });
@@ -295,7 +325,7 @@ const sendPrompt = async () => {
       body: {
         order_id: cartStore?.activeOrder?.id,
         phone_number: `${phone_code?.value}${clean_phone}`,
-        amount: cartStore.totalPriceQuantity.total,
+        amount: checkoutTotal.value,
       },
     }
   );
