@@ -25,8 +25,8 @@ class UtilColumnsModel(models.Model):
 
 # Create validator instances that handle None values by setting allow_blank=True
 phone_validator = RegexValidator(
-    regex=r"^\d{9,10}$",
-    message="Enter a valid phone number (9-10 digits)",
+    regex=r"^\d{9,15}$",
+    message="Enter a valid phone number (9-15 digits)",
 )
 
 phone_code_validator = RegexValidator(
@@ -70,7 +70,7 @@ class User(AbstractUser):
         null=True,
     )
     phone_number = models.CharField(
-        max_length=10,
+        max_length=15,
         validators=[phone_validator],
         blank=True,
         null=True,
