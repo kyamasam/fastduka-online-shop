@@ -127,6 +127,7 @@ export interface SiteSettings {
   twitter_url: string | null;
   instagram_url: string | null;
   youtube_url: string | null;
+  tiktok_url: string | null;
   currency_code: string;
   currency_symbol: string;
   mpesa_paybill_number: string;

@@ -60,6 +60,15 @@ const social_data = computed(() => {
     });
   }
 
+  if (siteSettingsStore.settings.tiktok_url) {
+    links.push({
+      id: 5,
+      link: siteSettingsStore.settings.tiktok_url,
+      icon: "fa-brands fa-tiktok",
+      title: "TikTok",
+    });
+  }
+
   return links;
 });
 </script>
