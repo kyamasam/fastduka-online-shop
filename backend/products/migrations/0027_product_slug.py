@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='product',
             name='slug',
-            field=models.SlugField(blank=True, max_length=300, db_index=True),
+            field=models.SlugField(blank=True, max_length=300, db_index=False),
         ),
         # Generate slugs for existing products
         migrations.RunPython(generate_slugs, reverse_slugs),
