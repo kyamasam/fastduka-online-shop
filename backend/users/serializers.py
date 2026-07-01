@@ -272,3 +272,21 @@ class SendPasswordResetCodeSerializer(serializers.Serializer):
         mail.send()
 
         return user
+
+
+class ClaimAccountSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    email = serializers.EmailField()
+    password = serializers.CharField(min_length=6)
+
+    def validate(self, data):
+        try:
+            user = User.objects.get(otp_code=data['token'], otp_code_used=False)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Invalid or expired claim token.")
+        if user.otp_code_expires_at < timezone.now():
+            raise serializers.ValidationError("Claim token has expired.")
+        if User.objects.filter(email=data['email']).exclude(pk=user.pk).exists():
+            raise serializers.ValidationError("That email is already registered.")
+        data['user'] = user
+        return data

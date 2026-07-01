@@ -199,7 +199,7 @@ class OrderSerializer(serializers.ModelSerializer):
         return TransactionSerializer(obj.payment_transaction).data
     class Meta:
         model = Order
-        fields = [ "user", "user_id", "status", "delivery_location","vendor","vendor_obj",
+        fields = [ "user", "user_id", "is_guest", "status", "delivery_location","vendor","vendor_obj",
                   "delivery_latitude","delivery_longitude","payment_transaction","delivery_distance","delivery_duration",
                 "orderitem_set", "created_at", "updated_at", "payment_transaction_obj", "id",
                 "customer_signature", "rider_signature", "delivery_note", "delivery_completed_at", "order_client",
@@ -216,7 +216,9 @@ class OrderSerializer(serializers.ModelSerializer):
         order_client = validated_data.get("order_client", "site")
 
         if user is None:
-            user = self.context["request"].user
+            request = self.context.get("request")
+            if request and request.user.is_authenticated:
+                user = request.user
         order_items = validated_data.pop("orderitem_set")
 
         # Handle POS orders differently from site orders
@@ -258,6 +260,7 @@ class OrderSerializer(serializers.ModelSerializer):
         # Create order
         order = Order.objects.create(
             user=user,
+            is_guest=(user is None),
             delivery_location=delivery_location,
             delivery_latitude=delivery_latitude,
             delivery_longitude=delivery_longitude,
@@ -328,6 +331,8 @@ class OrderStkSerializer(serializers.Serializer):
     order_id = serializers.PrimaryKeyRelatedField(queryset=Order.objects.all())
     phone_number = serializers.CharField()
     amount = serializers.FloatField()
+    guest_name = serializers.CharField(required=False, allow_blank=True)
+    guest_phone_code = serializers.CharField(required=False, allow_blank=True)
 
 
 class ConfirmPaymentSerializer(serializers.Serializer):

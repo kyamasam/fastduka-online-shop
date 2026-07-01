@@ -2,11 +2,14 @@ import os
 import logging
 import math
 import requests
+from datetime import timedelta
 from django.utils import timezone
+from django.utils.crypto import get_random_string
 from rest_framework import viewsets, serializers, filters,status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from django.db.models import Q
 from delivery.services.process_order_delivery import process_automatic_delivery
@@ -25,6 +28,7 @@ from orders.serializers import (
 )
 from orders.tax_utils import calculate_order_tax
 from users.constants import USER_TYPE_BUSINESS_MANAGER, USER_TYPE_BUSINESS_OWNER, USER_TYPE_CUSTOMER, USER_TYPE_PLATFORM_MANAGER, USER_TYPE_RIDER
+from users.models import User, Profile
 from users.permissions import HasToOwnCart
 from vendors.models import VendorMember
 from vendors.permissions import IsVendorAdmin, IsVendorEditor, IsVendorShopKeeper
@@ -246,6 +250,11 @@ class OrderViewSet(viewsets.ModelViewSet):
         "payment_transaction__payment_method",
         "rider_id"]
     
+    def get_permissions(self):
+        if self.action in ['create', 'create_stk']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
     def get_serializer_class(self):
         if self.action in ['list','retrieve']:
             return OrderSerializer
@@ -311,7 +320,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(OrderSerializer(data).data)
     def get_queryset(self):
         user = self.request.user
-        
+        if not user.is_authenticated:
+            return Order.objects.none()
+
                 # For customers, return only their orders
         if user.user_type == USER_TYPE_RIDER:
             return Order.objects.filter(rider__user=user)
@@ -335,41 +346,79 @@ class OrderViewSet(viewsets.ModelViewSet):
         # Default case - return empty queryset
         return Order.objects.none()
 
-    @action(detail=False, methods=["post"], url_path="create-stk", permission_classes=[IsAuthenticated],
+    @action(detail=False, methods=["post"], url_path="create-stk",
             serializer_class=OrderStkSerializer, )
     def create_stk(self, request):
-        
+
         serializer = OrderStkSerializer(data=request.data)
         if not serializer.is_valid():
             raise serializers.ValidationError(serializer.errors)
         order = Order.objects.get(pk=serializer.data['order_id'])
-        if serializer.is_valid():
-            # create Transaction
-            transaction_amount = float(math.ceil(order.total_after_tax or serializer.data['amount']))
-            json_data = {"customer_account_number": serializer.data['phone_number'], "amount": transaction_amount,
-                         "receiving_account_number": os.environ.get("FASTDUKA_PAYBILL"),
-                         "receiving_organization_id": os.environ.get("FASTDUKA_ORGID"), "payment_method_name": "mpesa",
-                         "payment_method_subtype": "stk_push", "config_id": os.environ.get("FASTDUKA_CONFIG_ID"),
-                         "transaction_note": "meatworld transaction", }
-            api_key = "Api-Key " + os.environ.get("FASTDUKA_API_KEY")
-            header = {"Authorization": f"{api_key}", "Content-Type": "application/json", }
 
-            response = requests.post("https://api.fastduka.co.ke/api/transaction/", json=json_data, headers=header, )
+        # Auto-register guest user before STK push
+        guest_tokens = None
+        if order.is_guest:
+            phone = serializer.data['phone_number']
+            phone_code = serializer.data.get('guest_phone_code', '+254')
+            name = serializer.data.get('guest_name', '')
 
-            # Check the status code to see if the request was successful
-            if response.status_code == 200:
-                response_data = response.json()
-                paymentTransaction = Transaction.objects.create(customer_account_number=serializer.data['phone_number'],
-                                                                user=self.request.user, transaction_type=PURCHASE,
-                                                                transaction_amount=transaction_amount, )
-                paymentTransaction.transaction_identifier = response_data["idempotency_key"]
-                order.payment_transaction = paymentTransaction
+            existing = User.objects.filter(phone_number=phone).first()
+            if existing:
+                order.user = existing
                 order.save()
-                paymentTransaction.save()
             else:
-                raise serializers.ValidationError(f"{response.text}")
+                placeholder_email = f"{phone}@guest.fastduka.co.ke"
+                random_pw = get_random_string(length=12)
+                new_user = User.objects.create_user(
+                    email=placeholder_email,
+                    password=random_pw,
+                    phone_code=phone_code,
+                    phone_number=phone,
+                    first_name=name,
+                )
+                Profile.objects.create(user=new_user)
+                new_user.otp_code = get_random_string(length=32)
+                new_user.otp_code_used = False
+                new_user.otp_code_expires_at = timezone.now() + timedelta(hours=24)
+                new_user.save()
+                order.user = new_user
+                order.save()
+                refresh = RefreshToken.for_user(new_user)
+                guest_tokens = {
+                    'access': str(refresh.access_token),
+                    'refresh': str(refresh),
+                    'claim_token': new_user.otp_code,
+                }
 
-            return Response(OrderSerializer(order).data)
+        # create Transaction
+        transaction_amount = float(math.ceil(order.total_after_tax or serializer.data['amount']))
+        json_data = {"customer_account_number": serializer.data['phone_number'], "amount": transaction_amount,
+                     "receiving_account_number": os.environ.get("FASTDUKA_PAYBILL"),
+                     "receiving_organization_id": os.environ.get("FASTDUKA_ORGID"), "payment_method_name": "mpesa",
+                     "payment_method_subtype": "stk_push", "config_id": os.environ.get("FASTDUKA_CONFIG_ID"),
+                     "transaction_note": "meatworld transaction", }
+        api_key = "Api-Key " + os.environ.get("FASTDUKA_API_KEY")
+        header = {"Authorization": f"{api_key}", "Content-Type": "application/json", }
+
+        response = requests.post("https://api.fastduka.co.ke/api/transaction/", json=json_data, headers=header, )
+
+        # Check the status code to see if the request was successful
+        if response.status_code == 200:
+            response_data = response.json()
+            paymentTransaction = Transaction.objects.create(customer_account_number=serializer.data['phone_number'],
+                                                            user=order.user, transaction_type=PURCHASE,
+                                                            transaction_amount=transaction_amount, )
+            paymentTransaction.transaction_identifier = response_data["idempotency_key"]
+            order.payment_transaction = paymentTransaction
+            order.save()
+            paymentTransaction.save()
+        else:
+            raise serializers.ValidationError(f"{response.text}")
+
+        response_data = OrderSerializer(order).data
+        if order.is_guest and guest_tokens:
+            response_data['guest_tokens'] = guest_tokens
+        return Response(response_data)
 
     @action(detail=False, methods=["post"], url_path="confirm-payment", permission_classes=[IsAuthenticated],
             serializer_class=ConfirmPaymentSerializer, )
@@ -458,7 +507,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         inventory_adjustments = []
 
         # Build delivery info for the reason field
-        customer_name = f"{order.user.first_name} {order.user.last_name}".strip() if order.user else "Unknown Customer"
+        customer_name = f"{order.user.first_name} {order.user.last_name}".strip() if order.user else "Guest"
         delivery_location = order.delivery_location or "Not specified"
         rider_name = f"{order.rider.user.first_name} {order.rider.user.last_name}".strip() if order.rider and order.rider.user else "No rider assigned"
 

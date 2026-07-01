@@ -5,11 +5,12 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
 from users.constants import USER_TYPE_BUSINESS_MANAGER, USER_TYPE_BUSINESS_OWNER, USER_TYPE_CUSTOMER, USER_TYPE_PLATFORM_MANAGER, USER_TYPE_RIDER
 from users.models import User
 from users.permissions import AnonCreateAndUpdateOwnerOnly
-from users.serializers import ChangePasswordSerializer, CustomTokenObtainPairSerializer, UserSerializer, SendPasswordResetCodeSerializer, \
+from users.serializers import ChangePasswordSerializer, ClaimAccountSerializer, CustomTokenObtainPairSerializer, UserSerializer, SendPasswordResetCodeSerializer, \
     ResetPasswordSerializer
 from drf_spectacular.utils import extend_schema, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
@@ -178,3 +179,16 @@ class UserViewSet(viewsets.ModelViewSet):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+    @action(detail=False, methods=['post'], url_path='claim-account', permission_classes=[AllowAny])
+    def claim_account(self, request):
+        serializer = ClaimAccountSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        user.email = serializer.validated_data['email']
+        user.username = serializer.validated_data['email']
+        user.set_password(serializer.validated_data['password'])
+        user.otp_code_used = True
+        user.save()
+        refresh = RefreshToken.for_user(user)
+        return Response({'access': str(refresh.access_token), 'refresh': str(refresh)})

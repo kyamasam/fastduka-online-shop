@@ -67,6 +67,11 @@ class CartItem(UtilColumnsModel):
 
 
 class Order(UtilColumnsModel):
+    DELIVERY_LOCATION_TYPE_CHOICES = (
+        ('map', 'Map selector'),
+        ('predefined', 'Predefined location'),
+        ('pickup', 'In-store pickup'),
+    )
     order_status_choices = (
             (ORDER_PLACED, "Placed"), 
             (ORDER_PROCESSING, "Processing"),
@@ -75,12 +80,26 @@ class Order(UtilColumnsModel):
             (ORDER_CANCELLED, "Cancelled"), 
             (ORDER_PAID, "Paid")
          )
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
+    is_guest = models.BooleanField(default=False)
     status = models.CharField(max_length=10, default=ORDER_PLACED, choices=order_status_choices)
     delivery_location = models.CharField(max_length=255)
     delivery_latitude = models.FloatField(null=True)
     delivery_longitude = models.FloatField(null=True)
-    delivery_location = models.CharField(max_length=255)
+    delivery_location_type = models.CharField(
+        max_length=20,
+        choices=DELIVERY_LOCATION_TYPE_CHOICES,
+        default='map',
+    )
+    predefined_delivery_location = models.ForeignKey(
+        'delivery.DeliveryLocation',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='orders',
+    )
+    delivery_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    grand_total = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     delivery_duration = models.CharField(max_length=255, null=True, blank=True)
     delivery_distance = models.FloatField(null=True, blank=True)
     payment_transaction = models.ForeignKey(Transaction, on_delete=models.SET_NULL, null=True, blank=True)
@@ -105,7 +124,8 @@ class Order(UtilColumnsModel):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.user.get_full_name() or self.user.username}'s Order in {self.status}"
+        name = self.user.get_full_name() if self.user else "Guest"
+        return f"{name}'s Order in {self.status}"
 
 
 class OrderItem(UtilColumnsModel):
@@ -118,5 +138,4 @@ class OrderItem(UtilColumnsModel):
     tax_amount = models.DecimalField(max_digits=12, decimal_places=2,null=True, blank=True)
     total_before_tax = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     total_after_tax = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-
 

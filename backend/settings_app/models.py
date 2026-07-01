@@ -16,6 +16,10 @@ class UtilColumnsModel(models.Model):
         abstract = True
 
 class SiteSettings(UtilColumnsModel):
+    DELIVERY_LOCATION_TYPE_CHOICES = (
+        ('map', 'Map selector'),
+        ('predefined', 'Predefined locations'),
+    )
     # Site Information
     title = models.CharField(max_length=255)
     site_link = models.CharField(max_length=255, default="https://store.fastduka.co.ke")
@@ -68,6 +72,11 @@ class SiteSettings(UtilColumnsModel):
     free_delivery_threshold = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     
     # Delivery Settings
+    delivery_location_type = models.CharField(
+        max_length=20,
+        choices=DELIVERY_LOCATION_TYPE_CHOICES,
+        default='map',
+    )
     default_delivery_radius = models.DecimalField(max_digits=5, decimal_places=1, default=10.0, 
                                                   validators=[MinValueValidator(0.1)])
     estimated_delivery_time_min = models.PositiveIntegerField(default=30, help_text="In minutes")

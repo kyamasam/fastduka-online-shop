@@ -1,8 +1,52 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 
 from delivery.constants import RIDER_PENDING, RIDER_STATUS_CHOICES
 from users.models import User, UtilColumnsModel
 from vendors.models import Vendor
+
+
+class DeliveryCity(UtilColumnsModel):
+    name = models.CharField(max_length=255, unique=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    display_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['display_order', 'name']
+        verbose_name_plural = 'Delivery cities'
+
+    def __str__(self):
+        return self.name
+
+
+class DeliveryLocation(UtilColumnsModel):
+    city = models.ForeignKey(
+        DeliveryCity,
+        on_delete=models.CASCADE,
+        related_name='locations',
+    )
+    name = models.CharField(max_length=255)
+    delivery_fee = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+    )
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    display_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['display_order', 'name']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['city', 'name'],
+                name='unique_delivery_location_per_city',
+            ),
+        ]
+
+    def __str__(self):
+        return f'{self.name}, {self.city.name}'
 
 # Create your models here.
 
