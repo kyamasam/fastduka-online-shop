@@ -3,10 +3,12 @@
     <div class="tp-checkout-bill-form">
       <div class="tp-checkout-bill-inner">
         <!-- Step 1: Account Information -->
-        <div v-show="currentStep === 1" class="checkout-step">
+        <div v-show="currentStep === 1"
+             class="checkout-step">
 
           <!-- Login form (shown when user clicks "login" link) -->
-          <div v-if="isLoginMode" class="login-form">
+          <div v-if="isLoginMode"
+               class="login-form">
             <div class="row">
               <div class="col-md-12">
                 <div class="tp-checkout-input">
@@ -31,16 +33,23 @@
               <div class="col-md-12">
                 <div class="login-options d-flex justify-content-between align-items-center">
                   <div class="remember-me">
-                    <input type="checkbox" id="remember-me" v-model="loginData.rememberMe" />
-                    <label for="remember-me" class="ml-2">Remember me</label>
+                    <input type="checkbox"
+                           id="remember-me"
+                           v-model="loginData.rememberMe" />
+                    <label for="remember-me"
+                           class="ml-2">Remember me</label>
                   </div>
-                  <a href="#" class="forgot-password" @click.prevent="handleForgotPassword">
+                  <a href="#"
+                     class="forgot-password"
+                     @click.prevent="handleForgotPassword">
                     Forgot Password?
                   </a>
                 </div>
               </div>
               <div class="col-md-12 mt-2">
-                <a href="#" class="guest-link" @click.prevent="isLoginMode = false">
+                <a href="#"
+                   class="guest-link"
+                   @click.prevent="isLoginMode = false">
                   Continue as guest instead
                 </a>
               </div>
@@ -48,7 +57,8 @@
           </div>
 
           <!-- Guest / Create Account form -->
-          <div v-else class="guest-form">
+          <div v-else
+               class="guest-form">
             <div class="row">
               <!-- Phone number — always shown -->
               <div class="col-md-12">
@@ -58,7 +68,8 @@
                     <select v-model="formData['phone_code']"
                             class="border"
                             @change="hasUserTyped = true">
-                      <option value="+254" label="+254" />
+                      <option value="+254"
+                              label="+254" />
                     </select>
                     <input required
                            v-model="formData['phone_number']"
@@ -126,7 +137,9 @@
 
               <!-- Login link -->
               <div class="col-md-12 mt-2">
-                <a href="#" class="guest-link" @click.prevent="isLoginMode = true">
+                <a href="#"
+                   class="guest-link"
+                   @click.prevent="isLoginMode = true">
                   Already have an account? Login
                 </a>
               </div>
@@ -135,7 +148,8 @@
         </div>
 
         <!-- Step 2: Delivery Information -->
-        <div v-show="currentStep === 2" class="checkout-step">
+        <div v-show="currentStep === 2"
+             class="checkout-step">
           <div class="row">
             <div class="col-md-12">
               <div class="tp-checkout-input">
@@ -145,17 +159,29 @@
                                 :default_longitude="formData?.profile?.longitude"
                                 :location_address="formData?.profile?.address"
                                 @location-selected="handleLocationSelected" />
-                <div v-else class="row">
+                <div v-else
+                     class="row">
                   <div class="col-md-6">
-                    <select v-model="selectedCityId" @change="handleCityChange" class="w-100 border p-3">
-                      <option :value="null" disabled>Select city</option>
-                      <option v-for="city in deliveryCities" :key="city.id" :value="city.id">{{ city.name }}</option>
+                    <select v-model="selectedCityId"
+                            @change="handleCityChange"
+                            class="w-100 border p-3">
+                      <option :value="null"
+                              disabled>Select city</option>
+                      <option v-for="city in deliveryCities"
+                              :key="city.id"
+                              :value="city.id">{{ city.name }}</option>
                     </select>
                   </div>
                   <div class="col-md-6">
-                    <select v-model="selectedLocationId" @change="handlePredefinedLocation" class="w-100 border p-3" :disabled="!selectedCity">
-                      <option :value="null" disabled>Select location</option>
-                      <option v-for="location in selectedCity?.locations || []" :key="location.id" :value="location.id">
+                    <select v-model="selectedLocationId"
+                            @change="handlePredefinedLocation"
+                            class="w-100 border p-3"
+                            :disabled="!selectedCity">
+                      <option :value="null"
+                              disabled>Select location</option>
+                      <option v-for="location in selectedCity?.locations || []"
+                              :key="location.id"
+                              :value="location.id">
                         {{ location.name }} — {{ siteSettingsStore.currencySymbol }} {{ location.delivery_fee }}
                       </option>
                     </select>
@@ -165,12 +191,25 @@
             </div>
             <div class="col-md-12">
               <div class="tp-checkout-input">
-                <label>House No / Office No. <span>*</span></label>
+                <label>House Name and Number / Office Name and Number <span>*</span></label>
                 <input required
                        v-model="formData['profile']['suite_number']"
                        type="text"
                        placeholder="Apartment, suite, unit, etc."
                        @input="hasUserTyped = true" />
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="tp-checkout-input">
+                <label for="delivery-note">Delivery Notes (Optional)</label>
+                <textarea id="delivery-note"
+                          v-model="deliveryNote"
+                          rows="4"
+                          maxlength="5000"
+                          placeholder="Add directions or delivery instructions"></textarea>
+                <small class="delivery-note-help">
+                  You can also specify the name and phone number of the person we should contact for this delivery.
+                </small>
               </div>
             </div>
           </div>
@@ -180,40 +219,44 @@
 
     <!-- Navigation Buttons -->
     <div class="checkout-navigation">
-      <button v-if="currentStep === 2"
-              type="button"
-              class="tp-checkout-btn tp-checkout-btn-secondary w-100 mb-2"
-              @click="currentStep = 1">
-        Back
-      </button>
+      <!-- Step 1 -->
+      <div v-if="currentStep === 1"
+           class="step-nav-row step-nav-row--end">
+        <button v-if="isLoginMode"
+                type="button"
+                class="tp-checkout-btn step-nav-next"
+                @click="handleLogin">
+          Login
+        </button>
+        <button v-else
+                type="button"
+                class="tp-checkout-btn step-nav-next"
+                @click="goToNextStep">
+          Continue →
+        </button>
+      </div>
 
-      <button v-if="currentStep === 1 && isLoginMode"
-              type="button"
-              class="tp-checkout-btn w-100"
-              @click="handleLogin">
-        Login
-      </button>
-
-      <button v-if="currentStep === 1 && !isLoginMode"
-              type="button"
-              class="tp-checkout-btn w-100"
-              @click="goToNextStep">
-        Continue to Delivery
-      </button>
-
-      <button v-if="currentStep === 2"
-              type="submit"
-              class="tp-checkout-btn w-100">
-        Continue to Payment
-      </button>
+      <!-- Step 2 -->
+      <div v-if="currentStep === 2"
+           class="step-nav-row">
+        <button type="button"
+                class="tp-checkout-btn tp-checkout-btn-secondary step-nav-back"
+                @click="currentStep = 1">
+          ← Back
+        </button>
+        <button type="submit"
+                class="tp-checkout-btn step-nav-next">
+          Continue →
+        </button>
+      </div>
     </div>
 
   </form>
 </template>
 
 <script setup>
-import { useUserStore } from "@/pinia/useUserDataStore";
 import { useSiteSettingsStore } from "@/pinia/useSiteSettingsStore";
+import { useUserStore } from "@/pinia/useUserDataStore";
 import _ from "lodash";
 import { toast } from "vue3-toastify";
 
@@ -223,6 +266,7 @@ const store = useUserStore();
 const siteSettingsStore = useSiteSettingsStore();
 const deliverySelection = useDeliverySelection();
 const guestPhone = useGuestPhone();
+const deliveryNote = useCookie('checkoutDeliveryNote', { default: () => '' });
 const deliveryCities = ref([]);
 const selectedCityId = ref(deliverySelection.value.cityId);
 const selectedLocationId = ref(deliverySelection.value.locationId);
@@ -337,7 +381,7 @@ const goToNextStep = () => {
 
   if (wantsAccount.value) {
     if (!formData.value.first_name || !formData.value.last_name ||
-        !formData.value.email || !formData.value.password) {
+      !formData.value.email || !formData.value.password) {
       toast.error("Please fill in all account fields");
       return;
     }
@@ -558,6 +602,7 @@ watch(currentUserData, () => {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -574,6 +619,50 @@ watch(currentUserData, () => {
 
 .checkout-navigation {
   margin-top: 20px;
+}
+
+.step-nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 16px;
+}
+
+.step-nav-row--end {
+  justify-content: flex-end;
+}
+
+.step-nav-back,
+.step-nav-next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 150px;
+  width: 150px;
+  min-height: 52px;
+  padding: 10px 20px;
+  margin: 0;
+  line-height: 1.2;
+}
+
+@media (max-width: 575px) {
+  .step-nav-row {
+    gap: 12px;
+  }
+
+  .step-nav-back,
+  .step-nav-next {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+  }
+
+  .step-nav-row--end .step-nav-next {
+    flex: 0 1 150px;
+  }
 }
 
 /* Create account checkbox */
@@ -608,6 +697,20 @@ watch(currentUserData, () => {
 
 .guest-link:hover {
   text-decoration: underline;
+}
+
+.tp-checkout-input textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #e0e2e3;
+  resize: vertical;
+}
+
+.delivery-note-help {
+  display: block;
+  margin-top: 6px;
+  color: #666;
+  line-height: 1.5;
 }
 
 /* Login Form */

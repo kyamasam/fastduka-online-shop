@@ -119,7 +119,7 @@
           <p class="font-semibold">Account Number: 4233</p>
 
           <p>Once Complete, Click Verify Payment</p>
-          <button class="tp-btn w-40">Verify Payment</button>
+          <button class="tp-btn payment-action-button">Verify Payment</button>
         </div>
       </div>
       <div class="tp-checkout-payment-item">
@@ -145,16 +145,16 @@
             Verifying payment automatically... ({{ pollingAttempts }}/{{ MAX_POLLING_ATTEMPTS }})
           </p>
 
-          <div class="flex flex-row gap-2">
+          <div class="payment-action-row">
             <button @click.prevent="createOrder"
-                    class="tp-btn w-40"
+                    class="tp-btn payment-action-button"
                     :disabled="loadingCreateOrder || loadingSendPrompt">
               Send Prompt
               <span v-if="loadingCreateOrder || loadingSendPrompt">loading...</span>
             </button>
             <button v-if="showManualVerifyButton"
                     @click.prevent="verifyPayment"
-                    class="tp-btn-green rounded-sm py-2 text-xs w-40"
+                    class="tp-btn-green payment-action-button"
                     :disabled="loadingConfirmPayment">
               Verify Payment
               <span v-if="loadingConfirmPayment">loading...</span>
@@ -171,13 +171,6 @@
         <label for="read_all">Agree to the terms of service</label>
       </div>
     </div> -->
-    <div class="tp-checkout-btn-wrapper">
-      <button :disabled="currentUserData?.value !== undefined"
-              @click="proceedToOrders()"
-              class="tp-checkout-btn w-100 disabled:bg-red-300 disabled:cursor-not-allowed">
-        Proceed
-      </button>
-    </div>
   </div>
 </template>
 
@@ -213,6 +206,7 @@ const checkoutTotal = computed(() => {
 onMounted(() => siteSettingsStore.fetchSettings());
 const currentUserData = useCookie("userData");
 const guestPhoneCookie = useGuestPhone();
+const deliveryNote = useCookie<string>('checkoutDeliveryNote', { default: () => '' });
 
 const isGuest = computed(() => !currentUserData?.value?.id);
 
@@ -284,6 +278,7 @@ const createOrder = async () => {
         delivery_longitude: isGuest.value
           ? deliverySelection.value.longitude
           : currentUserData?.value?.profile?.longitude,
+        delivery_note: deliveryNote.value.trim(),
         predefined_delivery_location: deliverySelection.value.locationId || null,
         orderitem_set: orderItems,
       };
@@ -481,4 +476,47 @@ const clear = () => {
 onUnmounted(() => {
   stopPolling();
 });
+
+defineExpose({ proceedToOrders });
 </script>
+
+<style scoped>
+.tp-checkout-payment .col-md-12,
+.tp-checkout-payment .tp-checkout-input,
+.tp-checkout-payment .tp-checkout-input > .flex,
+.cheque-payment {
+  width: 100%;
+}
+
+.payment-action-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+}
+
+.payment-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+  min-height: 52px;
+  padding: 10px 16px;
+  margin: 0;
+  line-height: 1.2;
+  text-align: center;
+}
+
+@media (max-width: 575px) {
+  .payment-action-row {
+    flex-direction: column;
+  }
+
+  .payment-action-button {
+    width: 100%;
+    flex-basis: auto;
+  }
+}
+</style>

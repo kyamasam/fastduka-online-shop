@@ -49,14 +49,24 @@
 
         <!-- Step 3: Payment -->
         <div v-show="currentStep === 3" class="checkout-step-payment">
-          <button
-            type="button"
-            class="tp-checkout-btn tp-checkout-btn-secondary w-100 mb-4"
-            @click="goBackToDelivery"
-          >
-            ← Back to Delivery
-          </button>
-          <checkout-payment-section />
+          <checkout-payment-section ref="paymentSectionRef" />
+          <div class="step-nav-row mt-3">
+            <button
+              type="button"
+              class="tp-checkout-btn tp-checkout-btn-secondary step-nav-back"
+              @click="goBackToDelivery"
+            >
+              ← Back
+            </button>
+            <button
+              type="button"
+              class="tp-checkout-btn step-nav-next"
+              :disabled="!paymentConfirmed"
+              @click="paymentSectionRef?.proceedToOrders()"
+            >
+              Complete Order
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -64,6 +74,10 @@
 </template>
 
 <style scoped>
+.tp-checkout-area {
+  display: flow-root;
+}
+
 .checkout-single-card {
   background: #ffffff;
   border-radius: 12px;
@@ -160,6 +174,59 @@
 .tp-checkout-btn-secondary:hover {
   background-color: #5a6268;
 }
+
+.step-nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 16px;
+}
+
+.step-nav-back,
+.step-nav-next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 150px;
+  width: 150px;
+  min-height: 52px;
+  padding: 10px 20px;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.step-nav-next:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 575px) {
+  .tp-checkout-area .container {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .checkout-single-card {
+    width: 100%;
+    margin: 16px auto;
+    padding: 24px 16px;
+    border-radius: 8px;
+  }
+
+  .step-nav-row {
+    gap: 12px;
+  }
+
+  .step-nav-back,
+  .step-nav-next {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+  }
+}
 </style>
 
 <script setup lang="ts">
@@ -168,6 +235,16 @@ import { useCartStore } from "@/pinia/useCartStore";
 const cartStore = useCartStore();
 const currentStep = ref(1);
 const accountSectionRef = ref<any>(null);
+const paymentSectionRef = ref<any>(null);
+
+const paymentConfirmed = computed(
+  () => cartStore.activeOrder?.payment_transaction_obj?.transaction_status === 'processed'
+);
+
+watch(currentStep, async () => {
+  await nextTick();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
 
 const goBackToDelivery = () => {
   currentStep.value = 2;

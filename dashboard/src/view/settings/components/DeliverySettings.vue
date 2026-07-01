@@ -13,19 +13,24 @@
           </select>
         </div>
 
-        <div v-if="settings.delivery_location_type === 'map'" class="space-y-4">
+        <div v-if="settings.delivery_location_type === 'map'"
+             class="space-y-4">
           <div>
             <label class="block text-sm font-semibold text-gray-900 mb-2">Default delivery fee</label>
             <input :value="settings.default_delivery_fee"
                    @input="updateSetting('default_delivery_fee', $event.target.value)"
-                   type="number" min="0" step="0.01"
+                   type="number"
+                   min="0"
+                   step="0.01"
                    class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg" />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-900 mb-2">Default delivery radius (km)</label>
             <input :value="settings.default_delivery_radius"
                    @input="updateSetting('default_delivery_radius', $event.target.value)"
-                   type="number" min="0.1" step="0.1"
+                   type="number"
+                   min="0.1"
+                   step="0.1"
                    class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg" />
           </div>
         </div>
@@ -35,21 +40,24 @@
             <label class="block text-sm font-semibold text-gray-900 mb-2">Min delivery time (minutes)</label>
             <input :value="settings.estimated_delivery_time_min"
                    @input="updateSetting('estimated_delivery_time_min', $event.target.value)"
-                   type="number" min="0"
+                   type="number"
+                   min="0"
                    class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg" />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-900 mb-2">Max delivery time (minutes)</label>
             <input :value="settings.estimated_delivery_time_max"
                    @input="updateSetting('estimated_delivery_time_max', $event.target.value)"
-                   type="number" min="0"
+                   type="number"
+                   min="0"
                    class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg" />
           </div>
         </div>
         <label class="flex items-center gap-3 text-sm font-medium text-gray-900">
           <input :checked="settings.match_user_to_closest_vendor"
                  @change="updateSetting('match_user_to_closest_vendor', $event.target.checked)"
-                 type="checkbox" class="w-4 h-4" />
+                 type="checkbox"
+                 class="w-4 h-4" />
           Match users to the closest vendor automatically
         </label>
       </div>
@@ -60,71 +68,135 @@
       <div class="flex items-center justify-between mb-5">
         <div>
           <h2 class="text-base font-semibold text-gray-900">Predefined locations</h2>
-          <p class="text-xs text-gray-600 mt-1">Location coordinates take priority over city coordinates for vendor matching.</p>
+          <p class="text-xs text-gray-600 mt-1">Location coordinates take priority over city coordinates for vendor
+            matching.</p>
         </div>
         <div class="flex gap-2">
-          <button @click="seedKenya" :disabled="seeding" type="button"
+          <button @click="seedKenya"
+                  :disabled="seeding"
+                  type="button"
                   class="px-4 py-2 border border-blue-600 text-blue-600 text-sm rounded-lg disabled:opacity-50">
-            {{ seeding ? 'Seeding…' : 'Seed Kenya' }}
+            {{ seeding ? 'Seeding…' : 'Populate Kenya Cities' }}
           </button>
-          <button @click="startCity()" type="button"
+          <button @click="startCity()"
+                  type="button"
                   class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg">Add city</button>
         </div>
       </div>
 
-      <div v-if="cityForm" class="border rounded-lg p-4 mb-5 bg-gray-50">
+      <div v-if="cityForm"
+           class="border rounded-lg p-4 mb-5 bg-gray-50">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-          <input v-model="cityForm.name" placeholder="City name" class="px-3 py-2 border rounded-lg" />
-          <input v-model="cityForm.latitude" type="number" step="any" placeholder="Latitude" class="px-3 py-2 border rounded-lg" />
-          <input v-model="cityForm.longitude" type="number" step="any" placeholder="Longitude" class="px-3 py-2 border rounded-lg" />
-          <input v-model="cityForm.display_order" type="number" min="0" placeholder="Order" class="px-3 py-2 border rounded-lg" />
+          <input v-model="cityForm.name"
+                 placeholder="City name"
+                 class="px-3 py-2 border rounded-lg" />
+          <input v-model="cityForm.latitude"
+                 type="number"
+                 step="any"
+                 placeholder="Latitude"
+                 class="px-3 py-2 border rounded-lg" />
+          <input v-model="cityForm.longitude"
+                 type="number"
+                 step="any"
+                 placeholder="Longitude"
+                 class="px-3 py-2 border rounded-lg" />
+          <input v-model="cityForm.display_order"
+                 type="number"
+                 min="0"
+                 placeholder="Order"
+                 class="px-3 py-2 border rounded-lg" />
         </div>
         <div class="flex gap-2 mt-3">
-          <button @click="saveCity" type="button" class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg">Save city</button>
-          <button @click="cityForm = null" type="button" class="px-4 py-2 border text-sm rounded-lg">Cancel</button>
+          <button @click="saveCity"
+                  type="button"
+                  class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg">Save city</button>
+          <button @click="cityForm = null"
+                  type="button"
+                  class="px-4 py-2 border text-sm rounded-lg">Cancel</button>
         </div>
       </div>
 
-      <p v-if="loading" class="text-sm text-gray-600">Loading locations…</p>
-      <p v-else-if="!cities.length" class="text-sm text-gray-600 py-6 text-center">No cities configured yet.</p>
+      <p v-if="loading"
+         class="text-sm text-gray-600">Loading locations…</p>
+      <p v-else-if="!cities.length"
+         class="text-sm text-gray-600 py-6 text-center">No cities configured yet.</p>
 
-      <div v-for="city in cities" :key="city.id" class="border rounded-lg mb-4 overflow-hidden">
+      <div v-for="city in cities"
+           :key="city.id"
+           class="border rounded-lg mb-4 overflow-hidden">
         <div class="p-4 bg-gray-50 flex items-center justify-between gap-3">
           <div>
             <h3 class="font-semibold text-gray-900">{{ city.name }}</h3>
-            <p class="text-xs text-gray-600">{{ city.latitude || 'No latitude' }}, {{ city.longitude || 'No longitude' }}</p>
+            <p class="text-xs text-gray-600">{{ city.latitude || 'No latitude' }},
+              {{ city.longitude || 'No longitude' }}</p>
           </div>
           <div class="flex gap-2">
-            <button @click="startLocation(city)" type="button" class="text-sm text-blue-600">Add location</button>
-            <button @click="startCity(city)" type="button" class="text-sm text-gray-700">Edit</button>
-            <button @click="removeCity(city)" type="button" class="text-sm text-red-600">Delete</button>
+            <button @click="startLocation(city)"
+                    type="button"
+                    class="text-sm text-blue-600">Add location</button>
+            <button @click="startCity(city)"
+                    type="button"
+                    class="text-sm text-gray-700">Edit</button>
+            <button @click="removeCity(city)"
+                    type="button"
+                    class="text-sm text-red-600">Delete</button>
           </div>
         </div>
 
-        <div v-if="locationForm && locationForm.city === city.id" class="p-4 border-b bg-blue-50">
+        <div v-if="locationForm && locationForm.city === city.id"
+             class="p-4 border-b bg-blue-50">
           <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
-            <input v-model="locationForm.name" placeholder="Location name" class="px-3 py-2 border rounded-lg" />
-            <input v-model="locationForm.delivery_fee" type="number" min="0" step="0.01" placeholder="Delivery fee" class="px-3 py-2 border rounded-lg" />
-            <input v-model="locationForm.latitude" type="number" step="any" placeholder="Latitude (optional)" class="px-3 py-2 border rounded-lg" />
-            <input v-model="locationForm.longitude" type="number" step="any" placeholder="Longitude (optional)" class="px-3 py-2 border rounded-lg" />
-            <input v-model="locationForm.display_order" type="number" min="0" placeholder="Order" class="px-3 py-2 border rounded-lg" />
+            <input v-model="locationForm.name"
+                   placeholder="Location name"
+                   class="px-3 py-2 border rounded-lg" />
+            <input v-model="locationForm.delivery_fee"
+                   type="number"
+                   min="0"
+                   step="0.01"
+                   placeholder="Delivery fee"
+                   class="px-3 py-2 border rounded-lg" />
+            <input v-model="locationForm.latitude"
+                   type="number"
+                   step="any"
+                   placeholder="Latitude (optional)"
+                   class="px-3 py-2 border rounded-lg" />
+            <input v-model="locationForm.longitude"
+                   type="number"
+                   step="any"
+                   placeholder="Longitude (optional)"
+                   class="px-3 py-2 border rounded-lg" />
+            <input v-model="locationForm.display_order"
+                   type="number"
+                   min="0"
+                   placeholder="Order"
+                   class="px-3 py-2 border rounded-lg" />
           </div>
           <div class="flex gap-2 mt-3">
-            <button @click="saveLocation" type="button" class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg">Save location</button>
-            <button @click="locationForm = null" type="button" class="px-4 py-2 border text-sm rounded-lg">Cancel</button>
+            <button @click="saveLocation"
+                    type="button"
+                    class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg">Save location</button>
+            <button @click="locationForm = null"
+                    type="button"
+                    class="px-4 py-2 border text-sm rounded-lg">Cancel</button>
           </div>
         </div>
 
-        <div v-if="!city.locations.length" class="p-4 text-sm text-gray-500">No locations in this city.</div>
-        <div v-for="location in city.locations" :key="location.id"
+        <div v-if="!city.locations.length"
+             class="p-4 text-sm text-gray-500">No locations in this city.</div>
+        <div v-for="location in city.locations"
+             :key="location.id"
              class="p-4 border-t flex items-center justify-between gap-3">
           <div>
             <span class="font-medium">{{ location.name }}</span>
             <span class="ml-3 text-sm text-green-700">{{ settings.currency_symbol }} {{ location.delivery_fee }}</span>
           </div>
           <div class="flex gap-2">
-            <button @click="startLocation(city, location)" type="button" class="text-sm text-gray-700">Edit</button>
-            <button @click="removeLocation(location)" type="button" class="text-sm text-red-600">Delete</button>
+            <button @click="startLocation(city, location)"
+                    type="button"
+                    class="text-sm text-gray-700">Edit</button>
+            <button @click="removeLocation(location)"
+                    type="button"
+                    class="text-sm text-red-600">Delete</button>
           </div>
         </div>
       </div>
