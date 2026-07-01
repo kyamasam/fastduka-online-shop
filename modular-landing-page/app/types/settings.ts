@@ -44,6 +44,7 @@ export interface SiteSettings {
   twitter_url: string;
   instagram_url: string;
   youtube_url: string;
+  tiktok_url: string;
 
   // Menu & Navigation
   top_menu_structure: MenuItem[];
