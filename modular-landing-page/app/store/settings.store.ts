@@ -141,11 +141,13 @@ export function useSocialLinks() {
   const twitter = useSetting('twitter_url');
   const instagram = useSetting('instagram_url');
   const youtube = useSetting('youtube_url');
+  const tiktok = useSetting('tiktok_url');
 
   return {
     facebook: facebook || '',
     twitter: twitter || '',
     instagram: instagram || '',
     youtube: youtube || '',
+    tiktok: tiktok || '',
   };
 }

@@ -3,21 +3,17 @@ FROM node:20 AS build
 
 WORKDIR /app
 
-# Enable Corepack for Yarn
-RUN corepack enable
-
 # Copy package files
-COPY package*.json yarn.lock* ./
+COPY package*.json package-lock.json* ./
 
-# Install dependencies with clean cache
-RUN yarn cache clean && \
-    yarn install --frozen-lockfile --non-interactive
+# Install dependencies
+RUN npm ci --omit=dev=false
 
 # Copy source code
 COPY . .
 
 # Build the application
-RUN yarn build
+RUN npm run build
 
 # Production stage
 FROM node:20-slim AS production

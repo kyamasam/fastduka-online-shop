@@ -2,7 +2,7 @@ from django.db.models import Sum
 from rest_framework import serializers
 
 from inventory.models import Inventory
-from products.models import Category, Product, ProductPhoto, ProductVariant, ProductVariantPhoto, ProductReview, CategoryType, TaxRate
+from products.models import Category, Product, ProductPhoto, ProductVariant, ProductVariantPhoto, ProductReview, CategoryType, TaxRate, Brand, Collection
 from users.models import User
 from django.db import transaction
 from django.core.validators import EmailValidator
@@ -46,9 +46,9 @@ class CategorySerializer(serializers.ModelSerializer):
             val = Category.objects.filter(pk=obj.parent.id).first()
             if val is not None:
                 return {
-                    
-                    "name":val.name,
-                    }
+                    "name": val.name,
+                    "slug": val.slug,
+                }
             return None
         return None
     
@@ -59,10 +59,26 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = [
-            "id", "name", "parent", "parent_obj", "photo", 
-            "children", "category_type", "category_type_id", 
+            "id", "name", "slug", "parent", "parent_obj", "photo",
+            "children", "category_type", "category_type_id",
             "created_at", "updated_at"
         ]
+
+
+class BrandSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Brand
+        fields = ["id", "name", "slug", "description", "logo", "is_active", "created_at", "updated_at"]
+        read_only_fields = ["slug", "created_at", "updated_at"]
+
+
+class CollectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Collection
+        fields = ["id", "name", "slug", "description", "photo", "is_active", "created_at", "updated_at"]
+        read_only_fields = ["slug", "created_at", "updated_at"]
+
+
 class ProductVariantSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductVariant
@@ -81,6 +97,10 @@ class ProductSerializer(serializers.ModelSerializer):
     category_id = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
     product_type = CategoryTypeSerializer(read_only=True)
     product_type_id = serializers.PrimaryKeyRelatedField(queryset=CategoryType.objects.all(), write_only=True, source='product_type')
+    brands = BrandSerializer(many=True, read_only=True)
+    brands_ids = serializers.PrimaryKeyRelatedField(queryset=Brand.objects.all(), many=True, write_only=True, required=False, source='brands')
+    collections = CollectionSerializer(many=True, read_only=True)
+    collections_ids = serializers.PrimaryKeyRelatedField(queryset=Collection.objects.all(), many=True, write_only=True, required=False, source='collections')
     photos = serializers.SerializerMethodField(read_only=True)
     inventory = serializers.SerializerMethodField(read_only=True)
     on_sale = serializers.SerializerMethodField(read_only=True)
@@ -91,7 +111,7 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ["id", "name", "slug", "sku", "featured", "description","additional_information","seo_description", "primary_photo", "category", "category_id",
-                  "product_type", "product_type_id", "selling_price", "sale_price", "allowable_discount", "on_sale", "in_stock", "variants", "photos", "inventory","reviews",
+                  "product_type", "product_type_id", "brands", "brands_ids", "collections", "collections_ids", "selling_price", "sale_price", "allowable_discount", "on_sale", "in_stock", "variants", "photos", "inventory","reviews",
                   "created_at", "updated_at", "buying_price", "review_stats",
                   "is_taxable", "price_includes_tax", "tax_rate",
                   ]
@@ -117,12 +137,23 @@ class ProductSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         category = validated_data.pop("category_id")
         product_type = validated_data.pop("product_type")
+        brands = validated_data.pop("brands", [])
+        collections = validated_data.pop("collections", [])
+
         product = Product.objects.create(category=category, product_type=product_type, **validated_data)
+
+        if brands:
+            product.brands.set(brands)
+        if collections:
+            product.collections.set(collections)
+
         return product
 
     def update(self, instance, validated_data):
         category = validated_data.pop("category_id", None)
         product_type = validated_data.pop("product_type", None)
+        brands = validated_data.pop("brands", None)
+        collections = validated_data.pop("collections", None)
 
         # Update fields manually
         for attr, value in validated_data.items():
@@ -132,6 +163,11 @@ class ProductSerializer(serializers.ModelSerializer):
             instance.category = category
         if product_type:
             instance.product_type = product_type
+
+        if brands is not None:
+            instance.brands.set(brands)
+        if collections is not None:
+            instance.collections.set(collections)
 
         instance.save()
         return instance

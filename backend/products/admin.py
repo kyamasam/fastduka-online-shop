@@ -1,9 +1,11 @@
 from django.contrib import admin
 
-from products.models import Product, Category, ProductPhoto, ProductVariant, ProductVariantPhoto, ProductReview
+from products.models import Product, Category, ProductPhoto, ProductVariant, ProductVariantPhoto, ProductReview, Brand, Collection
 
 admin.site.register(Product)
 admin.site.register(Category)
+admin.site.register(Brand)
+admin.site.register(Collection)
 admin.site.register(ProductPhoto)
 admin.site.register(ProductVariant)
 admin.site.register(ProductVariantPhoto)
