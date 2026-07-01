@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema, OpenApiParameter
+from django.db import transaction
 from django.db.models import Q
 from delivery.services.process_order_delivery import process_automatic_delivery
 from orders import constants
@@ -422,6 +423,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["post"], url_path="confirm-payment", permission_classes=[IsAuthenticated],
             serializer_class=ConfirmPaymentSerializer, )
+    @transaction.atomic
     def confirm_payment(self, request):
         payment_transaction_serializer = ConfirmPaymentSerializer(data=request.data)
         if not payment_transaction_serializer.is_valid():
