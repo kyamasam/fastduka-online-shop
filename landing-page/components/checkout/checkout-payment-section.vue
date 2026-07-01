@@ -1,5 +1,5 @@
 <template>
-  <div class="tp-checkout-place white-bg">
+  <div class="tp-checkout-place">
     <h3 class="tp-checkout-place-title">Your Order</h3>
     <div class="tp-order-info-list">
       <ul>
@@ -212,21 +212,17 @@ const checkoutTotal = computed(() => {
 
 onMounted(() => siteSettingsStore.fetchSettings());
 const currentUserData = useCookie("userData");
+const guestPhoneCookie = useGuestPhone();
 
-const phone_code = ref(currentUserData?.value?.phone_code);
-const phone_number = ref(currentUserData?.value?.phone_number);
+const isGuest = computed(() => !currentUserData?.value?.id);
+
+const phone_code = ref(currentUserData?.value?.phone_code || guestPhoneCookie.value.phone_code);
+const phone_number = ref(currentUserData?.value?.phone_number || guestPhoneCookie.value.phone_number);
 
 watch(currentUserData, () => {
-  console.log("Watching", userStore?.currentUserData?.phone_code);
-  console.log("Watching", userStore?.currentUserData?.phone_number);
-  phone_code.value = currentUserData?.value?.phone_code;
-  phone_number.value = currentUserData?.value?.phone_number;
+  phone_code.value = currentUserData?.value?.phone_code || guestPhoneCookie.value.phone_code;
+  phone_number.value = currentUserData?.value?.phone_number || guestPhoneCookie.value.phone_number;
 });
-
-// onMounted(() => {
-//   phone_code.value = ref(userStore?.currentUserData?.phone_code);
-//   phone_number.value = ref(userStore?.currentUserData?.phone_number);
-// });
 
 // handle payment item
 const handlePayment = (value: string) => {
@@ -248,16 +244,19 @@ const isPolling = ref(false);
 const showManualVerifyButton = ref(false);
 
 const checkAllRequiredFields = () => {
-  if (siteSettingsStore.settings?.delivery_location_type === 'predefined' && !deliverySelection.value.locationId) {
-    toast.warning("Select a city and delivery location before placing your order");
-    return false;
-  }
-  console.log("deli", currentUserData?.value?.profile?.address);
-  if (!currentUserData?.value?.profile?.address) {
-    toast.warning(
-      "You do not have a delivery location set. Enter Delivery Location and Click Update Profile"
-    );
-    return false;
+  if (siteSettingsStore.settings?.delivery_location_type === 'predefined') {
+    if (!deliverySelection.value.locationId) {
+      toast.warning("Select a city and delivery location before placing your order");
+      return false;
+    }
+  } else {
+    const hasAddress = isGuest.value
+      ? (deliverySelection.value.latitude && deliverySelection.value.longitude)
+      : currentUserData?.value?.profile?.address;
+    if (!hasAddress) {
+      toast.warning("Please enter a delivery location in the previous step");
+      return false;
+    }
   }
   return true;
 };
@@ -275,16 +274,25 @@ const createOrder = async () => {
           purchase_price: cartStore.getNetPriceOfProductInCart(item?.id),
         });
       });
-      const { data: orderData, error: orderError } = await getData("/order/", {
-        method: "POST",
-        body: {
-          delivery_location: currentUserData?.value?.profile?.address,
-          delivery_latitude: currentUserData?.value?.profile?.latitude,
-          delivery_longitude: currentUserData?.value?.profile?.longitude,
-          predefined_delivery_location: deliverySelection.value.locationId || null,
-          orderitem_set: orderItems,
-        },
-      });
+      const orderBody = {
+        delivery_location: isGuest.value
+          ? (deliverySelection.value.locationName || '')
+          : (currentUserData?.value?.profile?.address || ''),
+        delivery_latitude: isGuest.value
+          ? deliverySelection.value.latitude
+          : currentUserData?.value?.profile?.latitude,
+        delivery_longitude: isGuest.value
+          ? deliverySelection.value.longitude
+          : currentUserData?.value?.profile?.longitude,
+        predefined_delivery_location: deliverySelection.value.locationId || null,
+        orderitem_set: orderItems,
+      };
+
+      const orderRequest = isGuest.value
+        ? getDataUnauthed("/order/", { method: "POST", body: orderBody })
+        : getData("/order/", { method: "POST", body: orderBody });
+
+      const { data: orderData, error: orderError } = await orderRequest;
 
       if (!orderError?.value) {
         console.log("order", orderData?.value);
@@ -313,23 +321,32 @@ const showErrors = (error: any) => {
 
 const sendPrompt = async () => {
   loadingSendPrompt.value = true;
-  // clean phone
   let clean_phone = `${phone_number?.value}`;
   if (clean_phone[0] === "0") {
     clean_phone = clean_phone.substring(1, clean_phone.length);
   }
-  const { data: transactionData, error: transactionError } = await getData(
-    "/order/create-stk/",
-    {
-      method: "POST",
-      body: {
-        order_id: cartStore?.activeOrder?.id,
-        phone_number: `${phone_code?.value}${clean_phone}`,
-        amount: checkoutTotal.value,
-      },
-    }
-  );
+  const stkBody = {
+    order_id: cartStore?.activeOrder?.id,
+    phone_number: `${phone_code?.value}${clean_phone}`,
+    amount: checkoutTotal.value,
+  };
+
+  const stkRequest = isGuest.value
+    ? getDataUnauthed("/order/create-stk/", { method: "POST", body: stkBody })
+    : getData("/order/create-stk/", { method: "POST", body: stkBody });
+
+  const { data: transactionData, error: transactionError } = await stkRequest;
+
   if (!transactionError?.value) {
+    // If backend returned guest tokens, store them so verify-payment can use them
+    if (transactionData?.value?.guest_tokens?.access) {
+      const loginCookie = useCookie("currentUser");
+      loginCookie.value = {
+        access: transactionData.value.guest_tokens.access,
+        refresh: transactionData.value.guest_tokens.refresh,
+      };
+    }
+
     loadingSendPrompt.value = false;
     cartStore.setActiveOrder(transactionData?.value);
 

@@ -62,8 +62,14 @@
           <h2 class="text-base font-semibold text-gray-900">Predefined locations</h2>
           <p class="text-xs text-gray-600 mt-1">Location coordinates take priority over city coordinates for vendor matching.</p>
         </div>
-        <button @click="startCity()" type="button"
-                class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg">Add city</button>
+        <div class="flex gap-2">
+          <button @click="seedKenya" :disabled="seeding" type="button"
+                  class="px-4 py-2 border border-blue-600 text-blue-600 text-sm rounded-lg disabled:opacity-50">
+            {{ seeding ? 'Seeding…' : 'Seed Kenya' }}
+          </button>
+          <button @click="startCity()" type="button"
+                  class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg">Add city</button>
+        </div>
       </div>
 
       <div v-if="cityForm" class="border rounded-lg p-4 mb-5 bg-gray-50">
@@ -131,7 +137,7 @@ export default {
   name: 'DeliverySettings',
   props: { settings: { type: Object, required: true } },
   data() {
-    return { cities: [], loading: false, cityForm: null, locationForm: null }
+    return { cities: [], loading: false, seeding: false, cityForm: null, locationForm: null }
   },
   mounted() { this.loadCities() },
   methods: {
@@ -146,6 +152,17 @@ export default {
         const response = await this.$store.dispatch('fetchList', { url: 'delivery-cities/' })
         this.cities = response.data.results || response.data || []
       } finally { this.loading = false }
+    },
+    async seedKenya() {
+      if (!window.confirm('Add all 47 Kenyan counties and their delivery locations? Existing fees will not be changed.')) return
+      this.seeding = true
+      try {
+        await this.$store.dispatch('postData', {
+          url: 'delivery-cities/seed-kenya',
+          data: {}
+        })
+        await this.loadCities()
+      } finally { this.seeding = false }
     },
     startCity(city = null) {
       this.cityForm = city ? { ...city } : { name: '', latitude: '', longitude: '', display_order: 0, is_active: true }

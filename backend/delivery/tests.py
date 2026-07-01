@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 
 from delivery.models import DeliveryCity, DeliveryLocation
 from delivery.serializers import DeliveryLocationSerializer
+from users.models import User
 
 
 class DeliveryLocationTests(TestCase):
@@ -46,3 +47,49 @@ class DeliveryLocationTests(TestCase):
 
         self.assertFalse(serializer.is_valid())
         self.assertIn('non_field_errors', serializer.errors)
+
+
+class KenyaLocationSeedTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            email='admin@example.com', password='password', is_staff=True
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(self.admin)
+
+    def test_seed_creates_counties_and_expected_special_locations(self):
+        response = self.client.post('/api/delivery-cities/seed-kenya/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(DeliveryCity.objects.count(), 47)
+        self.assertEqual(
+            DeliveryCity.objects.get(name='Nairobi').locations.count(), 17
+        )
+        self.assertEqual(
+            DeliveryCity.objects.get(name='Mombasa').locations.count(), 6
+        )
+        self.assertTrue(
+            DeliveryCity.objects.get(name='Kisumu').locations.filter(
+                name='Kisumu', delivery_fee=Decimal('300.00')
+            ).exists()
+        )
+
+    def test_seed_is_idempotent_and_preserves_custom_fees(self):
+        self.client.post('/api/delivery-cities/seed-kenya/')
+        location = DeliveryLocation.objects.get(city__name='Nairobi', name='Kibra')
+        location.delivery_fee = Decimal('999.00')
+        location.save()
+
+        response = self.client.post('/api/delivery-cities/seed-kenya/')
+
+        self.assertEqual(response.json()['cities_created'], 0)
+        self.assertEqual(response.json()['locations_created'], 0)
+        location.refresh_from_db()
+        self.assertEqual(location.delivery_fee, Decimal('999.00'))
+
+    def test_seed_requires_staff_user(self):
+        self.client.force_authenticate(user=None)
+
+        response = self.client.post('/api/delivery-cities/seed-kenya/')
+
+        self.assertIn(response.status_code, (401, 403))

@@ -2,46 +2,11 @@
   <form @submit.prevent="handleSubmit">
     <div class="tp-checkout-bill-form">
       <div class="tp-checkout-bill-inner">
-        <!-- Step Indicator -->
-        <div class="checkout-steps mb-4">
-          <div class="steps-container d-flex justify-content-between align-items-center">
-            <div class="step-item"
-                 :class="{ active: currentStep === 1, completed: currentStep > 1 }"
-                 @click="currentStep = 1">
-              <div class="step-number">1</div>
-              <div class="step-label">Account Information</div>
-            </div>
-            <div class="step-divider"></div>
-            <div class="step-item"
-                 :class="{ active: currentStep === 2, completed: currentStep > 2 }">
-              <div class="step-number">2</div>
-              <div class="step-label">Delivery Information</div>
-            </div>
-          </div>
-        </div>
-
         <!-- Step 1: Account Information -->
-        <div v-show="currentStep === 1"
-             class="checkout-step">
-          <!-- Login/Create Account Toggle -->
-          <div class="auth-mode-toggle mb-4">
-            <div class="toggle-buttons">
-              <button type="button"
-                      :class="{ active: !isLoginMode }"
-                      @click="isLoginMode = false">
-                Create Account
-              </button>
-              <button type="button"
-                      :class="{ active: isLoginMode }"
-                      @click="isLoginMode = true">
-                Login
-              </button>
-            </div>
-          </div>
+        <div v-show="currentStep === 1" class="checkout-step">
 
-          <!-- Login Mode -->
-          <div v-if="isLoginMode"
-               class="login-form">
+          <!-- Login form (shown when user clicks "login" link) -->
+          <div v-if="isLoginMode" class="login-form">
             <div class="row">
               <div class="col-md-12">
                 <div class="tp-checkout-input">
@@ -66,95 +31,111 @@
               <div class="col-md-12">
                 <div class="login-options d-flex justify-content-between align-items-center">
                   <div class="remember-me">
-                    <input type="checkbox"
-                           id="remember-me"
-                           v-model="loginData.rememberMe" />
-                    <label for="remember-me"
-                           class="ml-2">Remember me</label>
+                    <input type="checkbox" id="remember-me" v-model="loginData.rememberMe" />
+                    <label for="remember-me" class="ml-2">Remember me</label>
                   </div>
-                  <a href="#"
-                     class="forgot-password"
-                     @click.prevent="handleForgotPassword">
+                  <a href="#" class="forgot-password" @click.prevent="handleForgotPassword">
                     Forgot Password?
                   </a>
                 </div>
               </div>
+              <div class="col-md-12 mt-2">
+                <a href="#" class="guest-link" @click.prevent="isLoginMode = false">
+                  Continue as guest instead
+                </a>
+              </div>
             </div>
           </div>
 
-          <!-- Create Account Mode -->
-          <div v-else
-               class="create-account-form">
+          <!-- Guest / Create Account form -->
+          <div v-else class="guest-form">
             <div class="row">
-            <div class="col-md-6">
-              <div class="tp-checkout-input">
-                <label>First Name <span>*</span></label>
-                <input v-model="formData['first_name']"
-                       type="text"
-                       placeholder="First Name"
-                       required
-                       @input="hasUserTyped = true" />
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="tp-checkout-input">
-                <label>Last Name <span>*</span></label>
-                <input v-model="formData['last_name']"
-                       type="text"
-                       placeholder="Last Name"
-                       required
-                       @input="hasUserTyped = true" />
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="tp-checkout-input">
-                <label>Email <span>*</span></label>
-                <input required
-                       v-model="formData['email']"
-                       type="email"
-                       placeholder="Email"
-                       @input="hasUserTyped = true" />
-              </div>
-            </div>
-            <div v-if="currentUserData === undefined || Object.keys(currentUserData).length === 0"
-                 class="col-md-12">
-              <div class="tp-checkout-input">
-                <label>Password <span>*</span></label>
-                <input required
-                       v-model="formData['password']"
-                       type="password"
-                       placeholder="******"
-                       @input="hasUserTyped = true" />
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="tp-checkout-input">
-                <label>Phone <span>*</span></label>
-                <div class="flex">
-                  <select required
-                          v-model="formData['phone_code']"
-                          class="border"
-                          type="select"
-                          @change="hasUserTyped = true">
-                    <option value="+254"
-                            label="+254" />
-                  </select>
-                  <input required
-                         v-model="formData['phone_number']"
-                         type="text"
-                         placeholder=""
-                         maxlength="9"
-                         @input="hasUserTyped = true" />
+              <!-- Phone number — always shown -->
+              <div class="col-md-12">
+                <div class="tp-checkout-input">
+                  <label>Phone <span>*</span></label>
+                  <div class="flex">
+                    <select v-model="formData['phone_code']"
+                            class="border"
+                            @change="hasUserTyped = true">
+                      <option value="+254" label="+254" />
+                    </select>
+                    <input required
+                           v-model="formData['phone_number']"
+                           type="text"
+                           placeholder="7XXXXXXXX"
+                           maxlength="9"
+                           @input="hasUserTyped = true" />
+                  </div>
                 </div>
               </div>
-            </div>
+
+              <!-- Create account checkbox -->
+              <div class="col-md-12 mt-2 mb-3">
+                <div class="create-account-check">
+                  <input type="checkbox"
+                         id="wants-account"
+                         v-model="wantsAccount" />
+                  <label for="wants-account">Create an account</label>
+                </div>
+              </div>
+
+              <!-- Extra fields revealed when checkbox is ticked -->
+              <template v-if="wantsAccount">
+                <div class="col-md-6">
+                  <div class="tp-checkout-input">
+                    <label>First Name <span>*</span></label>
+                    <input v-model="formData['first_name']"
+                           type="text"
+                           placeholder="First Name"
+                           :required="wantsAccount"
+                           @input="hasUserTyped = true" />
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="tp-checkout-input">
+                    <label>Last Name <span>*</span></label>
+                    <input v-model="formData['last_name']"
+                           type="text"
+                           placeholder="Last Name"
+                           :required="wantsAccount"
+                           @input="hasUserTyped = true" />
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="tp-checkout-input">
+                    <label>Email <span>*</span></label>
+                    <input v-model="formData['email']"
+                           type="email"
+                           placeholder="Email"
+                           :required="wantsAccount"
+                           @input="hasUserTyped = true" />
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="tp-checkout-input">
+                    <label>Password <span>*</span></label>
+                    <input v-model="formData['password']"
+                           type="password"
+                           placeholder="Min. 6 characters"
+                           :required="wantsAccount"
+                           @input="hasUserTyped = true" />
+                  </div>
+                </div>
+              </template>
+
+              <!-- Login link -->
+              <div class="col-md-12 mt-2">
+                <a href="#" class="guest-link" @click.prevent="isLoginMode = true">
+                  Already have an account? Login
+                </a>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Step 2: Delivery Information -->
-        <div v-show="currentStep === 2"
-             class="checkout-step">
+        <div v-show="currentStep === 2" class="checkout-step">
           <div class="row">
             <div class="col-md-12">
               <div class="tp-checkout-input">
@@ -220,27 +201,13 @@
         Continue to Delivery
       </button>
 
-      <button v-if="currentStep === 2 && (currentUserData === undefined || Object.keys(currentUserData).length === 0)"
+      <button v-if="currentStep === 2"
               type="submit"
               class="tp-checkout-btn w-100">
-        Create Account
-      </button>
-
-      <button v-else-if="currentStep === 2"
-              type="submit"
-              class="tp-checkout-btn w-100">
-        Update Profile
+        Continue to Payment
       </button>
     </div>
 
-    <div v-if="isUpdating"
-         class="text-center mt-2 text-gray-600">
-      <p>Automatically saving changes...</p>
-    </div>
-    <div v-if="lastUpdated"
-         class="text-center mt-2 text-green-600">
-      <p>Last updated: {{ lastUpdated }}</p>
-    </div>
   </form>
 </template>
 
@@ -249,9 +216,13 @@ import { useUserStore } from "@/pinia/useUserDataStore";
 import { useSiteSettingsStore } from "@/pinia/useSiteSettingsStore";
 import _ from "lodash";
 import { toast } from "vue3-toastify";
+
+const emit = defineEmits(['step-changed', 'completed']);
+
 const store = useUserStore();
 const siteSettingsStore = useSiteSettingsStore();
 const deliverySelection = useDeliverySelection();
+const guestPhone = useGuestPhone();
 const deliveryCities = ref([]);
 const selectedCityId = ref(deliverySelection.value.cityId);
 const selectedLocationId = ref(deliverySelection.value.locationId);
@@ -292,6 +263,12 @@ const handlePredefinedLocation = () => {
 
 const currentStep = ref(1);
 const isLoginMode = ref(false);
+const wantsAccount = ref(false);
+
+watch(currentStep, (n) => emit('step-changed', n));
+
+const setStep = (n) => { currentStep.value = n; };
+defineExpose({ setStep });
 
 const loginData = ref({
   email: "",
@@ -314,13 +291,11 @@ const formData = ref({
   email: "",
 });
 
-// Auto-update functionality
 const isUpdating = ref(false);
 const lastUpdated = ref("");
 const hasUserTyped = ref(false);
 
 const handleLogin = async () => {
-  // Validate login fields
   if (!loginData.value.email || !loginData.value.password) {
     toast.error("Please enter your email and password");
     return;
@@ -340,8 +315,6 @@ const handleLogin = async () => {
       loginToken.value = data.value;
       await getUserWithToken(loginToken?.value?.access);
       toast.success("Login successful");
-
-      // Move to step 2
       currentStep.value = 2;
     } else {
       toast.error("Invalid email or password");
@@ -354,34 +327,45 @@ const handleLogin = async () => {
 
 const handleForgotPassword = () => {
   toast.info("Password reset functionality coming soon");
-  // TODO: Implement forgot password functionality
 };
 
 const goToNextStep = () => {
-  // Validate step 1 fields
-  if (!formData.value.first_name || !formData.value.last_name ||
-    !formData.value.email || !formData.value.phone_number) {
-    toast.error("Please fill in all required fields");
+  if (!formData.value.phone_number) {
+    toast.error("Please enter your phone number");
     return;
   }
 
-  // Check password for new users
-  if ((currentUserData.value === undefined || Object.keys(currentUserData.value).length === 0)
-    && !formData.value.password) {
-    toast.error("Please enter a password");
-    return;
+  if (wantsAccount.value) {
+    if (!formData.value.first_name || !formData.value.last_name ||
+        !formData.value.email || !formData.value.password) {
+      toast.error("Please fill in all account fields");
+      return;
+    }
   }
+
+  // Save guest phone for payment section
+  guestPhone.value = {
+    phone_code: formData.value.phone_code || '+254',
+    phone_number: formData.value.phone_number,
+  };
 
   currentStep.value = 2;
 };
 
 const handleLocationSelected = (location) => {
-  console.log("Selected location: *****", location);
   formData.value.profile.address = location?.address;
   formData.value.profile.latitude = location?.lat;
   formData.value.profile.longitude = location?.lng;
   hasUserTyped.value = true;
-  deliverySelection.value = { cityId: null, locationId: null, cityName: '', locationName: location?.address || '', deliveryFee: Number(siteSettingsStore.settings?.default_delivery_fee || 0), latitude: location?.lat, longitude: location?.lng };
+  deliverySelection.value = {
+    cityId: null,
+    locationId: null,
+    cityName: '',
+    locationName: location?.address || '',
+    deliveryFee: Number(siteSettingsStore.settings?.default_delivery_fee || 0),
+    latitude: location?.lat,
+    longitude: location?.lng,
+  };
 };
 
 const logout = () => {
@@ -393,13 +377,12 @@ const logout = () => {
   }
 };
 
-const updateUser = async (isAutomaticUpdate = false) => {
+const updateUser = async () => {
   const url = `/users/${currentUserData?.value?.id}/`;
   isUpdating.value = true;
 
-  const method = "PATCH";
   const { error } = await getData(url, {
-    method: method,
+    method: "PATCH",
     body: {
       first_name: formData?.value?.first_name,
       last_name: formData?.value?.last_name,
@@ -419,21 +402,15 @@ const updateUser = async (isAutomaticUpdate = false) => {
     error.value?.cause?.errors?.map((e) => {
       toast.error(`${e?.attr?.replace("_", " ")} ${e?.detail}`);
     });
-
-    toast.error(
-      `Failed to update profile ${isAutomaticUpdate ? "automatically" : ""}`
-    );
+    toast.error("Failed to update profile");
     isUpdating.value = false;
     throw error;
   } else {
     await getCurrentUser();
     const now = new Date();
     lastUpdated.value = now.toLocaleTimeString();
-    toast.success(
-      `Profile updated ${isAutomaticUpdate ? "automatically" : ""}`
-    );
+    toast.success("Profile updated");
     isUpdating.value = false;
-    return;
   }
 };
 
@@ -444,27 +421,30 @@ const debouncedUpdateProfile = _.debounce(async () => {
 }, 2000);
 
 const handleSubmit = async () => {
-  // Validate step 2 fields
   if (!formData.value.profile.address || !formData.value?.profile?.suite_number) {
     toast.error("Please fill in all delivery information");
     return;
   }
 
-  await updateRegisterUser();
+  try {
+    const success = await updateRegisterUser();
+    if (success !== false) {
+      emit('completed');
+    }
+  } catch {
+    // errors already shown via toast in updateUser
+  }
 };
 
 const updateRegisterUser = async () => {
-  let url = "/users/";
-  let method = "POST";
-  let data = null;
-  let error = null;
-  console.log("user", currentUserData);
-
   if (currentUserData?.value?.id) {
-    updateUser();
-  } else {
+    await updateUser(); // throws on error
+    return true;
+  }
+
+  if (wantsAccount.value) {
     logout();
-    ({ data, error } = await getDataUnauthed(url, {
+    const { error } = await getDataUnauthed("/users/", {
       method: "POST",
       body: {
         first_name: formData?.value?.first_name,
@@ -480,49 +460,44 @@ const updateRegisterUser = async () => {
           longitude: formData?.value?.profile?.longitude,
         },
       },
-    }));
+    });
 
     if (error?.value) {
       error.value?.cause?.errors?.map((e) => {
         toast.error(`${e?.attr?.replace("_", " ")} ${e?.detail}`);
       });
-    } else {
-      toast.success("Account Created Successfully");
-      autoLoginUser(formData?.value?.email, formData?.value?.password);
+      return false;
     }
+
+    toast.success("Account created successfully");
+    await autoLoginUser(formData?.value?.email, formData?.value?.password);
+    return true;
   }
+
+  // Pure guest: delivery info already in deliverySelection cookie
+  return true;
 };
 
 const autoLoginUser = async (email, password) => {
-  const email_field = email;
-  const password_field = password;
   const { data, error } = await getDataUnauthed("/token/", {
     method: "POST",
-    body: {
-      email: email_field,
-      password: password_field,
-    },
+    body: { email, password },
   });
 
   if (!error.value) {
-    const loginData = useCookie("currentUser");
-    loginData.value = data.value;
-    await getUserWithToken(loginData?.value?.access);
-  } else {
-    console.log("we hare ");
+    const loginCookie = useCookie("currentUser");
+    loginCookie.value = data.value;
+    await getUserWithToken(loginCookie?.value?.access);
   }
 };
 
-const isLoggedIn = computed(() => {
-  return Object.keys(store?.currentUserData).length;
-});
+const isLoggedIn = computed(() => Object.keys(store?.currentUserData).length);
 
 const route = useRoute();
 
 watch(
   () => route.path,
   async () => {
-    console.log("watch", store.currentUserData);
     Object.assign(formData.value, store.currentUserData);
   }
 );
@@ -530,7 +505,6 @@ watch(
 watch(
   formData,
   () => {
-    console.log("formdata changed", currentUserData.value);
     Object.assign(currentUserData.value, formData.value);
 
     if (currentUserData?.value?.id && hasUserTyped.value) {
@@ -548,24 +522,18 @@ onMounted(async () => {
   await loadDeliveryCities();
   if (currentUserData.value) {
     Object.assign(formData.value, currentUserData.value);
+    // Logged-in users skip the account step — go straight to delivery
+    currentStep.value = 2;
   } else {
-    Object.assign(formData.value, {
-      first_name: "",
-      last_name: "",
-      profile: {
-        suite_number: "",
-        address: "",
-      },
-      phone_code: "+254",
-      password: "",
-      phone_number: "",
-      email: "",
-    });
+    // Pre-fill phone from previous guest session if available
+    if (guestPhone.value?.phone_number) {
+      formData.value.phone_code = guestPhone.value.phone_code;
+      formData.value.phone_number = guestPhone.value.phone_number;
+    }
   }
 });
 
 watch(currentUserData, () => {
-  console.log("changed", currentUserData.value);
   if (currentUserData.value) {
     Object.assign(formData.value, {
       ...currentUserData.value,
@@ -581,71 +549,6 @@ watch(currentUserData, () => {
 </script>
 
 <style scoped>
-.checkout-steps {
-  padding: 20px 0;
-}
-
-.steps-container {
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.step-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-  flex: 1;
-}
-
-.step-number {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #e0e0e0;
-  color: #999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  margin-bottom: 8px;
-  transition: all 0.3s ease;
-}
-
-.step-label {
-  font-size: 14px;
-  color: #999;
-  text-align: center;
-  transition: all 0.3s ease;
-}
-
-.step-item.active .step-number {
-  background-color: #0989ff;
-  color: white;
-}
-
-.step-item.active .step-label {
-  color: #0989ff;
-  font-weight: 600;
-}
-
-.step-item.completed .step-number {
-  background-color: #28a745;
-  color: white;
-}
-
-.step-item.completed .step-label {
-  color: #28a745;
-}
-
-.step-divider {
-  flex: 1;
-  height: 2px;
-  background-color: #e0e0e0;
-  margin: 0 10px;
-  margin-bottom: 30px;
-}
-
 .checkout-step {
   animation: fadeIn 0.3s ease;
 }
@@ -655,7 +558,6 @@ watch(currentUserData, () => {
     opacity: 0;
     transform: translateY(10px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -674,41 +576,38 @@ watch(currentUserData, () => {
   margin-top: 20px;
 }
 
-/* Auth Mode Toggle */
-.auth-mode-toggle {
-  margin-bottom: 30px;
-}
-
-.toggle-buttons {
+/* Create account checkbox */
+.create-account-check {
   display: flex;
-  gap: 10px;
-  max-width: 400px;
-  margin: 0 auto;
-  background: #f5f5f5;
-  padding: 5px;
-  border-radius: 8px;
+  align-items: center;
+  gap: 8px;
 }
 
-.toggle-buttons button {
-  flex: 1;
-  padding: 12px 20px;
-  border: none;
-  background: transparent;
-  color: #666;
-  font-weight: 500;
+.create-account-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
   cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.3s ease;
+  accent-color: #0989ff;
 }
 
-.toggle-buttons button.active {
-  background: #0989ff;
-  color: white;
-  box-shadow: 0 2px 4px rgba(9, 137, 255, 0.2);
+.create-account-check label {
+  margin: 0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #444;
 }
 
-.toggle-buttons button:hover:not(.active) {
-  background: rgba(9, 137, 255, 0.1);
+/* Login / guest links */
+.guest-link {
+  color: #0989ff;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.guest-link:hover {
+  text-decoration: underline;
 }
 
 /* Login Form */
