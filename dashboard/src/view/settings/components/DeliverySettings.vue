@@ -221,7 +221,7 @@ export default {
     async loadCities() {
       this.loading = true
       try {
-        const response = await this.$store.dispatch('fetchList', { url: 'delivery-cities/' })
+        const response = await this.$store.dispatch('fetchList', { url: 'delivery-cities/?limit=100' })
         this.cities = response.data.results || response.data || []
       } finally { this.loading = false }
     },
