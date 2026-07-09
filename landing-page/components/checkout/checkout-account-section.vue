@@ -275,7 +275,7 @@ const selectedCity = computed(() => deliveryCities.value.find((city) => city.id 
 
 const loadDeliveryCities = async () => {
   if (deliveryLocationType.value !== 'predefined') return;
-  const { data, error, execute } = getDataUnauthed('/delivery-cities/?limit=100');
+  const { data, error, execute } = getDataUnauthed('/delivery-cities/');
   await execute();
   if (!error.value) deliveryCities.value = data.value?.results || data.value || [];
 };

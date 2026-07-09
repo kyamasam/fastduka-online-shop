@@ -18,6 +18,7 @@ class PublicReadAdminWriteViewSet(viewsets.ModelViewSet):
 
 class DeliveryCityViewSet(PublicReadAdminWriteViewSet):
     serializer_class = DeliveryCitySerializer
+    pagination_class = None
 
     def get_queryset(self):
         queryset = DeliveryCity.objects.prefetch_related('locations')
