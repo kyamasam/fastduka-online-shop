@@ -7,7 +7,15 @@
                :row-key="(record) => record?.id"
                :scroll="{ x: 1000 }"
                :show-expand-column="showExpandedItems"
-               style="border-radius: 10px">
+               :pagination="{
+                 current: currentPage,
+                 total: total,
+                 pageSize: pageSize,
+                 showSizeChanger: false,
+                 showTotal: (total) => `Total ${total} records`,
+               }"
+               style="border-radius: 10px"
+               @change="handleTableChange">
         <template #bodyCell="{ column, text, record }"
                   class="w-full">
           <slot :column="column"
@@ -107,6 +115,9 @@ export default {
       dataSource: [],
       showFilters: true,
       loading: true,
+      currentPage: 1,
+      total: 0,
+      pageSize: 15,
     };
   },
   props: {
@@ -158,16 +169,23 @@ export default {
     },
     queryData(url) {
       this.loading = true;
+      const separator = url.includes("?") ? "&" : "?";
+      const pagedUrl = `${url}${separator}page=${this.currentPage}`;
 
       store
-        .dispatch("fetchList", { url })
+        .dispatch("fetchList", { url: pagedUrl })
         .then((resp) => {
           this.dataSource = resp.data.results;
+          this.total = resp.data.count ?? 0;
           this.loading = false;
         })
         .catch(() => {
           this.loading = false;
         });
+    },
+    handleTableChange(pagination) {
+      this.currentPage = pagination.current;
+      this.queryData(this.fetchUrl);
     },
     toggleFilters() {
       this.showFilters = !this.showFilters;
@@ -183,8 +201,9 @@ export default {
     },
   },
   watch: {
-    fetchUrl: function (newVal, oldVal) {
-      this.queryData(this.fetchUrl);
+    fetchUrl: function (newVal) {
+      this.currentPage = 1;
+      this.queryData(newVal);
     },
     $route: function (to, from) {
       console.log('changed');

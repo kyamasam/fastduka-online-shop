@@ -135,7 +135,7 @@ class ProductFilter(filters.FilterSet):
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     model = Product
-    queryset = Product.objects.all()
+    queryset = Product.objects.all().order_by('-created_at')
     permission_classes = [AnonReadAdminCreate]
 
     filter_backends = [
@@ -214,6 +214,8 @@ class ProductViewSet(viewsets.ModelViewSet):
                 Q(description__icontains=search) |
                 Q(sku__icontains=search)
             )
+            
+        
 
         return qs
 
